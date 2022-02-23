@@ -17,6 +17,13 @@ library:
 
 dependencies:
   - base >= 4.14 && < 5
+  - lens
+  - openapi3
+  - servant
+  - servant-openapi3
+  - servant-server
+  - wai
+  - wai-extra
 
 executables:
   servant-template-exe:
@@ -24,6 +31,7 @@ executables:
     main:           Main.hs
     dependencies:
       - servant-template
+      - warp
 
 tests:
   servant-template-spec:
