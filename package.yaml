@@ -1,0 +1,35 @@
+name:               servant-template
+version:            0.1.0.0
+author:             Marco Perone
+maintainer:         marco.perone@tweag.io
+extra-source-files:
+  - README.md
+
+ghc-options:
+  -W
+  -Wall
+  -Werror
+  -fwrite-ide-info
+  -hiedir=.hie
+
+library:
+  source-dirs:      src
+
+dependencies:
+  - base >= 4.14 && < 5
+
+executables:
+  servant-template-exe:
+    source-dirs:    app
+    main:           Main.hs
+    dependencies:
+      - servant-template
+
+tests:
+  servant-template-spec:
+    main:           Spec.hs
+    source-dirs:    spec
+    dependencies:
+      - servant-template
+      - hspec
+      - QuickCheck

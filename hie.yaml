@@ -1,0 +1,8 @@
+cradle:
+  stack:
+    - path: "./src"
+      component: "servant-template:lib"
+    - path: "./spec"
+      component: "servant-template:test:servant-template-spec"
+    - path: "./app"
+      component: "servant-template:exe:servant-template-exe"
