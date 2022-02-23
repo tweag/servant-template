@@ -3,6 +3,7 @@
 module Api.Application where
 
 import Api.Docs (DocsAPI, docsServer)
+import Api.Healthcheck (HealthcheckAPI, healthcheckServer)
 import Api.Tagger (TaggerAPI, taggerServer)
 
 -- base
@@ -20,7 +21,12 @@ import Network.Wai (Application)
 -- wai-extra
 import Network.Wai.Middleware.RequestLogger (logStdoutDev)
 
-type API = TaggerAPI :<|> DocsAPI
+type API
+  =    TaggerAPI
+  :<|> DocsAPI
+  :<|> HealthcheckAPI
 
 app :: Application
-app = logStdoutDev (serve (Proxy :: Proxy API) (taggerServer :<|> docsServer))
+app = logStdoutDev (serve
+  (Proxy :: Proxy API)
+  (taggerServer :<|> docsServer :<|> healthcheckServer))
