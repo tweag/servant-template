@@ -22,6 +22,8 @@ dependencies:
   - servant
   - servant-openapi3
   - servant-server
+  - text
+  - uuid
   - wai
   - wai-extra
 
