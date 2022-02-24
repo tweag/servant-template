@@ -1,3 +1,4 @@
+{-# LANGUAGE DerivingStrategies #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
 module Tagger.Tag where
@@ -11,4 +12,4 @@ import Data.OpenApi (ToSchema)
 import Data.Text (Text)
 
 newtype Tag = Tag Text
-  deriving (ToSchema, FromJSON, ToJSON)
+  deriving newtype (ToSchema, FromJSON, ToJSON)
