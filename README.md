@@ -40,3 +40,11 @@ stack exec servant-template-exe
 ```
 
 which will expose the service on port 8080
+
+## Openapi documentation
+
+You can access the OpenAPI documentation just by visiting
+
+```
+localhost:8080/docs
+```

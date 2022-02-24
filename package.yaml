@@ -17,6 +17,16 @@ library:
 
 dependencies:
   - base >= 4.14 && < 5
+  - aeson
+  - lens
+  - openapi3
+  - servant
+  - servant-openapi3
+  - servant-server
+  - text
+  - uuid
+  - wai
+  - wai-extra
 
 executables:
   servant-template-exe:
@@ -24,6 +34,7 @@ executables:
     main:           Main.hs
     dependencies:
       - servant-template
+      - warp
 
 tests:
   servant-template-spec:

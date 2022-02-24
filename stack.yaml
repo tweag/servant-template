@@ -2,4 +2,10 @@ resolver:
   url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/18/26.yaml
 
 packages:
-- .
+  - .
+
+extra-deps:
+  - servant-0.19
+  - servant-server-0.19
+
+allow-newer: true
