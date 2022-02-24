@@ -6,6 +6,9 @@ module Api.Tagger where
 import Tagger.Content (Content)
 import Tagger.Tag (Tag)
 
+-- base
+import Control.Monad.IO.Class (liftIO)
+
 -- servant
 import Servant.API (type (:>), type (:<|>)(..), Get, Post, JSON, ReqBody)
 
@@ -13,15 +16,15 @@ import Servant.API (type (:>), type (:<|>)(..), Get, Post, JSON, ReqBody)
 import Servant (Server, Handler)
 
 -- uuid
--- uuid
-import Data.UUID (UUID, nil)
+import Data.UUID (UUID)
+import Data.UUID.V4 (nextRandom)
 
 type TaggerAPI
   =    "add-content"  :> ReqBody '[JSON] Content :> Post '[JSON] UUID
   :<|> "get-contents" :> ReqBody '[JSON] [Tag]   :> Get  '[JSON] [Content]
 
 addContentHandler :: Content -> Handler UUID
-addContentHandler _ = pure nil
+addContentHandler _ = liftIO nextRandom
 
 getContentsHandler :: [Tag] -> Handler [Content]
 getContentsHandler _ = pure []
