@@ -1,5 +1,6 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DerivingStrategies #-}
 {-# LANGUAGE TypeOperators #-}
 
 module Api.Application where
@@ -32,7 +33,8 @@ data ApplicationAPI mode = ApplicationAPI
   { tagger      :: mode :- NamedRoutes TaggerAPI
   , docs        :: mode :- DocsAPI
   , healthcheck :: mode :- HealthcheckAPI
-  } deriving (Generic)
+  }
+  deriving stock Generic
 
 server :: ApplicationAPI AsServer
 server = ApplicationAPI

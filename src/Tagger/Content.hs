@@ -1,5 +1,6 @@
 {-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DerivingStrategies #-}
 
 module Tagger.Content where
 
@@ -21,4 +22,5 @@ data Content = Content
   { _content :: Text
   , _tags :: [Tag]
   }
-  deriving (Generic, ToSchema, FromJSON, ToJSON)
+  deriving stock Generic
+  deriving anyclass (ToSchema, FromJSON, ToJSON)

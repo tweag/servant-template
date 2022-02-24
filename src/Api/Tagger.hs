@@ -1,5 +1,6 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DerivingStrategies #-}
 {-# LANGUAGE TypeOperators #-}
 
 module Api.Tagger where
@@ -30,7 +31,8 @@ import Data.UUID.V4 (nextRandom)
 data TaggerAPI mode = TaggerAPI
   { addContent  :: mode :- "add-content"  :> ReqBody '[JSON] Content :> Post '[JSON] UUID
   , getContents :: mode :- "get-contents" :> ReqBody '[JSON] [Tag]   :> Get  '[JSON] [Content]
-  } deriving Generic
+  }
+  deriving stock Generic
 
 instance HasOpenApi TaggerAPI where
   toOpenApi _ = mempty -- TODO: generate this automatically
