@@ -5,6 +5,20 @@
 
 packages:
 - completed:
+    hackage: opaleye-0.9.1.0@sha256:b7b3e086c62319ed929c70874eeda833833c957d3c5431888c8605ae1b9122fa,5837
+    pantry-tree:
+      size: 5662
+      sha256: 770075682b00589dd4bb62d2f8239eeca41d1484db1b957b1c9a13c148dd88ba
+  original:
+    hackage: opaleye-0.9.1.0
+- completed:
+    hackage: rel8-1.3.1.0@sha256:82292d07f590c92b256f512347bb410989501711d47fdd2b43823f6467169f03,5114
+    pantry-tree:
+      size: 9026
+      sha256: 7fbfd8f7ce8a72348b9345831a1aeea2fc5bf17cdd6080106334d6962efcd889
+  original:
+    hackage: rel8-1.3.1.0
+- completed:
     hackage: servant-0.19@sha256:9f1145d48c049e5d39d8314bc0458d15e7767b8bc871eb1f2177b9fd29101272,5371
     pantry-tree:
       size: 2802

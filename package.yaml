@@ -20,6 +20,7 @@ dependencies:
   - aeson
   - lens
   - openapi3
+  - rel8
   - servant
   - servant-openapi3
   - servant-server
