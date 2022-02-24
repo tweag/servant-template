@@ -43,6 +43,6 @@ server = ApplicationAPI
   }
 
 app :: Application
-app = logStdoutDev (serve
+app = logStdoutDev $ serve
   (Proxy :: Proxy API)
-  server)
+  server
