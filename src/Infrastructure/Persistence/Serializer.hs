@@ -14,7 +14,7 @@ import Data.UUID (UUID)
 -- CONTENT
 
 -- TODO: I don't really like the term serialize here
-serializeContent :: IO UUID -> Content -> IO (DB.Content Expr, [DB.Tag Expr])
+serializeContent :: IO UUID -> Content Tag -> IO (DB.Content Expr, [DB.Tag Expr])
 serializeContent uuidGenerator content = do
   uuid <- uuidGenerator
   let dbContent = DB.Content
@@ -24,7 +24,7 @@ serializeContent uuidGenerator content = do
   dbTags <- traverse (serializeTag uuidGenerator) (_tags content)
   pure (dbContent, dbTags)
 
-unserializeContent :: DB.Content Result -> [DB.Tag Result] -> Content
+unserializeContent :: DB.Content Result -> [DB.Tag Result] -> Content Tag
 unserializeContent content tags = Content
   { _content = contentContent content
   , _tags    = unserilizeTag <$> tags

@@ -29,18 +29,18 @@ import Data.UUID (UUID)
 import Data.UUID.V4 (nextRandom)
 
 data TaggerAPI mode = TaggerAPI
-  { addContent  :: mode :- "add-content"  :> ReqBody '[JSON] Content :> Post '[JSON] UUID
-  , getContents :: mode :- "get-contents" :> ReqBody '[JSON] [Tag]   :> Get  '[JSON] [Content]
+  { addContent  :: mode :- "add-content"  :> ReqBody '[JSON] (Content Tag) :> Post '[JSON] UUID
+  , getContents :: mode :- "get-contents" :> ReqBody '[JSON] [Tag]         :> Get  '[JSON] [Content Tag]
   }
   deriving stock Generic
 
 instance HasOpenApi TaggerAPI where
   toOpenApi _ = mempty -- TODO: generate this automatically
 
-addContentHandler :: Content -> Handler UUID
+addContentHandler :: Content Tag -> Handler UUID
 addContentHandler _ = liftIO nextRandom
 
-getContentsHandler :: [Tag] -> Handler [Content]
+getContentsHandler :: [Tag] -> Handler [Content Tag]
 getContentsHandler _ = pure []
 
 taggerServer :: TaggerAPI AsServer
