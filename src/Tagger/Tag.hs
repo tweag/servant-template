@@ -11,5 +11,5 @@ import Data.OpenApi (ToSchema)
 
 import Data.Text (Text)
 
-newtype Tag = Tag Text
+newtype Tag = Tag { _name :: Text }
   deriving newtype (ToSchema, FromJSON, ToJSON)
