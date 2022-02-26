@@ -13,7 +13,7 @@ import qualified Hasql.Transaction as T (statement)
 import Hasql.Transaction.Sessions (transaction, IsolationLevel (Serializable), Mode (Write))
 
 -- rel8
-import Rel8 (Expr, Insert(..), OnConflict(..), Query, Result, each, filter, insert, many, select, values, where_, (==.), TableSchema, Name, Rel8able)
+import Rel8 (Expr, Insert(..), OnConflict(..), Query, Result, each, filter, insert, many, select, values, where_, (==.), TableSchema, Name, Rel8able, {-and_, ListTable-})
 
 
 -- SELECT CONTENTS WITH TAGS
@@ -34,6 +34,15 @@ selectAllContentsWithTags = statement () . select $ do
   content <- each contentSchema
   tags    <- many $ tagsForContent content
   return (content, tags)
+
+-- selectContentsByTags :: [Tag Expr] -> Session [(Content Result, [Tag Result])]
+-- selectContentsByTags tags = statement () . select $ do
+--   content <- each contentSchema
+--   tags'   <- many $ tagsForContent content
+--   filter (\(_, tags'') -> and_ $ isContainedIn tags'' <$> tags) (content, tags')
+
+-- isContainedIn :: ListTable Expr (f Expr) -> f Expr -> Expr Bool
+-- isContainedIn table row = _
 
 -- ADD CONTENT WITH TAGS
 

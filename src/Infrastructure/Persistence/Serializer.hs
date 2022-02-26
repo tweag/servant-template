@@ -13,16 +13,14 @@ import Data.UUID (UUID)
 
 -- CONTENT
 
--- TODO: I don't really like the term serialize here
-serializeContent :: IO UUID -> Content Tag -> IO (DB.Content Expr, [DB.Tag Expr])
-serializeContent uuidGenerator content = do
-  uuid <- uuidGenerator
-  let dbContent = DB.Content
-        { contentId      = lit $ ContentId uuid
-        , contentContent = lit $ _content content
-        }
-  dbTags <- traverse (serializeTag uuidGenerator) (_tags content)
-  pure (dbContent, dbTags)
+serializeContent :: UUID -> Content (UUID, Tag) -> (DB.Content Expr, [DB.Tag Expr])
+serializeContent uuid content = (dbContent, dbTags)
+  where
+    dbContent = DB.Content
+      { contentId      = lit $ ContentId uuid
+      , contentContent = lit $ _content content
+      }
+    dbTags = uncurry serializeTag <$> _tags content
 
 unserializeContent :: DB.Content Result -> [DB.Tag Result] -> Content Tag
 unserializeContent content tags = Content
@@ -32,13 +30,11 @@ unserializeContent content tags = Content
 
 -- TAG
 
-serializeTag :: IO UUID -> Tag -> IO (DB.Tag Expr)
-serializeTag uuidGenerator tag = do
-  uuid <- uuidGenerator
-  pure DB.Tag
-    { tagId   = lit $ TagId uuid
-    , tagName = lit $ _name tag
-    }
+serializeTag :: UUID -> Tag -> DB.Tag Expr
+serializeTag uuid tag = DB.Tag
+  { tagId   = lit $ TagId uuid
+  , tagName = lit $ _name tag
+  }
 
 unserilizeTag :: DB.Tag Result -> Tag
 unserilizeTag tag = Tag (tagName tag)
