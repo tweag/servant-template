@@ -2,7 +2,7 @@
 
 module Infrastructure.Persistence.PostgresqlContentRepository where
 
-import Infrastructure.Persistence.Serializer (unserializeContent)
+import Infrastructure.Persistence.Serializer (unserializeContent, serializeContent)
 import qualified Infrastructure.Persistence.Queries as DB (selectAllContentsWithTags, addContentWithTags)
 import Tagger.Content (Content, hasAllTags)
 import Tagger.ContentRepository (ContentRepository(..))
@@ -50,5 +50,5 @@ postgresAddContentWithTags :: Connection -> Content Tag -> ExceptT QueryError IO
 postgresAddContentWithTags connection content = do
   contentUUID          <- liftIO nextRandom
   contentWithTagsUUIDs <- liftIO $ forM content (\tag -> (, tag) <$> nextRandom)
-  ExceptT $ run (uncurry DB.addContentWithTags (contentUUID, contentWithTagsUUIDs)) connection
+  ExceptT $ run (uncurry DB.addContentWithTags $ serializeContent contentUUID contentWithTagsUUIDs) connection
   pure contentUUID

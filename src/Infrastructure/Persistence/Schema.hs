@@ -10,7 +10,7 @@ module Infrastructure.Persistence.Schema where
 import GHC.Generics (Generic)
 
 -- rel8
-import Rel8 (Column, DBEq, DBType, Name, Rel8able, TableSchema(..))
+import Rel8 (Column, DBEq, DBType, Name, Rel8able, TableSchema(..), Result, Expr, lit)
 
 -- text
 import Data.Text (Text)
@@ -40,6 +40,9 @@ tagSchema = TableSchema
     }
   }
 
+litTag :: Tag Result -> Tag Expr
+litTag (Tag id' name') = Tag (lit id') (lit name')
+
 -- CONTENT
 
 newtype ContentId = ContentId UUID
@@ -61,6 +64,9 @@ contentSchema = TableSchema
     , contentContent = "content"
     }
   }
+
+litContent :: Content Result -> Content Expr
+litContent (Content id' content') = Content (lit id') (lit content')
 
 -- CONTENTS_TAGS
 

@@ -6,19 +6,19 @@ import Tagger.Content (Content(..))
 import Tagger.Tag (Tag(..))
 
 -- rel8
-import Rel8 (Expr, lit, Result)
+import Rel8 (Result)
 
 -- uuid
 import Data.UUID (UUID)
 
 -- CONTENT
 
-serializeContent :: UUID -> Content (UUID, Tag) -> (DB.Content Expr, [DB.Tag Expr])
+serializeContent :: UUID -> Content (UUID, Tag) -> (DB.Content Result, [DB.Tag Result])
 serializeContent uuid content = (dbContent, dbTags)
   where
     dbContent = DB.Content
-      { contentId      = lit $ ContentId uuid
-      , contentContent = lit $ _content content
+      { contentId      = ContentId uuid
+      , contentContent = _content content
       }
     dbTags = uncurry serializeTag <$> _tags content
 
@@ -30,10 +30,10 @@ unserializeContent content tags = Content
 
 -- TAG
 
-serializeTag :: UUID -> Tag -> DB.Tag Expr
+serializeTag :: UUID -> Tag -> DB.Tag Result
 serializeTag uuid tag = DB.Tag
-  { tagId   = lit $ TagId uuid
-  , tagName = lit $ _name tag
+  { tagId   = TagId uuid
+  , tagName = _name tag
   }
 
 unserilizeTag :: DB.Tag Result -> Tag
