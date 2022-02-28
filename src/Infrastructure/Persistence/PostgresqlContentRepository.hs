@@ -2,7 +2,7 @@
 
 module Infrastructure.Persistence.PostgresqlContentRepository where
 
-import Infrastructure.Persistence.Serializer (unserializeContent, serializeContent)
+import Infrastructure.Persistence.Serializer (unserializeContent)
 import qualified Infrastructure.Persistence.Queries as DB (selectAllContentsWithTags, addContentWithTags)
 import Tagger.Content (Content, hasAllTags)
 import Tagger.ContentRepository (ContentRepository(..))
@@ -37,9 +37,18 @@ postgresSelectContentsByTags connection tags = do
   let allContents = uncurry unserializeContent <$> allDBContents
   pure $ filter (hasAllTags tags) allContents
 
+-- steps:
+--  - generate UUID for content
+--  - generate UUIDs for tags
+--  - transaction
+--    - select tags from db
+--    - replace generated UUID with the one coming from the database
+--    - insert new tags
+--    - insert content
+--    - insert contents_tags
 postgresAddContentWithTags :: Connection -> Content Tag -> ExceptT QueryError IO UUID
 postgresAddContentWithTags connection content = do
-  contentUUID <- liftIO nextRandom
-  dbContents <- liftIO $ forM content (\tag -> (, tag) <$> nextRandom )
-  ExceptT $ run (uncurry DB.addContentWithTags $ serializeContent contentUUID dbContents) connection
+  contentUUID          <- liftIO nextRandom
+  contentWithTagsUUIDs <- liftIO $ forM content (\tag -> (, tag) <$> nextRandom)
+  ExceptT $ run (uncurry DB.addContentWithTags (contentUUID, contentWithTagsUUIDs)) connection
   pure contentUUID
