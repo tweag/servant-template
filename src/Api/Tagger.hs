@@ -6,10 +6,10 @@
 module Api.Tagger where
 
 import Tagger.Content (Content)
+import Tagger.ContentRepository (ContentRepository(selectContentsByTags, addContentWithTags))
 import Tagger.Tag (Tag)
 
 -- base
-import Control.Monad.IO.Class (liftIO)
 import GHC.Generics (Generic)
 import Prelude hiding (getContents)
 
@@ -26,7 +26,6 @@ import Servant.Server.Generic (AsServer)
 
 -- uuid
 import Data.UUID (UUID)
-import Data.UUID.V4 (nextRandom)
 
 data TaggerAPI mode = TaggerAPI
   { addContent  :: mode :- "add-content"  :> ReqBody '[JSON] (Content Tag) :> Post '[JSON] UUID
@@ -37,14 +36,8 @@ data TaggerAPI mode = TaggerAPI
 instance HasOpenApi TaggerAPI where
   toOpenApi _ = mempty -- TODO: generate this automatically
 
-addContentHandler :: Content Tag -> Handler UUID
-addContentHandler _ = liftIO nextRandom
-
-getContentsHandler :: [Tag] -> Handler [Content Tag]
-getContentsHandler _ = pure []
-
-taggerServer :: TaggerAPI AsServer
-taggerServer = TaggerAPI
-  { addContent  = addContentHandler
-  , getContents = getContentsHandler
+taggerServer :: ContentRepository Handler -> TaggerAPI AsServer
+taggerServer contentRepository = TaggerAPI
+  { addContent  = addContentWithTags contentRepository
+  , getContents = selectContentsByTags contentRepository
   }

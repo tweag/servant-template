@@ -8,6 +8,7 @@ module Api.Application where
 import Api.Docs (DocsAPI, docsServer)
 import Api.Healthcheck (HealthcheckAPI, healthcheckServer)
 import Api.Tagger (TaggerAPI, taggerServer)
+import Tagger.ContentRepository (ContentRepository)
 
 -- base
 import Data.Proxy (Proxy(..))
@@ -18,7 +19,7 @@ import Servant.API (NamedRoutes)
 import Servant.API.Generic ((:-))
 
 -- servant-server
-import Servant (serve)
+import Servant (serve, Handler)
 import Servant.Server.Generic (AsServer)
 
 -- wai
@@ -36,14 +37,14 @@ data ApplicationAPI mode = ApplicationAPI
   }
   deriving stock Generic
 
-server :: ApplicationAPI AsServer
-server = ApplicationAPI
-  { tagger      = taggerServer
+server :: ContentRepository Handler -> ApplicationAPI AsServer
+server contentRepository = ApplicationAPI
+  { tagger      = taggerServer contentRepository
   , docs        = docsServer
   , healthcheck = healthcheckServer
   }
 
-app :: Application
-app = logStdoutDev $ serve
+app :: ContentRepository Handler -> Application
+app contentRepository = logStdoutDev $ serve
   (Proxy :: Proxy API)
-  server
+  (server contentRepository)

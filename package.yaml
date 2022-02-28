@@ -38,6 +38,9 @@ executables:
     main:           Main.hs
     dependencies:
       - servant-template
+      - bytestring
+      - hasql
+      - transformers
       - warp
 
 tests:
