@@ -27,6 +27,8 @@ To build the project, run
 stack build
 ```
 
+The build requires the presence of the `pg_config` executable.
+
 To run the tests, run
 
 ```
@@ -40,6 +42,12 @@ stack exec servant-template-exe
 ```
 
 which will expose the service on port 8080
+
+### Database
+
+In the root of the project you can find a `docker-compose.yml` file which provides a Postgresql database and a web interface to it, exposed on port `8081`.
+
+You can initialise the schema of the database by running the `schema.sql` which is also provided.
 
 ## Openapi documentation
 

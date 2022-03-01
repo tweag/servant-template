@@ -1,10 +1,8 @@
-{-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE DeriveFunctor #-}
 {-# LANGUAGE DeriveGeneric #-}
-{-# LANGUAGE DerivingStrategies #-}
+{-# LANGUAGE DerivingVia #-}
 
 module Tagger.Content where
-
-import Tagger.Tag (Tag)
 
 -- base
 import GHC.Generics (Generic)
@@ -18,9 +16,23 @@ import Data.OpenApi (ToSchema)
 -- text
 import Data.Text (Text)
 
-data Content = Content
+data Content tag = Content
   { _content :: Text
-  , _tags :: [Tag]
+  , _tags :: [tag]
   }
-  deriving stock Generic
-  deriving anyclass (ToSchema, FromJSON, ToJSON)
+  deriving stock (Functor, Generic)
+
+instance Foldable Content where
+  foldMap f = foldMap f . _tags
+
+instance Traversable Content where
+  traverse f (Content content tags) = Content content <$> traverse f tags
+
+instance ToSchema tag => ToSchema (Content tag)
+
+instance FromJSON tag => FromJSON (Content tag)
+
+instance ToJSON tag => ToJSON (Content tag)
+
+hasAllTags :: Eq tag => [tag] -> Content tag -> Bool
+hasAllTags tags content = and $ (\tag -> tag `elem` _tags content) <$> tags
