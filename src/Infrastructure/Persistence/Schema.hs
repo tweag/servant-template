@@ -113,3 +113,6 @@ userSchema = TableSchema
     , userPassword = "password"
     }
   }
+
+litUser :: User Result -> User Expr
+litUser (User id' name' password) = User (lit id') (lit name') (lit password)
