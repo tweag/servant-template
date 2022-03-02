@@ -1,4 +1,6 @@
+{-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DerivingStrategies #-}
 
 module Tagger.User where
 
@@ -15,9 +17,5 @@ import Servant.Auth.JWT (ToJWT, FromJWT)
 import Data.Text (Text)
 
 newtype User = User {name :: Text}
-  deriving (Eq, Show, Read, Generic)
-
-instance ToJSON User
-instance ToJWT User
-instance FromJSON User
-instance FromJWT User
+  deriving stock (Eq, Show, Read, Generic)
+  deriving anyclass (ToJSON, ToJWT, FromJSON, FromJWT)
