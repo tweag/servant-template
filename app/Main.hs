@@ -4,7 +4,7 @@ module Main where
 
 import Api.Application (app)
 import qualified Infrastructure.Authentication.AuthenticateUser as Auth (AuthenticateUser(AuthenticateUser), authenticateUser, hoistAuthenticateUser)
-import Infrastructure.Persistence.PostgresqlContentRepository (postgresContentRepository)
+import Infrastructure.Persistence.PostgresContentRepository (postgresContentRepository)
 import Tagger.ContentRepository (ContentRepository, hoistContentRepository)
 
 -- base

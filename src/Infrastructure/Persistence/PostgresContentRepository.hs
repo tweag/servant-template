@@ -1,6 +1,6 @@
 {-# LANGUAGE TupleSections #-}
 
-module Infrastructure.Persistence.PostgresqlContentRepository where
+module Infrastructure.Persistence.PostgresContentRepository where
 
 import Infrastructure.Persistence.Serializer (unserializeContent, serializeContent)
 import qualified Infrastructure.Persistence.Queries as DB (selectAllContentsWithTags, addContentWithTags)
