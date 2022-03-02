@@ -5,6 +5,7 @@
 module Api.Docs where
 
 import Api.Tagger (TaggerAPI)
+import Api.Authentication (AuthenticationAPI)
 
 -- base
 import Data.Proxy (Proxy(Proxy))
@@ -24,7 +25,7 @@ import Servant ((:>), Get, JSON, Server)
 type DocsAPI = "docs" :> Get '[JSON] OpenApi
 
 docsServer :: Server DocsAPI
-docsServer = return $ toOpenApi (Proxy :: Proxy TaggerAPI)
+docsServer = return $ toOpenApi (Proxy :: Proxy TaggerAPI) <> toOpenApi (Proxy :: Proxy AuthenticationAPI)
   & info.title       .~ "Tagger api"
   & info.version     .~ "1.0.0"
   & info.description ?~ "Api endpoints for the tagger API"
