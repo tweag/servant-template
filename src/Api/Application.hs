@@ -11,6 +11,7 @@ import Api.Authentication (AuthenticationAPI, authenticationServer)
 import Api.Docs (DocsAPI, docsServer)
 import Api.Healthcheck (HealthcheckAPI, healthcheckServer)
 import Api.Tagger (TaggerAPI, taggerServer)
+import Infrastructure.Authentication.AuthenticateUser (AuthenticateUser)
 import Tagger.ContentRepository (ContentRepository)
 import Tagger.User (User)
 
@@ -57,16 +58,16 @@ authenticatedTaggerServer contentRepository = \case
   _                 -> throwAll err401
 
 
-server :: JWTSettings -> ContentRepository Handler -> ApplicationAPI AsServer
-server jwtSettings contentRepository = ApplicationAPI
+server :: JWTSettings -> ContentRepository Handler -> AuthenticateUser Handler -> ApplicationAPI AsServer
+server jwtSettings contentRepository authenticateUser = ApplicationAPI
   { tagger         = authenticatedTaggerServer contentRepository
   , docs           = docsServer
   , healthcheck    = healthcheckServer
-  , authentication = authenticationServer jwtSettings
+  , authentication = authenticationServer jwtSettings authenticateUser
   }
 
-app :: JWK -> ContentRepository Handler -> Application
-app key contentRepository = logStdoutDev $ serveWithContext
+app :: JWK -> AuthenticateUser Handler -> ContentRepository Handler -> Application
+app key contentRepository authenticateUser = logStdoutDev $ serveWithContext
   (Proxy :: Proxy API)
   (defaultCookieSettings :. defaultJWTSettings key :. EmptyContext)
-  (server (defaultJWTSettings key) contentRepository)
+  (server (defaultJWTSettings key) authenticateUser contentRepository)

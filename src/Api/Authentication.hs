@@ -3,25 +3,26 @@
 
 module Api.Authentication where
 
-import Infrastructure.Authentication.Login (Login(username))
+import Infrastructure.Authentication.AuthenticateUser (AuthenticateUser (runAuthenticateUser))
+import Infrastructure.Authentication.Login (Login)
 import Infrastructure.Authentication.Token (Token(Token))
-import Tagger.User (User(User))
-
 
 -- base
 import Control.Monad.IO.Class (liftIO)
 
 -- servant
-import Servant (ReqBody, JSON, type (:>), Verb, StdMethod (POST), Server, err500)
+-- servant
+import Servant (ReqBody, JSON, type (:>), Verb, StdMethod (POST), Server, Handler, err500)
 
 -- servant-auth-server
 import Servant.Auth.Server (makeJWT, JWTSettings, ThrowAll (throwAll))
 
 type AuthenticationAPI = "login" :> ReqBody '[JSON] Login :> Verb 'POST 200 '[JSON] Token
 
-authenticationServer :: JWTSettings -> Server AuthenticationAPI
-authenticationServer jwtSettings login = do
-  eitherToken <- liftIO $ makeJWT (User $ username login) jwtSettings Nothing
+authenticationServer :: JWTSettings -> AuthenticateUser Handler -> Server AuthenticationAPI
+authenticationServer jwtSettings authenticateUser login = do
+  user <- runAuthenticateUser authenticateUser login
+  eitherToken <- liftIO $ makeJWT user jwtSettings Nothing
   case eitherToken of
     -- TODO: log why the JWT generation failed
     Left  _     -> throwAll err500
