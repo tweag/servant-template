@@ -1,6 +1,7 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DerivingStrategies #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeOperators #-}
 
@@ -27,10 +28,10 @@ import Servant.API.Generic ((:-))
 import Servant.Auth (Auth, JWT)
 
 -- servant-auth-server
-import Servant.Auth.Server (AuthResult, defaultJWTSettings, defaultCookieSettings)
+import Servant.Auth.Server (defaultJWTSettings, defaultCookieSettings, AuthResult (Authenticated), ThrowAll (throwAll))
 
 -- servant-server
-import Servant (Handler, serveWithContext, Context ((:.), EmptyContext))
+import Servant (Handler, serveWithContext, Context ((:.), EmptyContext), err401)
 import Servant.Server.Generic (AsServer)
 
 -- wai
@@ -48,9 +49,15 @@ data ApplicationAPI mode = ApplicationAPI
   }
   deriving stock Generic
 
+authenticatedTaggerServer :: ContentRepository Handler -> AuthResult User -> TaggerAPI AsServer
+authenticatedTaggerServer contentRepository = \case
+  (Authenticated _) -> taggerServer contentRepository
+  _                 -> throwAll err401
+
+
 server :: ContentRepository Handler -> ApplicationAPI AsServer
 server contentRepository = ApplicationAPI
-  { tagger      = \(_ :: AuthResult User) -> taggerServer contentRepository
+  { tagger      = authenticatedTaggerServer contentRepository
   , docs        = docsServer
   , healthcheck = healthcheckServer
   }
