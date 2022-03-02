@@ -9,6 +9,9 @@ module Infrastructure.Persistence.Schema where
 -- base
 import GHC.Generics (Generic)
 
+-- bytestring
+import Data.ByteString (ByteString)
+
 -- rel8
 import Rel8 (Column, DBEq, DBType, Name, Rel8able, TableSchema(..), Result, Expr, lit)
 
@@ -32,7 +35,7 @@ data Tag f = Tag
 
 tagSchema :: TableSchema (Tag Name)
 tagSchema = TableSchema
-  { name    = "tag"
+  { name    = "tags"
   , schema  = Nothing
   , columns = Tag
     { tagId   = "id"
@@ -57,7 +60,7 @@ data Content f = Content
 
 contentSchema :: TableSchema (Content Name)
 contentSchema = TableSchema
-  { name    = "content"
+  { name    = "contents"
   , schema  = Nothing
   , columns = Content
     { contentId      = "id"
@@ -84,5 +87,29 @@ contentsTagsSchema = TableSchema
   , columns = ContentsTags
     { ctContentId = "content_id"
     , ctTagId     = "tag_id"
+    }
+  }
+
+-- USERS
+
+newtype UserId = UserId UUID
+  deriving newtype (DBEq, DBType, Eq, Show)
+
+data User f = User
+  { userId       :: Column f UserId
+  , userName     :: Column f Text
+  , userPassword :: Column f ByteString
+  }
+  deriving stock Generic
+  deriving anyclass Rel8able
+
+userSchema :: TableSchema (User Name)
+userSchema = TableSchema
+  { name = "users"
+  , schema = Nothing
+  , columns = User
+    { userId = "id"
+    , userName = "name"
+    , userPassword = "password"
     }
   }
