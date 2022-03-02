@@ -4,8 +4,9 @@ module Infrastructure.Authentication.AuthenticateUser where
 
 import Infrastructure.Authentication.Login (Login(Login))
 import Infrastructure.Persistence.Queries (selectUserByName, SelectUserError)
+import Infrastructure.Persistence.Serializer (unserializeUser)
 import Infrastructure.Persistence.Schema (userPassword)
-import Tagger.User (User(User))
+import Tagger.User (User)
 
 -- base
 import Data.Bifunctor (Bifunctor(first))
@@ -39,5 +40,5 @@ authenticateUser connection (Login username password) = do
   eitherUser <- withExceptT AuthenticationQueryError $ ExceptT $ run (selectUserByName username) connection
   user       <- except $ first AuthenticationSelectUserError eitherUser
   if validatePassword (userPassword user) (encodeUtf8 password)
-  then pure $ User username
+  then pure $ unserializeUser user
   else throwE AuthenticationPasswordVerificationFailed
