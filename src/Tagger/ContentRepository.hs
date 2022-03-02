@@ -13,5 +13,5 @@ data ContentRepository m = ContentRepository
   , addContentWithTags   :: Content Tag -> m UUID
   }
 
-hoist :: (forall a. m a -> n a) -> ContentRepository m -> ContentRepository n
-hoist f (ContentRepository select add) = ContentRepository (f . select) (f . add)
+hoistContentRepository :: (forall a. m a -> n a) -> ContentRepository m -> ContentRepository n
+hoistContentRepository f (ContentRepository select add) = ContentRepository (f . select) (f . add)
