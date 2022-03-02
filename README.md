@@ -17,6 +17,14 @@ The application allows users to categorify contents by tags. Any content can hav
 
 It allows also to retrieve contents by a set of tags.
 
+### Authentication
+
+The main endpoints of the application are protected by JWT authentication. To access them you first need to get an authorization token.
+
+You could obtain it by calling the `login` endpoint.
+
+Then, you should pass your token in the `Authorization` header for the relevant endpoints.
+
 ## Development
 
 The project is using [Stack](https://docs.haskellstack.org/en/stable/README/).
