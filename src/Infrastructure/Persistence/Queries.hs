@@ -1,8 +1,9 @@
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE RankNTypes #-}
 
 module Infrastructure.Persistence.Queries where
 
-import Infrastructure.Persistence.Schema (Content(..), contentSchema, Tag(..), tagSchema, ContentsTags(..), contentsTagsSchema, litTag, litContent)
+import Infrastructure.Persistence.Schema (Content(..), contentSchema, Tag(..), tagSchema, ContentsTags(..), contentsTagsSchema, litTag, litContent, User (userName), userSchema)
 
 -- base
 import qualified Data.List as List (filter)
@@ -17,7 +18,10 @@ import qualified Hasql.Transaction as T (statement)
 import Hasql.Transaction.Sessions (transaction, IsolationLevel (Serializable), Mode (Write))
 
 -- rel8
-import Rel8 (Expr, Insert(..), OnConflict(..), Query, Result, each, filter, insert, many, select, values, where_, (==.), TableSchema, Name, Rel8able, in_ {-and_, ListTable-})
+import Rel8 (Expr, Insert(..), OnConflict(..), Query, Result, each, filter, insert, many, select, values, where_, (==.), TableSchema, Name, Rel8able, in_, lit {-and_, ListTable-})
+
+-- text
+import Data.Text (Text)
 
 -- SELECT CONTENTS WITH TAGS
 
@@ -84,3 +88,23 @@ addContentWithTags content tags = transaction Serializable Write $ do
   T.statement () $ add tagSchema newTags
   T.statement () $ add contentSchema [litContent content]
   T.statement () $ add contentsTagsSchema (contentTag (litContent content) <$> (litTag <$> alreadyPresentTags) <> newTags)
+
+-- SELECT USER BY USERNAME
+
+data SelectUserError
+  = NoUser
+  | MoreThanOneUser
+  deriving Show
+
+singleUser :: [User Result] -> Either SelectUserError (User Result)
+singleUser = \case
+  []     -> Left NoUser
+  [user] -> Right user
+  _      -> Left MoreThanOneUser
+
+selectUserByName :: Text -> Session (Either SelectUserError (User Result))
+selectUserByName name = singleUser <$> (statement () . select $
+  each userSchema >>= filter (\user -> userName user ==. lit name))
+
+addUser :: User Expr -> Session ()
+addUser = statement () . add userSchema . pure

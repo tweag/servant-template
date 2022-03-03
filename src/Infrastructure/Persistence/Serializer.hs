@@ -1,9 +1,12 @@
 module Infrastructure.Persistence.Serializer where
 
-import qualified Infrastructure.Persistence.Schema as DB (Content(Content), Tag(Tag))
-import Infrastructure.Persistence.Schema (contentId, contentContent, tagId, tagName, ContentId (ContentId), TagId (TagId))
+import qualified Infrastructure.Persistence.Schema as DB (Content(Content), Tag(Tag), User(User))
+import Infrastructure.Persistence.Schema (contentId, contentContent, tagId, tagName, ContentId (ContentId), TagId (TagId), UserId (UserId), userId, userName, userPassword)
 import Tagger.Content (Content(..))
-import Tagger.Tag (Tag(..))
+import Tagger.Tag (Tag(Tag))
+import qualified Tagger.Tag as T (_name)
+import Tagger.User (User(User), Password (Password, asBytestring))
+import qualified Tagger.User as U (_name, _password)
 
 -- rel8
 import Rel8 (Result)
@@ -33,8 +36,20 @@ unserializeContent content tags = Content
 serializeTag :: UUID -> Tag -> DB.Tag Result
 serializeTag uuid tag = DB.Tag
   { tagId   = TagId uuid
-  , tagName = _name tag
+  , tagName = T._name tag
   }
 
 unserilizeTag :: DB.Tag Result -> Tag
 unserilizeTag tag = Tag (tagName tag)
+
+-- USER
+
+serializeUser :: UUID -> User -> DB.User Result
+serializeUser uuid user = DB.User
+  { userId   = UserId uuid
+  , userName = U._name user
+  , userPassword = asBytestring $ U._password user
+  }
+
+unserializeUser :: DB.User Result -> User
+unserializeUser user = User (userName user) (Password $ userPassword user)

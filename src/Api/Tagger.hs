@@ -10,6 +10,7 @@ import Tagger.ContentRepository (ContentRepository(selectContentsByTags, addCont
 import Tagger.Tag (Tag)
 
 -- base
+import Data.Proxy (Proxy(Proxy))
 import GHC.Generics (Generic)
 import Prelude hiding (getContents)
 
@@ -34,7 +35,9 @@ data TaggerAPI mode = TaggerAPI
   deriving stock Generic
 
 instance HasOpenApi TaggerAPI where
-  toOpenApi _ = mempty -- TODO: generate this automatically
+  toOpenApi _
+    =  toOpenApi (Proxy :: Proxy ("add-content"  :> ReqBody '[JSON] (Content Tag) :> Post '[JSON] UUID))
+    <> toOpenApi (Proxy :: Proxy ("get-contents" :> ReqBody '[JSON] [Tag]         :> Get  '[JSON] [Content Tag]))
 
 taggerServer :: ContentRepository Handler -> TaggerAPI AsServer
 taggerServer contentRepository = TaggerAPI

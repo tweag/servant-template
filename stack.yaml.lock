@@ -32,6 +32,19 @@ packages:
       sha256: 626b78189a43285439c5db1eb1b2ab0e29e85396f8f5766220399060228fba27
   original:
     hackage: servant-server-0.19
+- completed:
+    subdir: servant-auth/servant-auth-server
+    name: servant-auth-server
+    version: 0.4.7.0
+    git: git@github.com:haskell-servant/servant.git
+    pantry-tree:
+      size: 1469
+      sha256: 863179602fd64c564cd6d7a5ed328fed8525329e07e5d924f629ad78c4ff461a
+    commit: d05da71f09be08131d29a2c17f613a4bd71faea2
+  original:
+    subdir: servant-auth/servant-auth-server
+    git: git@github.com:haskell-servant/servant.git
+    commit: d05da71f09be08131d29a2c17f613a4bd71faea2
 snapshots:
 - completed:
     size: 590102
