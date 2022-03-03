@@ -46,6 +46,7 @@ executables:
       - bytestring
       - hasql
       - jose
+      - mtl
       - transformers
       - warp
 
