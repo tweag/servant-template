@@ -7,21 +7,17 @@
 
 module Api.Application where
 
+import Api.AppServices (AppServices (AppServices, jwtSettings))
 import Api.Authentication (AuthenticationAPI, authenticationServer)
 import Api.Docs (DocsAPI, docsServer)
 import Api.Healthcheck (HealthcheckAPI, healthcheckServer)
 import Api.Tagger (TaggerAPI, taggerServer)
-import Infrastructure.Authentication.AuthenticateUser (AuthenticateUser)
 import Tagger.ContentRepository (ContentRepository)
 import Tagger.User (User)
-import Tagger.UserRepository (UserRepository)
 
 -- base
 import Data.Proxy (Proxy(..))
 import GHC.Generics (Generic)
-
--- jose
-import Crypto.JOSE.JWK (JWK)
 
 -- servant
 import Servant.API (NamedRoutes, type (:>))
@@ -31,7 +27,7 @@ import Servant.API.Generic ((:-))
 import Servant.Auth (Auth, JWT)
 
 -- servant-auth-server
-import Servant.Auth.Server (defaultJWTSettings, defaultCookieSettings, AuthResult (Authenticated), ThrowAll (throwAll), JWTSettings)
+import Servant.Auth.Server (defaultCookieSettings, AuthResult (Authenticated), ThrowAll (throwAll))
 
 -- servant-server
 import Servant (Handler, serveWithContext, Context ((:.), EmptyContext), err401)
@@ -58,17 +54,16 @@ authenticatedTaggerServer contentRepository = \case
   (Authenticated _) -> taggerServer contentRepository
   _                 -> throwAll err401
 
-
-server :: JWTSettings -> ContentRepository Handler -> UserRepository Handler -> AuthenticateUser Handler -> ApplicationAPI AsServer
-server jwtSettings contentRepository userRepository authenticateUser = ApplicationAPI
+server :: AppServices -> ApplicationAPI AsServer
+server (AppServices jwtSettings' contentRepository userRepository authenticateUser) = ApplicationAPI
   { tagger         = authenticatedTaggerServer contentRepository
   , docs           = docsServer
   , healthcheck    = healthcheckServer
-  , authentication = authenticationServer jwtSettings authenticateUser userRepository
+  , authentication = authenticationServer jwtSettings' authenticateUser userRepository
   }
 
-app :: JWK -> AuthenticateUser Handler -> UserRepository Handler -> ContentRepository Handler -> Application
-app key authenticateUser userRepository contentRepository = logStdoutDev $ serveWithContext
+app :: AppServices -> Application
+app appServices = logStdoutDev $ serveWithContext
   (Proxy :: Proxy API)
-  (defaultCookieSettings :. defaultJWTSettings key :. EmptyContext)
-  (server (defaultJWTSettings key) contentRepository userRepository authenticateUser)
+  (defaultCookieSettings :. jwtSettings appServices :. EmptyContext)
+  (server appServices)

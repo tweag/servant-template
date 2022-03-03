@@ -45,6 +45,7 @@ executables:
       - servant-template
       - bytestring
       - hasql
+      - jose
       - transformers
       - warp
 
