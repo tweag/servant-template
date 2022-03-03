@@ -1,3 +1,5 @@
+{-# LANGUAGE RankNTypes #-}
+
 module Tagger.UserRepository where
 
 -- bytestring
@@ -10,3 +12,6 @@ import Data.Text (Text)
 import Data.UUID (UUID)
 
 newtype UserRepository m = UserRepository {addUser :: Text -> ByteString -> m UUID}
+
+hoistUserRepository :: (forall a. m a -> n a) -> UserRepository m -> UserRepository n
+hoistUserRepository f (UserRepository addUser') = UserRepository ((f .) . addUser')

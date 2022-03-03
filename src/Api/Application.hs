@@ -14,6 +14,7 @@ import Api.Tagger (TaggerAPI, taggerServer)
 import Infrastructure.Authentication.AuthenticateUser (AuthenticateUser)
 import Tagger.ContentRepository (ContentRepository)
 import Tagger.User (User)
+import Tagger.UserRepository (UserRepository)
 
 -- base
 import Data.Proxy (Proxy(..))
@@ -48,7 +49,7 @@ data ApplicationAPI mode = ApplicationAPI
   { tagger         :: mode :- Auth '[JWT] User :> NamedRoutes TaggerAPI
   , docs           :: mode :- DocsAPI
   , healthcheck    :: mode :- HealthcheckAPI
-  , authentication :: mode :- AuthenticationAPI
+  , authentication :: mode :- NamedRoutes AuthenticationAPI
   }
   deriving stock Generic
 
@@ -58,16 +59,16 @@ authenticatedTaggerServer contentRepository = \case
   _                 -> throwAll err401
 
 
-server :: JWTSettings -> ContentRepository Handler -> AuthenticateUser Handler -> ApplicationAPI AsServer
-server jwtSettings contentRepository authenticateUser = ApplicationAPI
+server :: JWTSettings -> ContentRepository Handler -> UserRepository Handler -> AuthenticateUser Handler -> ApplicationAPI AsServer
+server jwtSettings contentRepository userRepository authenticateUser = ApplicationAPI
   { tagger         = authenticatedTaggerServer contentRepository
   , docs           = docsServer
   , healthcheck    = healthcheckServer
-  , authentication = authenticationServer jwtSettings authenticateUser
+  , authentication = authenticationServer jwtSettings authenticateUser userRepository
   }
 
-app :: JWK -> AuthenticateUser Handler -> ContentRepository Handler -> Application
-app key contentRepository authenticateUser = logStdoutDev $ serveWithContext
+app :: JWK -> AuthenticateUser Handler -> UserRepository Handler -> ContentRepository Handler -> Application
+app key authenticateUser userRepository contentRepository = logStdoutDev $ serveWithContext
   (Proxy :: Proxy API)
   (defaultCookieSettings :. defaultJWTSettings key :. EmptyContext)
-  (server (defaultJWTSettings key) authenticateUser contentRepository)
+  (server (defaultJWTSettings key) contentRepository userRepository authenticateUser)
