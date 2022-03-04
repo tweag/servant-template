@@ -24,6 +24,7 @@ dependencies:
   - hasql-transaction
   - jose
   - lens
+  - mtl
   - openapi3
   - rel8
   - servant
@@ -46,7 +47,6 @@ executables:
       - bytestring
       - hasql
       - jose
-      - mtl
       - transformers
       - warp
 
