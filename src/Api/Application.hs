@@ -55,11 +55,11 @@ authenticatedTaggerServer contentRepository = \case
   _                 -> throwAll err401
 
 server :: AppServices -> ApplicationAPI AsServer
-server (AppServices jwtSettings' contentRepository userRepository authenticateUser) = ApplicationAPI
+server (AppServices _ passwordManager contentRepository userRepository authenticateUser) = ApplicationAPI
   { tagger         = authenticatedTaggerServer contentRepository
   , docs           = docsServer
   , healthcheck    = healthcheckServer
-  , authentication = authenticationServer jwtSettings' authenticateUser userRepository
+  , authentication = authenticationServer passwordManager authenticateUser userRepository
   }
 
 app :: AppServices -> Application
