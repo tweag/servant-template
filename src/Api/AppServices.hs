@@ -1,7 +1,12 @@
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE TupleSections #-}
+
 module Api.AppServices where
 
 import qualified Infrastructure.Authentication.AuthenticateUser as Auth (AuthenticateUser(AuthenticateUser), AuthenticationError(AuthenticationQueryError), authenticateUser, hoistAuthenticateUser)
 import Infrastructure.Authentication.PasswordManager (PasswordManager, PasswordManagerError(..), hoistPasswordManager, bcryptPasswordManager)
+import Infrastructure.Logging.Logger (messageLogger, provideContext)
 import Infrastructure.Persistence.PostgresContentRepository (postgresContentRepository)
 import Infrastructure.Persistence.PostgresUserRepository (postgresUserRepository)
 import Tagger.ContentRepository (ContentRepository, hoistContentRepository)
@@ -10,6 +15,10 @@ import Tagger.UserRepository (UserRepository, hoistUserRepository)
 -- base
 import Control.Monad ((<=<))
 import Control.Monad.IO.Class (liftIO)
+import Prelude hiding (log)
+
+-- co-log-core
+import Colog.Core ((<&), LogAction, Severity(..))
 
 -- hasql
 import Hasql.Connection (Connection)
@@ -37,34 +46,44 @@ data AppServices = AppServices
   , authenticateUser  :: Auth.AuthenticateUser Handler
   }
 
+type SeverityLogger = forall a. Show a => LogAction Handler (Severity, a)
+
 eitherTToHandler :: (e -> Handler a) -> ExceptT e IO a -> Handler a
 eitherTToHandler handleError = either handleError pure <=< liftIO . runExceptT
 
-connectedContentRepository :: Connection -> ContentRepository Handler
-connectedContentRepository = hoistContentRepository (eitherTToHandler . const $ throwError err500) . postgresContentRepository
+connectedContentRepository :: SeverityLogger -> Connection -> ContentRepository Handler
+connectedContentRepository log = hoistContentRepository (eitherTToHandler $ ((log <&) . (Error,)) >> const (throwError err500)) . postgresContentRepository
 
-connectedUserRepository :: Connection -> UserRepository Handler
-connectedUserRepository = hoistUserRepository (eitherTToHandler . const $ throwError err500). postgresUserRepository
+connectedUserRepository :: SeverityLogger -> Connection -> UserRepository Handler
+connectedUserRepository log = hoistUserRepository (eitherTToHandler $ ((log <&) . (Error,)) >> const (throwError err500)) . postgresUserRepository
 
-connectedAuthenticateUser :: Connection -> Auth.AuthenticateUser Handler
-connectedAuthenticateUser = Auth.hoistAuthenticateUser (eitherTToHandler handleAuthenticationError) . Auth.AuthenticateUser . Auth.authenticateUser
+connectedAuthenticateUser :: SeverityLogger -> Connection -> Auth.AuthenticateUser Handler
+connectedAuthenticateUser log = Auth.hoistAuthenticateUser (eitherTToHandler handleAuthenticationError) . Auth.AuthenticateUser . Auth.authenticateUser
   where
     handleAuthenticationError :: Auth.AuthenticationError -> Handler a
-    handleAuthenticationError (Auth.AuthenticationQueryError _) = throwError err500
-    handleAuthenticationError _                                 = throwError err401
+    handleAuthenticationError (Auth.AuthenticationQueryError e) = do
+      log <& (Error, Auth.AuthenticationQueryError e)
+      throwError err500
+    handleAuthenticationError e = do
+      log <& (Warning, e)
+      throwError err401
 
-encryptedPasswordManager :: JWTSettings -> PasswordManager Handler
-encryptedPasswordManager = hoistPasswordManager (eitherTToHandler handlePasswordManagerError) . bcryptPasswordManager
+encryptedPasswordManager :: SeverityLogger -> JWTSettings -> PasswordManager Handler
+encryptedPasswordManager log = hoistPasswordManager (eitherTToHandler handlePasswordManagerError) . bcryptPasswordManager
   where
     handlePasswordManagerError :: PasswordManagerError -> Handler a
-    handlePasswordManagerError FailedHashing         = throwError err500
-    handlePasswordManagerError (FailedJWTCreation _) = throwError err401
+    handlePasswordManagerError FailedHashing = do
+      log <& (Error, FailedHashing)
+      throwError err500
+    handlePasswordManagerError (FailedJWTCreation e) = do
+      log <& (Error, FailedJWTCreation e)
+      throwError err401
 
 appServices :: Connection -> JWK -> AppServices
 appServices connection key = AppServices
   { jwtSettings       = defaultJWTSettings key
-  , passwordManager   = encryptedPasswordManager $ defaultJWTSettings key
-  , contentRepository = connectedContentRepository connection
-  , userRepository    = connectedUserRepository connection
-  , authenticateUser  = connectedAuthenticateUser connection
+  , passwordManager   = encryptedPasswordManager (provideContext "PasswordManager" messageLogger) $ defaultJWTSettings key
+  , contentRepository = connectedContentRepository (provideContext "ContentRepository" messageLogger) connection
+  , userRepository    = connectedUserRepository (provideContext "UserRepository" messageLogger) connection
+  , authenticateUser  = connectedAuthenticateUser (provideContext "AuthenticateUser" messageLogger) connection
   }

@@ -1,3 +1,4 @@
+{-# LANGUAGE DerivingStrategies #-}
 {-# LANGUAGE RankNTypes #-}
 
 module Infrastructure.Authentication.PasswordManager where
@@ -21,10 +22,9 @@ import Servant.Auth.Server (JWTSettings, makeJWT)
 -- transformers
 import Control.Monad.Trans.Except (ExceptT(ExceptT))
 
-
 data PasswordManager m = PasswordManager
   { generatePassword :: Login -> m Password
-  , verifyPassword   :: User -> m Token
+  , generateToken    :: User -> m Token
   }
 
 hoistPasswordManager :: (forall a. m a -> n a) -> PasswordManager m -> PasswordManager n
@@ -33,11 +33,12 @@ hoistPasswordManager f (PasswordManager generate verify) = PasswordManager (f . 
 data PasswordManagerError
   = FailedHashing
   | FailedJWTCreation Error
+  deriving stock Show
 
 bcryptPasswordManager :: JWTSettings -> PasswordManager (ExceptT PasswordManagerError IO)
 bcryptPasswordManager jwtSettings = PasswordManager
   { generatePassword = bcryptGeneratePassword
-  , verifyPassword   = bcryptVerifyPassword jwtSettings
+  , generateToken    = bcryptGenerateToken jwtSettings
   }
 
 bcryptGeneratePassword :: Login -> ExceptT PasswordManagerError IO Password
@@ -48,5 +49,5 @@ bcryptGeneratePassword
   . asBytestring
   . password
 
-bcryptVerifyPassword :: JWTSettings -> User -> ExceptT PasswordManagerError IO Token
-bcryptVerifyPassword jwtSettings user = ExceptT . fmap (bimap FailedJWTCreation Token) $ makeJWT user jwtSettings Nothing
+bcryptGenerateToken :: JWTSettings -> User -> ExceptT PasswordManagerError IO Token
+bcryptGenerateToken jwtSettings user = ExceptT . fmap (bimap FailedJWTCreation Token) $ makeJWT user jwtSettings Nothing

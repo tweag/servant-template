@@ -7,7 +7,7 @@ module Api.Authentication where
 
 import Infrastructure.Authentication.AuthenticateUser (AuthenticateUser(runAuthenticateUser))
 import Infrastructure.Authentication.Login (Login(username))
-import Infrastructure.Authentication.PasswordManager (PasswordManager(generatePassword, verifyPassword))
+import Infrastructure.Authentication.PasswordManager (PasswordManager(generatePassword, generateToken))
 import Infrastructure.Authentication.Token (Token)
 import Tagger.User (asBytestring)
 import Tagger.UserRepository (UserRepository(addUser))
@@ -54,4 +54,4 @@ registerEndpoint passwordManager userRepository login' = do
 loginEndpoint :: PasswordManager Handler -> AuthenticateUser Handler -> Login -> Handler Token
 loginEndpoint passwordManager authenticateUser login' = do
   user <- runAuthenticateUser authenticateUser login'
-  verifyPassword passwordManager user
+  generateToken passwordManager user

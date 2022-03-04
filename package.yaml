@@ -20,6 +20,7 @@ dependencies:
   - aeson
   - bcrypt
   - bytestring
+  - co-log-core
   - hasql
   - hasql-transaction
   - jose
@@ -33,6 +34,7 @@ dependencies:
   - servant-openapi3
   - servant-server
   - text
+  - time
   - transformers
   - uuid
   - wai
