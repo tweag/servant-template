@@ -1,6 +1,7 @@
 module Api.AppServices where
 
 import Infrastructure.Authentication.AuthenticateUser (AuthenticateUser)
+import Infrastructure.Authentication.PasswordManager (PasswordManager)
 import Tagger.ContentRepository (ContentRepository)
 import Tagger.UserRepository (UserRepository)
 
@@ -12,6 +13,7 @@ import Servant (Handler)
 
 data AppServices = AppServices
   { jwtSettings       :: JWTSettings
+  , passwordManager   :: PasswordManager Handler
   , contentRepository :: ContentRepository Handler
   , userRepository    :: UserRepository Handler
   , authenticateUser  :: AuthenticateUser Handler

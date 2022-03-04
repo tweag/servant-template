@@ -4,6 +4,8 @@
 
 module Infrastructure.Authentication.Login where
 
+import Tagger.User (Password)
+
 -- base
 import GHC.Generics (Generic)
 
@@ -18,7 +20,7 @@ import Data.Text (Text)
 
 data Login = Login
   { username :: Text
-  , password :: Text
+  , password :: Password
   }
   deriving stock Generic
   deriving anyclass (FromJSON, ToSchema)

@@ -5,6 +5,7 @@
 module Tagger.User where
 
 -- base
+import Data.Data (Proxy(Proxy))
 import GHC.Generics (Generic)
 
 -- aeson
@@ -12,6 +13,9 @@ import Data.Aeson (ToJSON(toJSON), FromJSON(parseJSON))
 
 -- bytestring
 import Data.ByteString (ByteString)
+
+-- openapi3
+import Data.OpenApi (ToSchema(declareNamedSchema))
 
 -- servant-auth
 import Servant.Auth.JWT (ToJWT, FromJWT)
@@ -29,6 +33,9 @@ instance FromJSON Password where
 
 instance ToJSON Password where
   toJSON (Password s) = toJSON $ decodeUtf8 s
+
+instance ToSchema Password where
+  declareNamedSchema _ = declareNamedSchema (Proxy :: Proxy Text)
 
 data User = User
   { _name :: Text

@@ -5,6 +5,7 @@ module Main where
 import Api.Application (app)
 import Api.AppServices (AppServices(..))
 import qualified Infrastructure.Authentication.AuthenticateUser as Auth (AuthenticateUser(AuthenticateUser), AuthenticationError(..), authenticateUser, hoistAuthenticateUser)
+import Infrastructure.Authentication.PasswordManager (PasswordManager, PasswordManagerError(..), bcryptPasswordManager, hoistPasswordManager)
 import Infrastructure.Persistence.PostgresContentRepository (postgresContentRepository)
 import Infrastructure.Persistence.PostgresUserRepository (postgresUserRepository)
 import Tagger.ContentRepository (ContentRepository, hoistContentRepository)
@@ -31,7 +32,7 @@ import Control.Monad.Except (throwError)
 import Servant (Handler, err401, err500)
 
 -- servant-auth-server
-import Servant.Auth.Server (defaultJWTSettings, generateKey)
+import Servant.Auth.Server (JWTSettings, defaultJWTSettings, generateKey)
 
 -- transformers
 import Control.Monad.Trans.Except (ExceptT, runExceptT)
@@ -56,9 +57,17 @@ connectedAuthenticateUser = Auth.hoistAuthenticateUser (eitherTToHandler handleA
     handleAuthenticationError (Auth.AuthenticationQueryError _) = throwError err500
     handleAuthenticationError _                                 = throwError err401
 
+encryptedPasswordManager :: JWTSettings -> PasswordManager Handler
+encryptedPasswordManager = hoistPasswordManager (eitherTToHandler handlePasswordManagerError) . bcryptPasswordManager
+  where
+    handlePasswordManagerError :: PasswordManagerError -> Handler a
+    handlePasswordManagerError FailedHashing         = throwError err500
+    handlePasswordManagerError (FailedJWTCreation _) = throwError err401
+
 appServices :: Connection -> JWK -> AppServices
 appServices connection key = AppServices
   { jwtSettings       = defaultJWTSettings key
+  , passwordManager   = encryptedPasswordManager $ defaultJWTSettings key
   , contentRepository = connectedContentRepository connection
   , userRepository    = connectedUserRepository connection
   , authenticateUser  = connectedAuthenticateUser connection

@@ -6,7 +6,7 @@ import Infrastructure.Authentication.Login (Login(Login))
 import Infrastructure.Persistence.Queries (selectUserByName, SelectUserError)
 import Infrastructure.Persistence.Serializer (unserializeUser)
 import Infrastructure.Persistence.Schema (userPassword)
-import Tagger.User (User)
+import Tagger.User (User, Password(asBytestring))
 
 -- base
 import Data.Bifunctor (Bifunctor(first))
@@ -17,9 +17,6 @@ import Crypto.BCrypt (validatePassword)
 -- hasql
 import Hasql.Connection (Connection)
 import Hasql.Session (run, QueryError)
-
--- text
-import Data.Text.Encoding (encodeUtf8)
 
 -- transformers
 import Control.Monad.Trans.Except (ExceptT(ExceptT), withExceptT, except, throwE)
@@ -39,6 +36,6 @@ authenticateUser :: Connection -> Login -> ExceptT AuthenticationError IO User
 authenticateUser connection (Login username password) = do
   eitherUser <- withExceptT AuthenticationQueryError $ ExceptT $ run (selectUserByName username) connection
   user       <- except $ first AuthenticationSelectUserError eitherUser
-  if validatePassword (userPassword user) (encodeUtf8 password)
+  if validatePassword (userPassword user) (asBytestring password)
   then pure $ unserializeUser user
   else throwE AuthenticationPasswordVerificationFailed
