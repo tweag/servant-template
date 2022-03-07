@@ -4,6 +4,8 @@
 
 module Tagger.Content where
 
+import Tagger.User (User)
+
 -- base
 import GHC.Generics (Generic)
 
@@ -19,6 +21,7 @@ import Data.Text (Text)
 data Content tag = Content
   { _content :: Text
   , _tags :: [tag]
+  , _user :: User
   }
   deriving stock (Functor, Generic)
 
@@ -26,7 +29,10 @@ instance Foldable Content where
   foldMap f = foldMap f . _tags
 
 instance Traversable Content where
-  traverse f (Content content tags) = Content content <$> traverse f tags
+  traverse f (Content content tags user) = Content
+    <$> pure content
+    <*> traverse f tags
+    <*> pure user
 
 instance ToSchema tag => ToSchema (Content tag)
 

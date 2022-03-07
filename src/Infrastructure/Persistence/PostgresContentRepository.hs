@@ -3,15 +3,19 @@
 module Infrastructure.Persistence.PostgresContentRepository where
 
 import Infrastructure.Persistence.Serializer (unserializeContent, serializeContent)
-import qualified Infrastructure.Persistence.Queries as DB (selectAllContentsWithTags, addContentWithTags)
+import qualified Infrastructure.Persistence.Queries as DB (selectAllContents, addContentWithTags)
 import Tagger.Content (Content, hasAllTags)
 import Tagger.ContentRepository (ContentRepository(..))
 import Tagger.Id (Id(Id))
 import Tagger.Tag (Tag)
+import Tagger.User (User)
 
 -- base
 import Control.Monad (forM)
 import Control.Monad.IO.Class (liftIO)
+
+-- extra
+import Data.Tuple.Extra (uncurry3)
 
 -- hasql
 import Hasql.Connection (Connection)
@@ -33,8 +37,8 @@ postgresContentRepository connection = ContentRepository
 -- TODO: filter the contents on the db side
 postgresSelectContentsByTags :: Connection -> [Tag] -> ExceptT QueryError IO [Content Tag]
 postgresSelectContentsByTags connection tags = do
-  allDBContents <- ExceptT $ run DB.selectAllContentsWithTags connection
-  let allContents = uncurry unserializeContent <$> allDBContents
+  allDBContents <- ExceptT $ run DB.selectAllContents connection
+  let allContents = uncurry3 unserializeContent <$> allDBContents
   pure $ filter (hasAllTags tags) allContents
 
 -- steps:
@@ -46,9 +50,9 @@ postgresSelectContentsByTags connection tags = do
 --    - insert new tags
 --    - insert content
 --    - insert contents_tags
-postgresAddContentWithTags :: Connection -> Content Tag -> ExceptT QueryError IO (Id (Content Tag))
-postgresAddContentWithTags connection content = do
+postgresAddContentWithTags :: Connection -> Id User -> Content Tag -> ExceptT QueryError IO (Id (Content Tag))
+postgresAddContentWithTags connection userId content = do
   contentUUID          <- liftIO nextRandom
   contentWithTagsUUIDs <- liftIO $ forM content (\tag -> (, tag) . Id <$> nextRandom)
-  ExceptT $ run (uncurry DB.addContentWithTags $ serializeContent (Id contentUUID) contentWithTagsUUIDs) connection
+  ExceptT $ run (uncurry DB.addContentWithTags . (\(a, b, _) -> (a, b)) $ serializeContent (Id contentUUID) userId contentWithTagsUUIDs) connection
   pure $ Id contentUUID

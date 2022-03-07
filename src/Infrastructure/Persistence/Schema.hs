@@ -1,7 +1,6 @@
 {-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DerivingStrategies #-}
-{-# LANGUAGE GeneralisedNewtypeDeriving #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Infrastructure.Persistence.Schema where
@@ -50,6 +49,7 @@ litTag (Tag id' name') = Tag (lit id') (lit name')
 data Content f = Content
   { contentId      :: Column f (Id (Domain.Content Domain.Tag))
   , contentContent :: Column f Text
+  , contentUserId  :: Column f (Id Domain.User)
   }
   deriving stock Generic
   deriving anyclass Rel8able
@@ -61,11 +61,12 @@ contentSchema = TableSchema
   , columns = Content
     { contentId      = "id"
     , contentContent = "content"
+    , contentUserId  = "user_id"
     }
   }
 
 litContent :: Content Result -> Content Expr
-litContent (Content id' content') = Content (lit id') (lit content')
+litContent (Content id' content' userId') = Content (lit id') (lit content') (lit userId')
 
 -- CONTENTS_TAGS
 

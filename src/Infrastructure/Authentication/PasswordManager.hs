@@ -6,6 +6,7 @@ module Infrastructure.Authentication.PasswordManager where
 import Infrastructure.Authentication.Login (Login(password))
 import Infrastructure.Authentication.Token (Token(Token))
 import Tagger.User (Password(Password, asBytestring), User)
+import Tagger.Id (Id)
 
 -- base
 import Data.Bifunctor (bimap)
@@ -24,7 +25,7 @@ import Control.Monad.Trans.Except (ExceptT(ExceptT))
 
 data PasswordManager m = PasswordManager
   { generatePassword :: Login -> m Password
-  , generateToken    :: User -> m Token
+  , generateToken    :: Id User -> m Token
   }
 
 hoistPasswordManager :: (forall a. m a -> n a) -> PasswordManager m -> PasswordManager n
@@ -49,5 +50,5 @@ bcryptGeneratePassword
   . asBytestring
   . password
 
-bcryptGenerateToken :: JWTSettings -> User -> ExceptT PasswordManagerError IO Token
-bcryptGenerateToken jwtSettings user = ExceptT . fmap (bimap FailedJWTCreation Token) $ makeJWT user jwtSettings Nothing
+bcryptGenerateToken :: JWTSettings -> Id User -> ExceptT PasswordManagerError IO Token
+bcryptGenerateToken jwtSettings userId = ExceptT . fmap (bimap FailedJWTCreation Token) $ makeJWT userId jwtSettings Nothing

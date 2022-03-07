@@ -17,16 +17,12 @@ import Data.ByteString (ByteString)
 -- openapi3
 import Data.OpenApi (ToSchema(declareNamedSchema))
 
--- servant-auth
-import Servant.Auth.JWT (ToJWT, FromJWT)
-
 -- text
 import Data.Text (Text)
 import Data.Text.Encoding (encodeUtf8, decodeUtf8)
 
 newtype Password = Password {asBytestring :: ByteString}
   deriving stock (Eq, Show, Read, Generic)
-  deriving anyclass (ToJWT, FromJWT)
 
 instance FromJSON Password where
   parseJSON json = Password . encodeUtf8 <$> parseJSON json
@@ -42,4 +38,6 @@ data User = User
   , _password :: Password
   }
   deriving stock (Eq, Show, Read, Generic)
-  deriving anyclass (ToJSON, ToJWT, FromJSON, FromJWT)
+  deriving anyclass (ToJSON, FromJSON)
+
+instance ToSchema User

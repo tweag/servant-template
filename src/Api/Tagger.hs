@@ -9,6 +9,7 @@ import Tagger.Content (Content)
 import Tagger.ContentRepository (ContentRepository(selectContentsByTags, addContentWithTags))
 import Tagger.Id (Id)
 import Tagger.Tag (Tag)
+import Tagger.User (User)
 
 -- base
 import Data.Proxy (Proxy(Proxy))
@@ -37,8 +38,8 @@ instance HasOpenApi TaggerAPI where
     =  toOpenApi (Proxy :: Proxy ("add-content"  :> ReqBody '[JSON] (Content Tag) :> Post '[JSON] (Id (Content Tag))))
     <> toOpenApi (Proxy :: Proxy ("get-contents" :> ReqBody '[JSON] [Tag]         :> Get  '[JSON] [Content Tag]))
 
-taggerServer :: ContentRepository Handler -> TaggerAPI AsServer
-taggerServer contentRepository = TaggerAPI
-  { addContent  = addContentWithTags contentRepository
+taggerServer :: Id User -> ContentRepository Handler -> TaggerAPI AsServer
+taggerServer userId contentRepository = TaggerAPI
+  { addContent  = addContentWithTags contentRepository userId
   , getContents = selectContentsByTags contentRepository
   }
