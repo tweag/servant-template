@@ -7,6 +7,7 @@ import qualified Infrastructure.Persistence.Queries as DB (selectAllContents, ad
 import Tagger.Content (Content, hasAllTags)
 import Tagger.ContentRepository (ContentRepository(..))
 import Tagger.Id (Id(Id))
+import Tagger.Owned (Owned)
 import Tagger.Tag (Tag)
 import Tagger.User (User)
 
@@ -35,7 +36,7 @@ postgresContentRepository connection = ContentRepository
   }
 
 -- TODO: filter the contents on the db side
-postgresSelectContentsByTags :: Connection -> [Tag] -> ExceptT QueryError IO [Content Tag]
+postgresSelectContentsByTags :: Connection -> [Tag] -> ExceptT QueryError IO [Owned (Content Tag)]
 postgresSelectContentsByTags connection tags = do
   allDBContents <- ExceptT $ run DB.selectAllContents connection
   let allContents = uncurry3 unserializeContent <$> allDBContents
@@ -54,5 +55,5 @@ postgresAddContentWithTags :: Connection -> Id User -> Content Tag -> ExceptT Qu
 postgresAddContentWithTags connection userId content = do
   contentUUID          <- liftIO nextRandom
   contentWithTagsUUIDs <- liftIO $ forM content (\tag -> (, tag) . Id <$> nextRandom)
-  ExceptT $ run (uncurry DB.addContentWithTags . (\(a, b, _) -> (a, b)) $ serializeContent (Id contentUUID) userId contentWithTagsUUIDs) connection
+  ExceptT $ run (uncurry DB.addContentWithTags  $ serializeContent (Id contentUUID) userId contentWithTagsUUIDs) connection
   pure $ Id contentUUID

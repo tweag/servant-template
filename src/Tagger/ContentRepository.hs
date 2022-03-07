@@ -5,10 +5,11 @@ module Tagger.ContentRepository where
 import Tagger.Content (Content)
 import Tagger.Id (Id)
 import Tagger.Tag (Tag)
+import Tagger.Owned (Owned)
 import Tagger.User (User)
 
 data ContentRepository m = ContentRepository
-  { selectContentsByTags :: [Tag] -> m [Content Tag]
+  { selectContentsByTags :: [Tag] -> m [Owned (Content Tag)]
   , addContentWithTags   :: Id User -> Content Tag -> m (Id (Content Tag))
   }
 

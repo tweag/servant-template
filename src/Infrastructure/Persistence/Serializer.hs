@@ -4,6 +4,8 @@ import qualified Infrastructure.Persistence.Schema as DB (Content(Content), Tag(
 import Infrastructure.Persistence.Schema (contentId, contentContent, contentUserId, tagId, tagName, userId, userName, userPassword)
 import Tagger.Content (Content(..))
 import Tagger.Id (Id)
+import qualified Tagger.Owned as O (_content, _user)
+import Tagger.Owned (Owned(Owned))
 import Tagger.Tag (Tag(Tag))
 import qualified Tagger.Tag as T (_name)
 import Tagger.User (User(User), Password (Password, asBytestring))
@@ -14,8 +16,8 @@ import Rel8 (Result)
 
 -- CONTENT
 
-serializeContent :: Id (Content Tag) -> Id User -> Content (Id Tag, Tag) -> (DB.Content Result, [DB.Tag Result], DB.User Result)
-serializeContent contentId' userId' content = (dbContent, dbTags, dbUser)
+serializeContent :: Id (Content Tag) -> Id User -> Content (Id Tag, Tag) -> (DB.Content Result, [DB.Tag Result])
+serializeContent contentId' userId' content = (dbContent, dbTags)
   where
     dbContent = DB.Content
       { contentId      = contentId'
@@ -23,13 +25,14 @@ serializeContent contentId' userId' content = (dbContent, dbTags, dbUser)
       , contentUserId  = userId'
       }
     dbTags = uncurry serializeTag <$> _tags content
-    dbUser = serializeUser userId' (_user content)
 
-unserializeContent :: DB.Content Result -> [DB.Tag Result] -> DB.User Result -> Content Tag
-unserializeContent content tags user = Content
-  { _content = contentContent content
-  , _tags    = unserilizeTag <$> tags
-  , _user    = unserializeUser user
+unserializeContent :: DB.Content Result -> [DB.Tag Result] -> DB.User Result -> Owned(Content Tag)
+unserializeContent content tags user = Owned
+  { O._content = Content
+    { _content = contentContent content
+    , _tags    = unserilizeTag <$> tags
+    }
+  , O._user = unserializeUser user
   }
 
 -- TAG

@@ -4,7 +4,7 @@
 
 module Tagger.Content where
 
-import Tagger.User (User)
+import Tagger.Owned (Owned(Owned))
 
 -- base
 import GHC.Generics (Generic)
@@ -21,7 +21,6 @@ import Data.Text (Text)
 data Content tag = Content
   { _content :: Text
   , _tags :: [tag]
-  , _user :: User
   }
   deriving stock (Functor, Generic)
 
@@ -29,10 +28,7 @@ instance Foldable Content where
   foldMap f = foldMap f . _tags
 
 instance Traversable Content where
-  traverse f (Content content tags user) = Content
-    <$> pure content
-    <*> traverse f tags
-    <*> pure user
+  traverse f (Content content tags) = Content content <$> traverse f tags
 
 instance ToSchema tag => ToSchema (Content tag)
 
@@ -40,5 +36,5 @@ instance FromJSON tag => FromJSON (Content tag)
 
 instance ToJSON tag => ToJSON (Content tag)
 
-hasAllTags :: Eq tag => [tag] -> Content tag -> Bool
-hasAllTags tags content = and $ (\tag -> tag `elem` _tags content) <$> tags
+hasAllTags :: Eq tag => [tag] -> Owned (Content tag) -> Bool
+hasAllTags tags (Owned _ content) = and $ (\tag -> tag `elem` _tags content) <$> tags
