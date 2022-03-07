@@ -1,6 +1,6 @@
-{-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DerivingStrategies #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 module Tagger.User where
 
@@ -9,7 +9,7 @@ import Data.Data (Proxy(Proxy))
 import GHC.Generics (Generic)
 
 -- aeson
-import Data.Aeson (ToJSON(toJSON), FromJSON(parseJSON))
+import Data.Aeson (ToJSON(toJSON), FromJSON(parseJSON), (.=), object)
 
 -- bytestring
 import Data.ByteString (ByteString)
@@ -38,6 +38,8 @@ data User = User
   , _password :: Password
   }
   deriving stock (Eq, Show, Read, Generic)
-  deriving anyclass (ToJSON, FromJSON)
+
+instance ToJSON User where
+  toJSON (User name _) = object ["_name" .= name]
 
 instance ToSchema User
