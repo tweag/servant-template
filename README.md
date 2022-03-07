@@ -17,6 +17,22 @@ The application allows users to categorify contents by tags. Any content can hav
 
 It allows also to retrieve contents by a set of tags.
 
+### Configuration
+
+Configuration of the application is managed using [TOML](https://toml.io). The application requires a configuration file in [config.toml](config.toml), with the following format:
+
+```toml
+[database]
+  host     = "localhost"
+  port     = 5432
+  dbname   = "tagger"
+  user     = "user"
+  password = "password"
+
+[api]
+  port = 8080
+```
+
 ### Authentication
 
 The main endpoints of the application are protected by JWT authentication. To access them you first need to get an authorization token for a user.
@@ -51,7 +67,7 @@ You can launch the web server using
 stack exec servant-template-exe
 ```
 
-which will expose the service on port 8080
+which will expose the service on port defined in configuration.
 
 ### Database
 
@@ -61,8 +77,4 @@ You can initialise the schema of the database by running the `schema.sql` which 
 
 ## Openapi documentation
 
-You can access the OpenAPI documentation just by visiting
-
-```
-localhost:8080/docs
-```
+You can access the OpenAPI documentation just by visiting the `docs` endpoint
