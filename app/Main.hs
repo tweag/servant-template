@@ -4,6 +4,7 @@ module Main where
 
 import Api.Application (app)
 import Api.AppServices (appServices)
+import Api.Config (api, apiPort, asInt, configCodec, connectionString, database)
 
 -- base
 import Data.Maybe (fromMaybe)
@@ -17,15 +18,18 @@ import Hasql.Connection (acquire)
 -- servant-auth-server
 import Servant.Auth.Server (generateKey)
 
+-- toml
+import Toml (decodeFileExact)
+
 -- warp
 import Network.Wai.Handler.Warp (run)
 
 main:: IO ()
 main = do
-  -- TODO: retrieve connection data from configuration file
-  connection <- acquire "host=localhost port=5432 dbname=tagger user=user password=password"
-  key <- generateKey
+  eitherConfig <- decodeFileExact configCodec "./config.toml"
+  config <- either (\errors -> fail $ "unable to parse configuration: " <> show errors) pure eitherConfig
+  connection <- acquire $ connectionString (database config)
   either
     (fail . unpack . fromMaybe "unable to connect to the database")
-    (\connection' -> run 8080 $ app (appServices connection' key))
+    (\connection' -> generateKey >>= run (asInt . apiPort . api $ config) . app . appServices connection')
     connection
