@@ -1,10 +1,14 @@
 {-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DerivingStrategies #-}
-{-# LANGUAGE GeneralisedNewtypeDeriving #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Infrastructure.Persistence.Schema where
+
+import Tagger.Id (Id)
+import qualified Tagger.Content as Domain (Content)
+import qualified Tagger.Tag as Domain (Tag)
+import qualified Tagger.User as Domain (User)
 
 -- base
 import GHC.Generics (Generic)
@@ -13,21 +17,15 @@ import GHC.Generics (Generic)
 import Data.ByteString (ByteString)
 
 -- rel8
-import Rel8 (Column, DBEq, DBType, Name, Rel8able, TableSchema(..), Result, Expr, lit)
+import Rel8 (Column, Name, Rel8able, TableSchema(..), Result, Expr, lit)
 
 -- text
 import Data.Text (Text)
 
--- uuid
-import Data.UUID (UUID)
-
 -- TAG
 
-newtype TagId = TagId UUID
-  deriving newtype (DBEq, DBType, Eq, Show)
-
 data Tag f = Tag
-  { tagId   :: Column f TagId
+  { tagId   :: Column f (Id Domain.Tag)
   , tagName :: Column f Text
   }
   deriving stock Generic
@@ -48,12 +46,10 @@ litTag (Tag id' name') = Tag (lit id') (lit name')
 
 -- CONTENT
 
-newtype ContentId = ContentId UUID
-  deriving newtype (DBEq, DBType, Eq, Show)
-
 data Content f = Content
-  { contentId      :: Column f ContentId
+  { contentId      :: Column f (Id (Domain.Content Domain.Tag))
   , contentContent :: Column f Text
+  , contentUserId  :: Column f (Id Domain.User)
   }
   deriving stock Generic
   deriving anyclass Rel8able
@@ -65,17 +61,18 @@ contentSchema = TableSchema
   , columns = Content
     { contentId      = "id"
     , contentContent = "content"
+    , contentUserId  = "user_id"
     }
   }
 
 litContent :: Content Result -> Content Expr
-litContent (Content id' content') = Content (lit id') (lit content')
+litContent (Content id' content' userId') = Content (lit id') (lit content') (lit userId')
 
 -- CONTENTS_TAGS
 
 data ContentsTags f = ContentsTags
-  { ctContentId :: Column f ContentId
-  , ctTagId     :: Column f TagId
+  { ctContentId :: Column f (Id (Domain.Content Domain.Tag))
+  , ctTagId     :: Column f (Id Domain.Tag)
   }
   deriving stock Generic
   deriving anyclass Rel8able
@@ -92,11 +89,8 @@ contentsTagsSchema = TableSchema
 
 -- USERS
 
-newtype UserId = UserId UUID
-  deriving newtype (DBEq, DBType, Eq, Show)
-
 data User f = User
-  { userId       :: Column f UserId
+  { userId       :: Column f (Id Domain.User)
   , userName     :: Column f Text
   , userPassword :: Column f ByteString
   }

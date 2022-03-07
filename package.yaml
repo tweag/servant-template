@@ -21,6 +21,7 @@ dependencies:
   - bcrypt
   - bytestring
   - co-log-core
+  - extra
   - hasql
   - hasql-transaction
   - jose

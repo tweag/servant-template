@@ -9,7 +9,8 @@ import Infrastructure.Authentication.AuthenticateUser (AuthenticateUser(runAuthe
 import Infrastructure.Authentication.Login (Login(username))
 import Infrastructure.Authentication.PasswordManager (PasswordManager(generatePassword, generateToken))
 import Infrastructure.Authentication.Token (Token)
-import Tagger.User (asBytestring)
+import Tagger.Id (Id)
+import Tagger.User (asBytestring, User)
 import Tagger.UserRepository (UserRepository(addUser))
 
 -- base
@@ -26,18 +27,15 @@ import Servant.OpenApi (HasOpenApi(toOpenApi))
 -- servant-server
 import Servant.Server.Generic (AsServer)
 
--- uuid
-import Data.UUID (UUID)
-
 data AuthenticationAPI mode = AuthenticationAPI
-  { register :: mode :- "register" :> ReqBody '[JSON] Login :> Post '[JSON] UUID
+  { register :: mode :- "register" :> ReqBody '[JSON] Login :> Post '[JSON] (Id User)
   , login    :: mode :- "login"    :> ReqBody '[JSON] Login :> Post '[JSON] Token
   }
   deriving stock Generic
 
 instance HasOpenApi AuthenticationAPI where
   toOpenApi _
-    =  toOpenApi (Proxy :: Proxy ("register" :> ReqBody '[JSON] Login :> Post '[JSON] UUID))
+    =  toOpenApi (Proxy :: Proxy ("register" :> ReqBody '[JSON] Login :> Post '[JSON] (Id User)))
     <> toOpenApi (Proxy :: Proxy ("login"    :> ReqBody '[JSON] Login :> Post '[JSON] Token))
 
 authenticationServer :: PasswordManager Handler -> AuthenticateUser Handler -> UserRepository Handler -> AuthenticationAPI AsServer
@@ -46,7 +44,7 @@ authenticationServer passwordManager authenticateUser userRepository = Authentic
   , login    = loginEndpoint passwordManager authenticateUser
   }
 
-registerEndpoint :: PasswordManager Handler -> UserRepository Handler -> Login -> Handler UUID
+registerEndpoint :: PasswordManager Handler -> UserRepository Handler -> Login -> Handler (Id User)
 registerEndpoint passwordManager userRepository login' = do
   hashedPassword <- generatePassword passwordManager login'
   addUser userRepository (username login') (asBytestring hashedPassword)

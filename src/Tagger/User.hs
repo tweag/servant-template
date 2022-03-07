@@ -1,6 +1,6 @@
-{-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DerivingStrategies #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 module Tagger.User where
 
@@ -9,7 +9,7 @@ import Data.Data (Proxy(Proxy))
 import GHC.Generics (Generic)
 
 -- aeson
-import Data.Aeson (ToJSON(toJSON), FromJSON(parseJSON))
+import Data.Aeson (ToJSON(toJSON), FromJSON(parseJSON), (.=), object)
 
 -- bytestring
 import Data.ByteString (ByteString)
@@ -17,16 +17,12 @@ import Data.ByteString (ByteString)
 -- openapi3
 import Data.OpenApi (ToSchema(declareNamedSchema))
 
--- servant-auth
-import Servant.Auth.JWT (ToJWT, FromJWT)
-
 -- text
 import Data.Text (Text)
 import Data.Text.Encoding (encodeUtf8, decodeUtf8)
 
 newtype Password = Password {asBytestring :: ByteString}
   deriving stock (Eq, Show, Read, Generic)
-  deriving anyclass (ToJWT, FromJWT)
 
 instance FromJSON Password where
   parseJSON json = Password . encodeUtf8 <$> parseJSON json
@@ -42,4 +38,8 @@ data User = User
   , _password :: Password
   }
   deriving stock (Eq, Show, Read, Generic)
-  deriving anyclass (ToJSON, ToJWT, FromJSON, FromJWT)
+
+instance ToJSON User where
+  toJSON (User name _) = object ["_name" .= name]
+
+instance ToSchema User

@@ -13,6 +13,7 @@ import Api.Docs (DocsAPI, docsServer)
 import Api.Healthcheck (HealthcheckAPI, healthcheckServer)
 import Api.Tagger (TaggerAPI, taggerServer)
 import Tagger.ContentRepository (ContentRepository)
+import Tagger.Id (Id)
 import Tagger.User (User)
 
 -- base
@@ -42,17 +43,17 @@ import Network.Wai.Middleware.RequestLogger (logStdoutDev)
 type API = NamedRoutes ApplicationAPI
 
 data ApplicationAPI mode = ApplicationAPI
-  { tagger         :: mode :- Auth '[JWT] User :> NamedRoutes TaggerAPI
+  { tagger         :: mode :- Auth '[JWT] (Id User) :> NamedRoutes TaggerAPI
   , docs           :: mode :- DocsAPI
   , healthcheck    :: mode :- HealthcheckAPI
   , authentication :: mode :- NamedRoutes AuthenticationAPI
   }
   deriving stock Generic
 
-authenticatedTaggerServer :: ContentRepository Handler -> AuthResult User -> TaggerAPI AsServer
+authenticatedTaggerServer :: ContentRepository Handler -> AuthResult (Id User) -> TaggerAPI AsServer
 authenticatedTaggerServer contentRepository = \case
-  (Authenticated _) -> taggerServer contentRepository
-  _                 -> throwAll err401
+  (Authenticated userId) -> taggerServer userId contentRepository
+  _                      -> throwAll err401
 
 server :: AppServices -> ApplicationAPI AsServer
 server (AppServices _ passwordManager contentRepository userRepository authenticateUser) = ApplicationAPI

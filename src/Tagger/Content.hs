@@ -4,6 +4,8 @@
 
 module Tagger.Content where
 
+import Tagger.Owned (Owned(Owned))
+
 -- base
 import GHC.Generics (Generic)
 
@@ -34,5 +36,5 @@ instance FromJSON tag => FromJSON (Content tag)
 
 instance ToJSON tag => ToJSON (Content tag)
 
-hasAllTags :: Eq tag => [tag] -> Content tag -> Bool
-hasAllTags tags content = and $ (\tag -> tag `elem` _tags content) <$> tags
+hasAllTags :: Eq tag => [tag] -> Owned (Content tag) -> Bool
+hasAllTags tags (Owned _ content) = and $ (\tag -> tag `elem` _tags content) <$> tags

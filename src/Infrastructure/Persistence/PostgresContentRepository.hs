@@ -3,14 +3,20 @@
 module Infrastructure.Persistence.PostgresContentRepository where
 
 import Infrastructure.Persistence.Serializer (unserializeContent, serializeContent)
-import qualified Infrastructure.Persistence.Queries as DB (selectAllContentsWithTags, addContentWithTags)
+import qualified Infrastructure.Persistence.Queries as DB (selectUserContents, addContentWithTags)
 import Tagger.Content (Content, hasAllTags)
 import Tagger.ContentRepository (ContentRepository(..))
+import Tagger.Id (Id(Id))
+import Tagger.Owned (Owned)
 import Tagger.Tag (Tag)
+import Tagger.User (User)
 
 -- base
 import Control.Monad (forM)
 import Control.Monad.IO.Class (liftIO)
+
+-- extra
+import Data.Tuple.Extra (uncurry3)
 
 -- hasql
 import Hasql.Connection (Connection)
@@ -20,22 +26,20 @@ import Hasql.Session (run, QueryError)
 import Control.Monad.Trans.Except (ExceptT (ExceptT))
 
 -- uuid
-import Data.UUID (UUID)
 import Data.UUID.V4 (nextRandom)
 
--- TODO:: should I use Reader to keep track of the Connection?
 postgresContentRepository :: Connection -> ContentRepository (ExceptT QueryError IO)
 postgresContentRepository connection = ContentRepository
-  { selectContentsByTags = postgresSelectContentsByTags connection
-  , addContentWithTags   = postgresAddContentWithTags connection
+  { selectUserContentsByTags = postgresSelectUserContentsByTags connection
+  , addContentWithTags       = postgresAddContentWithTags connection
   }
 
 -- TODO: filter the contents on the db side
-postgresSelectContentsByTags :: Connection -> [Tag] -> ExceptT QueryError IO [Content Tag]
-postgresSelectContentsByTags connection tags = do
-  allDBContents <- ExceptT $ run DB.selectAllContentsWithTags connection
-  let allContents = uncurry unserializeContent <$> allDBContents
-  pure $ filter (hasAllTags tags) allContents
+postgresSelectUserContentsByTags :: Connection -> Id User -> [Tag] -> ExceptT QueryError IO [Owned (Content Tag)]
+postgresSelectUserContentsByTags connection userId tags = do
+  userDBContents <- ExceptT $ run (DB.selectUserContents userId) connection
+  let userContents = uncurry3 unserializeContent <$> userDBContents
+  pure $ filter (hasAllTags tags) userContents
 
 -- steps:
 --  - generate UUID for content
@@ -46,9 +50,9 @@ postgresSelectContentsByTags connection tags = do
 --    - insert new tags
 --    - insert content
 --    - insert contents_tags
-postgresAddContentWithTags :: Connection -> Content Tag -> ExceptT QueryError IO UUID
-postgresAddContentWithTags connection content = do
+postgresAddContentWithTags :: Connection -> Id User -> Content Tag -> ExceptT QueryError IO (Id (Content Tag))
+postgresAddContentWithTags connection userId content = do
   contentUUID          <- liftIO nextRandom
-  contentWithTagsUUIDs <- liftIO $ forM content (\tag -> (, tag) <$> nextRandom)
-  ExceptT $ run (uncurry DB.addContentWithTags $ serializeContent contentUUID contentWithTagsUUIDs) connection
-  pure contentUUID
+  contentWithTagsUUIDs <- liftIO $ forM content (\tag -> (, tag) . Id <$> nextRandom)
+  ExceptT $ run (uncurry DB.addContentWithTags  $ serializeContent (Id contentUUID) userId contentWithTagsUUIDs) connection
+  pure $ Id contentUUID
