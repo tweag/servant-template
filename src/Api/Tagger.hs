@@ -7,6 +7,7 @@ module Api.Tagger where
 
 import Tagger.Content (Content)
 import Tagger.ContentRepository (ContentRepository(selectContentsByTags, addContentWithTags))
+import Tagger.Id (Id)
 import Tagger.Tag (Tag)
 
 -- base
@@ -25,18 +26,15 @@ import Servant.OpenApi (HasOpenApi(toOpenApi))
 import Servant (Handler)
 import Servant.Server.Generic (AsServer)
 
--- uuid
-import Data.UUID (UUID)
-
 data TaggerAPI mode = TaggerAPI
-  { addContent  :: mode :- "add-content"  :> ReqBody '[JSON] (Content Tag) :> Post '[JSON] UUID
+  { addContent  :: mode :- "add-content"  :> ReqBody '[JSON] (Content Tag) :> Post '[JSON] (Id (Content Tag))
   , getContents :: mode :- "get-contents" :> ReqBody '[JSON] [Tag]         :> Get  '[JSON] [Content Tag]
   }
   deriving stock Generic
 
 instance HasOpenApi TaggerAPI where
   toOpenApi _
-    =  toOpenApi (Proxy :: Proxy ("add-content"  :> ReqBody '[JSON] (Content Tag) :> Post '[JSON] UUID))
+    =  toOpenApi (Proxy :: Proxy ("add-content"  :> ReqBody '[JSON] (Content Tag) :> Post '[JSON] (Id (Content Tag))))
     <> toOpenApi (Proxy :: Proxy ("get-contents" :> ReqBody '[JSON] [Tag]         :> Get  '[JSON] [Content Tag]))
 
 taggerServer :: ContentRepository Handler -> TaggerAPI AsServer

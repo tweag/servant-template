@@ -6,6 +6,7 @@ import Infrastructure.Persistence.Serializer (unserializeContent, serializeConte
 import qualified Infrastructure.Persistence.Queries as DB (selectAllContentsWithTags, addContentWithTags)
 import Tagger.Content (Content, hasAllTags)
 import Tagger.ContentRepository (ContentRepository(..))
+import Tagger.Id (Id(Id))
 import Tagger.Tag (Tag)
 
 -- base
@@ -20,7 +21,6 @@ import Hasql.Session (run, QueryError)
 import Control.Monad.Trans.Except (ExceptT (ExceptT))
 
 -- uuid
-import Data.UUID (UUID)
 import Data.UUID.V4 (nextRandom)
 
 -- TODO:: should I use Reader to keep track of the Connection?
@@ -46,9 +46,9 @@ postgresSelectContentsByTags connection tags = do
 --    - insert new tags
 --    - insert content
 --    - insert contents_tags
-postgresAddContentWithTags :: Connection -> Content Tag -> ExceptT QueryError IO UUID
+postgresAddContentWithTags :: Connection -> Content Tag -> ExceptT QueryError IO (Id (Content Tag))
 postgresAddContentWithTags connection content = do
   contentUUID          <- liftIO nextRandom
-  contentWithTagsUUIDs <- liftIO $ forM content (\tag -> (, tag) <$> nextRandom)
-  ExceptT $ run (uncurry DB.addContentWithTags $ serializeContent contentUUID contentWithTagsUUIDs) connection
-  pure contentUUID
+  contentWithTagsUUIDs <- liftIO $ forM content (\tag -> (, tag) . Id <$> nextRandom)
+  ExceptT $ run (uncurry DB.addContentWithTags $ serializeContent (Id contentUUID) contentWithTagsUUIDs) connection
+  pure $ Id contentUUID
