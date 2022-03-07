@@ -4,6 +4,8 @@
 module Infrastructure.Persistence.Queries where
 
 import Infrastructure.Persistence.Schema (Content(..), contentSchema, Tag(..), tagSchema, ContentsTags(..), contentsTagsSchema, litTag, litContent, User (userName), userSchema, userId)
+import Tagger.Id (Id)
+import qualified Tagger.User as Domain (User)
 
 -- base
 import qualified Data.List as List (filter)
@@ -40,9 +42,10 @@ userForContent :: Content Expr -> Query (User Expr)
 userForContent content = each userSchema >>= filter (\user ->
   userId user ==. contentUserId content)
 
-selectAllContents :: Session [(Content Result, [Tag Result], User Result)]
-selectAllContents = statement () . select $ do
-  content <- each contentSchema
+selectUserContents :: Id Domain.User -> Session [(Content Result, [Tag Result], User Result)]
+selectUserContents userId' = statement () . select $ do
+  content <- each contentSchema >>= filter (\content ->
+    contentUserId content ==. lit userId')
   tags    <- many $ tagsForContent content
   user    <- userForContent content
   return (content, tags, user)

@@ -9,9 +9,9 @@ import Tagger.Owned (Owned)
 import Tagger.User (User)
 
 data ContentRepository m = ContentRepository
-  { selectContentsByTags :: [Tag] -> m [Owned (Content Tag)]
-  , addContentWithTags   :: Id User -> Content Tag -> m (Id (Content Tag))
+  { selectUserContentsByTags :: Id User -> [Tag] -> m [Owned (Content Tag)]
+  , addContentWithTags       :: Id User -> Content Tag -> m (Id (Content Tag))
   }
 
 hoistContentRepository :: (forall a. m a -> n a) -> ContentRepository m -> ContentRepository n
-hoistContentRepository f (ContentRepository select add) = ContentRepository (f . select) ((f .) . add)
+hoistContentRepository f (ContentRepository select add) = ContentRepository ((f .) . select) ((f .) . add)

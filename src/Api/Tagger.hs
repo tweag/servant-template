@@ -6,7 +6,7 @@
 module Api.Tagger where
 
 import Tagger.Content (Content)
-import Tagger.ContentRepository (ContentRepository(selectContentsByTags, addContentWithTags))
+import Tagger.ContentRepository (ContentRepository(selectUserContentsByTags, addContentWithTags))
 import Tagger.Id (Id)
 import Tagger.Owned (Owned)
 import Tagger.Tag (Tag)
@@ -42,5 +42,5 @@ instance HasOpenApi TaggerAPI where
 taggerServer :: Id User -> ContentRepository Handler -> TaggerAPI AsServer
 taggerServer userId contentRepository = TaggerAPI
   { addContent  = addContentWithTags contentRepository userId
-  , getContents = selectContentsByTags contentRepository
+  , getContents = selectUserContentsByTags contentRepository userId
   }
