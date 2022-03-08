@@ -4,11 +4,12 @@ module Infrastructure.Authentication.AuthenticateUser where
 
 import Infrastructure.Authentication.Login (Login(Login))
 import Infrastructure.Authentication.PasswordManager (PasswordManager(validatePassword))
-import Infrastructure.Persistence.Queries (selectUserByName, SelectUserError)
+import Infrastructure.Persistence.Queries (selectUserByName)
 import Infrastructure.Persistence.Schema (userId)
 import Infrastructure.Persistence.Serializer (unserializeUser)
 import Tagger.Id (Id)
 import Tagger.User (User)
+import Tagger.UserRepository (SelectUserError)
 
 -- base
 import Data.Bifunctor (Bifunctor(first))

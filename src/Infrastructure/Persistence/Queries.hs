@@ -6,6 +6,7 @@ module Infrastructure.Persistence.Queries where
 import Infrastructure.Persistence.Schema (Content(..), contentSchema, Tag(..), tagSchema, ContentsTags(..), contentsTagsSchema, litTag, litContent, User (userName), userSchema, userId)
 import Tagger.Id (Id)
 import qualified Tagger.User as Domain (User)
+import Tagger.UserRepository (SelectUserError(..))
 
 -- base
 import qualified Data.List as List (filter)
@@ -89,11 +90,6 @@ addContentWithTags content tags = transaction Serializable Write $ do
   T.statement () $ add contentsTagsSchema (contentTag (litContent content) <$> (litTag <$> alreadyPresentTags) <> newTags)
 
 -- SELECT USER BY USERNAME
-
-data SelectUserError
-  = NoUser
-  | MoreThanOneUser
-  deriving Show
 
 singleUser :: [User Result] -> Either SelectUserError (User Result)
 singleUser = \case
