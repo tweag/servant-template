@@ -57,8 +57,8 @@ connectedContentRepository log = hoistContentRepository (eitherTToHandler $ ((lo
 connectedUserRepository :: SeverityLogger -> Connection -> UserRepository Handler
 connectedUserRepository log = hoistUserRepository (eitherTToHandler $ ((log <&) . (Error,)) >> const (throwError err500)) . postgresUserRepository
 
-connectedAuthenticateUser :: SeverityLogger -> Connection -> Auth.AuthenticateUser Handler
-connectedAuthenticateUser log = Auth.hoistAuthenticateUser (eitherTToHandler handleAuthenticationError) . Auth.AuthenticateUser . Auth.authenticateUser
+connectedAuthenticateUser :: SeverityLogger -> PasswordManager Handler -> Connection -> Auth.AuthenticateUser Handler
+connectedAuthenticateUser log passwordManager' = Auth.hoistAuthenticateUser (eitherTToHandler handleAuthenticationError) . Auth.AuthenticateUser . Auth.authenticateUser passwordManager'
   where
     handleAuthenticationError :: Auth.AuthenticationError -> Handler a
     handleAuthenticationError (Auth.AuthenticationQueryError e) = do
@@ -80,10 +80,13 @@ encryptedPasswordManager log = hoistPasswordManager (eitherTToHandler handlePass
       throwError err401
 
 appServices :: Connection -> JWK -> AppServices
-appServices connection key = AppServices
-  { jwtSettings       = defaultJWTSettings key
-  , passwordManager   = encryptedPasswordManager (provideContext "PasswordManager" messageLogger) $ defaultJWTSettings key
-  , contentRepository = connectedContentRepository (provideContext "ContentRepository" messageLogger) connection
-  , userRepository    = connectedUserRepository (provideContext "UserRepository" messageLogger) connection
-  , authenticateUser  = connectedAuthenticateUser (provideContext "AuthenticateUser" messageLogger) connection
-  }
+appServices connection key =
+  let
+    passwordManager' = encryptedPasswordManager (provideContext "PasswordManager" messageLogger) $ defaultJWTSettings key
+  in  AppServices
+    { jwtSettings       = defaultJWTSettings key
+    , passwordManager   = passwordManager'
+    , contentRepository = connectedContentRepository (provideContext "ContentRepository" messageLogger) connection
+    , userRepository    = connectedUserRepository (provideContext "UserRepository" messageLogger) connection
+    , authenticateUser  = connectedAuthenticateUser (provideContext "AuthenticateUser" messageLogger) passwordManager' connection
+    }

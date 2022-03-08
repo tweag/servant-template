@@ -3,16 +3,15 @@
 module Infrastructure.Authentication.AuthenticateUser where
 
 import Infrastructure.Authentication.Login (Login(Login))
+import Infrastructure.Authentication.PasswordManager (PasswordManager(validatePassword))
 import Infrastructure.Persistence.Queries (selectUserByName, SelectUserError)
-import Infrastructure.Persistence.Schema (userId, userPassword)
+import Infrastructure.Persistence.Schema (userId)
+import Infrastructure.Persistence.Serializer (unserializeUser)
 import Tagger.Id (Id)
-import Tagger.User (User, Password(asBytestring))
+import Tagger.User (User)
 
 -- base
 import Data.Bifunctor (Bifunctor(first))
-
--- bcrypt
-import Crypto.BCrypt (validatePassword)
 
 -- hasql
 import Hasql.Connection (Connection)
@@ -32,10 +31,10 @@ data AuthenticationError
   | AuthenticationPasswordVerificationFailed
   deriving Show
 
-authenticateUser :: Connection -> Login -> ExceptT AuthenticationError IO (Id User)
-authenticateUser connection (Login username password) = do
+authenticateUser :: PasswordManager m -> Connection -> Login -> ExceptT AuthenticationError IO (Id User)
+authenticateUser passwordManager connection (Login username password) = do
   eitherUser <- withExceptT AuthenticationQueryError $ ExceptT $ run (selectUserByName username) connection
   user       <- except $ first AuthenticationSelectUserError eitherUser
-  if validatePassword (userPassword user) (asBytestring password)
+  if validatePassword passwordManager (unserializeUser user) password
   then pure $ userId user
   else throwE AuthenticationPasswordVerificationFailed
