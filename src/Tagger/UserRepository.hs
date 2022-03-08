@@ -18,7 +18,7 @@ data SelectUserError
   deriving Show
 
 data UserRepository m = UserRepository
-  { getUserByName :: Text -> m (Either SelectUserError User)
+  { getUserByName :: Text -> m (Either SelectUserError (Id User, User))
   , addUser       :: Text -> ByteString -> m (Id User)
   }
 

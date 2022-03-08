@@ -2,12 +2,13 @@ module Infrastructure.Persistence.PostgresUserRepository where
 
 import qualified Infrastructure.Persistence.Queries as Query (addUser, selectUserByName)
 import Infrastructure.Persistence.Serializer (serializeUser, unserializeUser)
-import Infrastructure.Persistence.Schema (litUser)
+import Infrastructure.Persistence.Schema (litUser, userId)
 import Tagger.Id (Id(Id))
 import Tagger.User (Password(Password), User(User))
 import Tagger.UserRepository (SelectUserError, UserRepository(..))
 
 -- base
+import Control.Arrow ((&&&))
 import Control.Monad.IO.Class (liftIO)
 import Data.Bifunctor (second)
 
@@ -33,11 +34,11 @@ postgresUserRepository connection = UserRepository
   , addUser       = postgresAddUser connection
   }
 
-postgresGetUserByName :: Connection -> Text -> ExceptT QueryError IO (Either SelectUserError User)
-postgresGetUserByName connection name = fmap (second unserializeUser) <$> ExceptT $ run (Query.selectUserByName name) connection
+postgresGetUserByName :: Connection -> Text -> ExceptT QueryError IO (Either SelectUserError (Id User, User))
+postgresGetUserByName connection name = fmap (second $ userId &&& unserializeUser) <$> ExceptT $ run (Query.selectUserByName name) connection
 
 postgresAddUser :: Connection -> Text -> ByteString -> ExceptT QueryError IO (Id User)
 postgresAddUser connection name password = do
-    userId <- liftIO nextRandom
-    ExceptT $ run (Query.addUser . litUser $ serializeUser (Id userId) (User name (Password password))) connection
-    pure $ Id userId
+    userId' <- liftIO nextRandom
+    ExceptT $ run (Query.addUser . litUser $ serializeUser (Id userId') (User name (Password password))) connection
+    pure $ Id userId'

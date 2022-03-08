@@ -22,6 +22,7 @@ import Colog.Core ((<&), LogAction, Severity(..))
 
 -- hasql
 import Hasql.Connection (Connection)
+import Hasql.Session (QueryError)
 
 -- jose
 import Crypto.JOSE.JWK (JWK)
@@ -54,11 +55,11 @@ eitherTToHandler handleError = either handleError pure <=< liftIO . runExceptT
 connectedContentRepository :: SeverityLogger -> Connection -> ContentRepository Handler
 connectedContentRepository log = hoistContentRepository (eitherTToHandler $ ((log <&) . (Error,)) >> const (throwError err500)) . postgresContentRepository
 
-connectedUserRepository :: SeverityLogger -> Connection -> UserRepository Handler
-connectedUserRepository log = hoistUserRepository (eitherTToHandler $ ((log <&) . (Error,)) >> const (throwError err500)) . postgresUserRepository
+connectedUserRepository :: SeverityLogger -> UserRepository (ExceptT QueryError IO) -> UserRepository Handler
+connectedUserRepository log = hoistUserRepository (eitherTToHandler $ ((log <&) . (Error,)) >> const (throwError err500))
 
-connectedAuthenticateUser :: SeverityLogger -> PasswordManager Handler -> Connection -> Auth.AuthenticateUser Handler
-connectedAuthenticateUser log passwordManager' = Auth.hoistAuthenticateUser (eitherTToHandler handleAuthenticationError) . Auth.AuthenticateUser . Auth.authenticateUser passwordManager'
+connectedAuthenticateUser :: SeverityLogger -> UserRepository (ExceptT QueryError IO) -> PasswordManager Handler -> Auth.AuthenticateUser Handler
+connectedAuthenticateUser log userRepository' passwordManager' = Auth.hoistAuthenticateUser (eitherTToHandler handleAuthenticationError) . Auth.AuthenticateUser $ Auth.authenticateUser userRepository' passwordManager'
   where
     handleAuthenticationError :: Auth.AuthenticationError -> Handler a
     handleAuthenticationError (Auth.AuthenticationQueryError e) = do
@@ -83,10 +84,11 @@ appServices :: Connection -> JWK -> AppServices
 appServices connection key =
   let
     passwordManager' = encryptedPasswordManager (provideContext "PasswordManager" messageLogger) $ defaultJWTSettings key
+    dbUserRepository = postgresUserRepository connection
   in  AppServices
     { jwtSettings       = defaultJWTSettings key
     , passwordManager   = passwordManager'
     , contentRepository = connectedContentRepository (provideContext "ContentRepository" messageLogger) connection
-    , userRepository    = connectedUserRepository (provideContext "UserRepository" messageLogger) connection
-    , authenticateUser  = connectedAuthenticateUser (provideContext "AuthenticateUser" messageLogger) passwordManager' connection
+    , userRepository    = connectedUserRepository (provideContext "UserRepository" messageLogger) dbUserRepository
+    , authenticateUser  = connectedAuthenticateUser (provideContext "AuthenticateUser" messageLogger) dbUserRepository passwordManager'
     }
