@@ -3,6 +3,7 @@
 
 module Tagger.Owned where
 
+import Tagger.Id (Id)
 import Tagger.User (User)
 
 -- base
@@ -16,6 +17,7 @@ import Data.OpenApi (ToSchema)
 
 data Owned a = Owned
   { _user    :: User
+  , _userId  :: Id User
   , _content :: a
   }
   deriving stock Generic
