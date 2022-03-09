@@ -60,5 +60,7 @@ tests:
     source-dirs:    spec
     dependencies:
       - servant-template
+      - containers
       - hspec
-      - QuickCheck
+      - postgresql-error-codes
+      - warp

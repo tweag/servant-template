@@ -12,6 +12,13 @@ packages:
   original:
     hackage: opaleye-0.9.1.0
 - completed:
+    hackage: postgresql-error-codes-1.0.1@sha256:34ce40401dc21762996dadd38336436f40a09da95ad3309ba6dc506d707cff11,1413
+    pantry-tree:
+      size: 240
+      sha256: 2b8d529e883ae9ff4c1c98b05410edd6343b0ea2ec016bae256ff7d7ede3fc46
+  original:
+    hackage: postgresql-error-codes-1.0.1
+- completed:
     hackage: rel8-1.3.1.0@sha256:82292d07f590c92b256f512347bb410989501711d47fdd2b43823f6467169f03,5114
     pantry-tree:
       size: 9026
