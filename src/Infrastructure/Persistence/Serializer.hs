@@ -4,7 +4,7 @@ import qualified Infrastructure.Persistence.Schema as DB (Content(Content), Tag(
 import Infrastructure.Persistence.Schema (contentId, contentContent, contentUserId, tagId, tagName, userId, userName, userPassword)
 import Tagger.Content (Content(..))
 import Tagger.Id (Id)
-import qualified Tagger.Owned as O (_content, _user, _userId)
+import qualified Tagger.Owned as O (_content, _userId)
 import Tagger.Owned (Owned(Owned))
 import Tagger.Tag (Tag(Tag))
 import qualified Tagger.Tag as T (_name)
@@ -32,7 +32,6 @@ unserializeContent content tags user = Owned
     { _content = contentContent content
     , _tags    = unserilizeTag <$> tags
     }
-  , O._user   = unserializeUser user
   , O._userId = userId user
   }
 

@@ -16,8 +16,7 @@ import Data.Aeson (ToJSON)
 import Data.OpenApi (ToSchema)
 
 data Owned a = Owned
-  { _user    :: User
-  , _userId  :: Id User
+  { _userId  :: Id User
   , _content :: a
   }
   deriving stock Generic
