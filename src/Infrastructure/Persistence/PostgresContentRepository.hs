@@ -54,5 +54,5 @@ postgresAddContentWithTags :: Connection -> Id User -> Content Tag -> ExceptT Qu
 postgresAddContentWithTags connection userId content = do
   contentUUID          <- liftIO nextRandom
   contentWithTagsUUIDs <- liftIO $ forM content (\tag -> (, tag) . Id <$> nextRandom)
-  ExceptT $ run (uncurry DB.addContentWithTags  $ serializeContent (Id contentUUID) userId contentWithTagsUUIDs) connection
+  ExceptT $ run (uncurry DB.addContentWithTags $ serializeContent (Id contentUUID) userId contentWithTagsUUIDs) connection
   pure $ Id contentUUID
