@@ -52,11 +52,11 @@ type SeverityLogger = forall a. Show a => LogAction Handler (Severity, a)
 eitherTToHandler :: (e -> Handler a) -> ExceptT e IO a -> Handler a
 eitherTToHandler handleError = either handleError pure <=< liftIO . runExceptT
 
-connectedContentRepository :: SeverityLogger -> Connection -> ContentRepository Handler
-connectedContentRepository log = hoistContentRepository (eitherTToHandler $ ((log <&) . (Error,)) >> const (throwError err500)) . postgresContentRepository
+connectedContentRepository :: SeverityLogger -> ContentRepository (ExceptT QueryError IO) -> ContentRepository Handler
+connectedContentRepository log = hoistContentRepository (eitherTToHandler $ (>> throwError err500) . (log <&) . (Error ,))
 
 connectedUserRepository :: SeverityLogger -> UserRepository (ExceptT QueryError IO) -> UserRepository Handler
-connectedUserRepository log = hoistUserRepository (eitherTToHandler $ ((log <&) . (Error,)) >> const (throwError err500))
+connectedUserRepository log = hoistUserRepository (eitherTToHandler $ (>> throwError err500) . (log <&) . (Error ,))
 
 connectedAuthenticateUser :: SeverityLogger -> UserRepository (ExceptT QueryError IO) -> PasswordManager Handler -> Auth.AuthenticateUser Handler
 connectedAuthenticateUser log userRepository' passwordManager' = Auth.hoistAuthenticateUser (eitherTToHandler handleAuthenticationError) . Auth.AuthenticateUser $ Auth.authenticateUser userRepository' passwordManager'
@@ -88,7 +88,7 @@ appServices connection key =
   in  AppServices
     { jwtSettings       = defaultJWTSettings key
     , passwordManager   = passwordManager'
-    , contentRepository = connectedContentRepository (provideContext "ContentRepository" messageLogger) connection
+    , contentRepository = connectedContentRepository (provideContext "ContentRepository" messageLogger) (postgresContentRepository connection)
     , userRepository    = connectedUserRepository (provideContext "UserRepository" messageLogger) dbUserRepository
     , authenticateUser  = connectedAuthenticateUser (provideContext "AuthenticateUser" messageLogger) dbUserRepository passwordManager'
     }

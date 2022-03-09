@@ -101,5 +101,7 @@ selectUserByName :: Text -> Session (Either SelectUserError (User Result))
 selectUserByName name = singleUser <$> (statement () . select $
   each userSchema >>= filter (\user -> userName user ==. lit name))
 
+-- ADD USER
+
 addUser :: User Expr -> Session ()
 addUser = statement () . add userSchema . pure
