@@ -40,7 +40,6 @@ dependencies:
   - transformers
   - uuid
   - wai
-  - wai-extra
 
 executables:
   servant-template-exe:
@@ -52,6 +51,7 @@ executables:
       - hasql
       - jose
       - transformers
+      - wai-extra
       - warp
 
 tests:
@@ -62,5 +62,10 @@ tests:
       - servant-template
       - containers
       - hspec
+      - http-client
+      - http-types
       - postgresql-error-codes
+      - servant-auth-client
+      - servant-client
+      - servant-client-core
       - warp

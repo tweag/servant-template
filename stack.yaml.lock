@@ -33,6 +33,20 @@ packages:
   original:
     hackage: servant-0.19
 - completed:
+    hackage: servant-client-0.19@sha256:8c0c4ee78e1d95a0bee22602c24cff104a1ce3a309b24697d23e8bfc738d5755,4737
+    pantry-tree:
+      size: 1435
+      sha256: 247a61e92707e119160245713add81f1fffd328a595997917c299c0dbb1d3130
+  original:
+    hackage: servant-client-0.19
+- completed:
+    hackage: servant-client-core-0.19@sha256:58f14b579b0afa0d4ede8457d6d5dc6d222da1b556b81177779522edc054183a,3659
+    pantry-tree:
+      size: 1446
+      sha256: 02cced10bfcb14f15fe9afccc58da36decd56d0af12e333bada47c3414cd92ec
+  original:
+    hackage: servant-client-core-0.19
+- completed:
     hackage: servant-server-0.19@sha256:d9636357e6f3db963e35418456607d0020e4e0c21df72b93e50fd5b9aa252995,5506
     pantry-tree:
       size: 2614

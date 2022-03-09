@@ -37,9 +37,6 @@ import Servant.Server.Generic (AsServer)
 -- wai
 import Network.Wai (Application)
 
--- wai-extra
-import Network.Wai.Middleware.RequestLogger (logStdoutDev)
-
 type API = NamedRoutes ApplicationAPI
 
 data ApplicationAPI mode = ApplicationAPI
@@ -64,7 +61,7 @@ server (AppServices _ passwordManager contentRepository userRepository authentic
   }
 
 app :: AppServices -> Application
-app appServices = logStdoutDev $ serveWithContext
+app appServices = serveWithContext
   (Proxy :: Proxy API)
   (defaultCookieSettings :. jwtSettings appServices :. EmptyContext)
   (server appServices)
