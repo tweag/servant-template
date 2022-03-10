@@ -8,10 +8,15 @@ import Tagger.Tag (Tag)
 import Tagger.Owned (Owned)
 import Tagger.User (User)
 
+-- |
+-- A 'ContentRepository' represents a collection of 'Content's.
+-- It is indexed by a context 'm' which wraps the results.
 data ContentRepository m = ContentRepository
-  { selectUserContentsByTags :: Id User -> [Tag] -> m [Owned (Content Tag)]
-  , addContentWithTags       :: Id User -> Content Tag -> m (Id (Content Tag))
+  { selectUserContentsByTags :: Id User -> [Tag] -> m [Owned (Content Tag)]    -- ^ selects all the 'Content's 'Owned' by a 'User' with a given 'Id' and indexed by all the provided 'Tag's
+  , addContentWithTags       :: Id User -> Content Tag -> m (Id (Content Tag)) -- ^ adds a 'Content' indexed by some 'Tag's for a 'User' identified by a given 'Id'
   }
 
+-- |
+-- given a natural transformation between a context 'm' and a context 'n', it allows to change the context where 'ContentRepository' is operating
 hoistContentRepository :: (forall a. m a -> n a) -> ContentRepository m -> ContentRepository n
 hoistContentRepository f (ContentRepository select add) = ContentRepository ((f .) . select) ((f .) . add)

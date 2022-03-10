@@ -29,7 +29,8 @@ import Data.Text (Text)
 import Data.Text.Encoding (encodeUtf8, decodeUtf8)
 
 -- |
--- An 'EncryptedPassword' is a newtype wrapping a 'Bytestring'
+-- An 'EncryptedPassword' is a newtype wrapping a 'Bytestring'.
+-- We do not export the constructor to enforce that an 'EncryptedPassword' is built using 'encryptPassword'
 newtype EncryptedPassword = EncryptedPassword {asBytestring :: ByteString}
   deriving stock (Eq, Show, Read, Generic)
   deriving newtype (DBEq, DBType)
@@ -43,8 +44,12 @@ instance ToJSON EncryptedPassword where
 instance ToSchema EncryptedPassword where
   declareNamedSchema _ = declareNamedSchema (Proxy :: Proxy Text)
 
+-- |
+-- encrypt a 'ByteString' into an 'EncryptedPassword' using bcrypt with 'fastBcryptHashingPolicy'
 encryptPassword :: ByteString -> IO (Maybe EncryptedPassword)
 encryptPassword password = fmap EncryptedPassword <$> hashPasswordUsingPolicy fastBcryptHashingPolicy password
 
+-- |
+-- Given an 'EncryptedPassword' and a 'ByteString' password, it checks whether the password is valid
 validatePassword :: EncryptedPassword -> ByteString -> Bool
 validatePassword (EncryptedPassword password) = BCrypt.validatePassword password
