@@ -11,6 +11,7 @@ import Tagger.User (User(_password))
 import Tagger.Id (Id)
 
 -- base
+import Control.Category ((>>>))
 import Data.Bifunctor (bimap)
 
 -- jose
@@ -22,20 +23,29 @@ import Servant.Auth.Server (JWTSettings, makeJWT)
 -- transformers
 import Control.Monad.Trans.Except (ExceptT(ExceptT))
 
+-- |
+-- A 'PasswordManager' is the service dedicated at dealing with password and authentication tokens
+-- It is indexed by a context 'm' which wraps the results.
 data PasswordManager m = PasswordManager
-  { generatePassword :: Login -> m EncryptedPassword
-  , generateToken    :: Id User -> m Token
-  , validatePassword :: User -> Password -> Bool
+  { generatePassword :: Login -> m EncryptedPassword -- ^ given some 'Login' credentials, tries to encrypt the password
+  , generateToken    :: Id User -> m Token           -- ^ given a 'User' 'Id', tries to generate an authentication 'Token'
+  , validatePassword :: User -> Password -> Bool     -- ^ given a 'User' and a non excrypted 'Password', checks whether the password corresponds to the user's one
   }
 
+-- |
+-- Given a natural transformation between a context 'm' and a context 'n', it allows to change the context where 'PasswordManager' is operating
 hoistPasswordManager :: (forall a. m a -> n a) -> PasswordManager m -> PasswordManager n
 hoistPasswordManager f (PasswordManager generate verify validate) = PasswordManager (f . generate) (f . verify) validate
 
+-- |
+-- How the 'PasswordManager' operations can fail
 data PasswordManagerError
-  = FailedHashing
-  | FailedJWTCreation Error
+  = FailedHashing           -- ^ there was an error while hashing the password
+  | FailedJWTCreation Error -- ^ there was an error while generating the authentication token
   deriving stock Show
 
+-- |
+-- A 'PasswordManager' implementation based on the 'bcrypt' algorithm
 bcryptPasswordManager :: JWTSettings -> PasswordManager (ExceptT PasswordManagerError IO)
 bcryptPasswordManager jwtSettings = PasswordManager
   { generatePassword = bcryptGeneratePassword
@@ -45,14 +55,24 @@ bcryptPasswordManager jwtSettings = PasswordManager
 
 bcryptGeneratePassword :: Login -> ExceptT PasswordManagerError IO EncryptedPassword
 bcryptGeneratePassword
-  = ExceptT
-  . fmap (maybe (Left FailedHashing) Right)
-  . encryptPassword
-  . asBytestring
-  . password
+  -- extract the password from the Login data
+  =   password
+  -- convert it to bytestring
+  >>> asBytestring
+  -- try to encrypt it
+  >>> encryptPassword
+  -- wrap the error message to get a PasswordManagerError
+  >>> fmap (maybe (Left FailedHashing) Right)
+  -- wrap everything in ExceptT
+  >>> ExceptT
 
 bcryptGenerateToken :: JWTSettings -> Id User -> ExceptT PasswordManagerError IO Token
-bcryptGenerateToken jwtSettings userId = ExceptT . fmap (bimap FailedJWTCreation Token) $ makeJWT userId jwtSettings Nothing
+bcryptGenerateToken jwtSettings userId = ExceptT $ do
+  -- try to generate the token containing the userId
+  -- the Nothing means that the token does not expire
+  token <- makeJWT userId jwtSettings Nothing
+  -- wrap the error to get a PasswordErrorManager and the token to get a Token
+  pure $ bimap FailedJWTCreation Token token
 
 bcryptValidatePassword :: User -> Password -> Bool
-bcryptValidatePassword user password' = Encrypted.validatePassword (_password $ user) (asBytestring password')
+bcryptValidatePassword user password' = Encrypted.validatePassword (_password user) (asBytestring password')

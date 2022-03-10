@@ -21,6 +21,8 @@ import Data.OpenApi (ToSchema(declareNamedSchema))
 import Data.Text (Text)
 import Data.Text.Encoding (encodeUtf8, decodeUtf8)
 
+-- |
+-- A newtype wrapper over 'ByteString' to represent a non encrypted password
 newtype Password = Password {asBytestring :: ByteString}
 
 instance FromJSON Password where
@@ -32,6 +34,8 @@ instance ToJSON Password where
 instance ToSchema Password where
   declareNamedSchema _ = declareNamedSchema (Proxy :: Proxy Text)
 
+-- |
+-- 'Login' data required to register and authenticate
 data Login = Login
   { username :: Text
   , password :: Password
