@@ -10,7 +10,7 @@ import Infrastructure.Authentication.Login (Login(username))
 import Infrastructure.Authentication.PasswordManager (PasswordManager(generatePassword, generateToken))
 import Infrastructure.Authentication.Token (Token)
 import Tagger.Id (Id)
-import Tagger.User (asBytestring, User)
+import Tagger.User (User)
 import Tagger.UserRepository (UserRepository(addUser))
 
 -- base
@@ -47,7 +47,7 @@ authenticationServer passwordManager authenticateUser userRepository = Authentic
 registerEndpoint :: PasswordManager Handler -> UserRepository Handler -> Login -> Handler (Id User)
 registerEndpoint passwordManager userRepository login' = do
   hashedPassword <- generatePassword passwordManager login'
-  addUser userRepository (username login') (asBytestring hashedPassword)
+  addUser userRepository (username login') hashedPassword
 
 loginEndpoint :: PasswordManager Handler -> AuthenticateUser Handler -> Login -> Handler Token
 loginEndpoint passwordManager authenticateUser login' = do

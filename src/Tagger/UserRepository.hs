@@ -2,12 +2,9 @@
 
 module Tagger.UserRepository where
 
-
+import Tagger.EncryptedPassword (EncryptedPassword)
 import Tagger.Id (Id)
 import Tagger.User (User)
-
--- bytestring
-import Data.ByteString (ByteString)
 
 -- text
 import Data.Text (Text)
@@ -19,7 +16,7 @@ data SelectUserError
 
 data UserRepository m = UserRepository
   { getUserByName :: Text -> m (Either SelectUserError (Id User, User))
-  , addUser       :: Text -> ByteString -> m (Id User)
+  , addUser       :: Text -> EncryptedPassword -> m (Id User)
   }
 
 hoistUserRepository :: (forall a. m a -> n a) -> UserRepository m -> UserRepository n

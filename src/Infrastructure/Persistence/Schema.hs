@@ -13,14 +13,12 @@ import qualified Tagger.User as Domain (User)
 -- base
 import GHC.Generics (Generic)
 
--- bytestring
-import Data.ByteString (ByteString)
-
 -- rel8
 import Rel8 (Column, Name, Rel8able, TableSchema(..), Result, Expr, lit)
 
 -- text
 import Data.Text (Text)
+import Tagger.EncryptedPassword (EncryptedPassword)
 
 -- TAG
 
@@ -92,7 +90,7 @@ contentsTagsSchema = TableSchema
 data User f = User
   { userId       :: Column f (Id Domain.User)
   , userName     :: Column f Text
-  , userPassword :: Column f ByteString
+  , userPassword :: Column f EncryptedPassword
   }
   deriving stock Generic
   deriving anyclass Rel8able

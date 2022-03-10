@@ -6,13 +6,12 @@ module TaggerSpec where
 import Api.Application (API, ApplicationAPI(..), app)
 import Api.Authentication (AuthenticationAPI(..))
 import Api.Tagger (TaggerAPI(..))
-import Infrastructure.Authentication.Login (Login(Login))
+import Infrastructure.Authentication.Login (Login(Login), Password(Password))
 import Infrastructure.Authentication.Token (Token(Token))
 import Tagger.Content (Content(Content))
 import Tagger.Id (Id)
 import Tagger.Owned (Owned(Owned))
 import Tagger.Tag (Tag(Tag))
-import Tagger.User (Password(Password), User)
 import TestServices (testServices)
 
 -- base

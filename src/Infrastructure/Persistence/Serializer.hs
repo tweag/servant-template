@@ -8,7 +8,7 @@ import qualified Tagger.Owned as O (_content, _userId)
 import Tagger.Owned (Owned(Owned))
 import Tagger.Tag (Tag(Tag))
 import qualified Tagger.Tag as T (_name)
-import Tagger.User (User(User), Password (Password, asBytestring))
+import Tagger.User (User(User))
 import qualified Tagger.User as U (_name, _password)
 
 -- rel8
@@ -52,8 +52,8 @@ serializeUser :: Id User -> User -> DB.User Result
 serializeUser uuid user = DB.User
   { userId   = uuid
   , userName = U._name user
-  , userPassword = asBytestring $ U._password user
+  , userPassword = U._password user
   }
 
 unserializeUser :: DB.User Result -> User
-unserializeUser user = User (userName user) (Password $ userPassword user)
+unserializeUser user = User (userName user) (userPassword user)
