@@ -12,7 +12,15 @@ import Data.ByteString (ByteString)
 -- text
 import Data.Text (Text)
 
-newtype UserRepository m = UserRepository {addUser :: Text -> ByteString -> m (Id User)}
+data SelectUserError
+  = NoUser
+  | MoreThanOneUser
+  deriving Show
+
+data UserRepository m = UserRepository
+  { getUserByName :: Text -> m (Either SelectUserError (Id User, User))
+  , addUser       :: Text -> ByteString -> m (Id User)
+  }
 
 hoistUserRepository :: (forall a. m a -> n a) -> UserRepository m -> UserRepository n
-hoistUserRepository f (UserRepository addUser') = UserRepository ((f .) . addUser')
+hoistUserRepository f (UserRepository getUserByName' addUser') = UserRepository (f . getUserByName') ((f .) . addUser')

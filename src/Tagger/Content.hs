@@ -22,7 +22,7 @@ data Content tag = Content
   { _content :: Text
   , _tags :: [tag]
   }
-  deriving stock (Functor, Generic)
+  deriving stock (Eq, Show, Functor, Generic)
 
 instance Foldable Content where
   foldMap f = foldMap f . _tags
@@ -37,4 +37,4 @@ instance FromJSON tag => FromJSON (Content tag)
 instance ToJSON tag => ToJSON (Content tag)
 
 hasAllTags :: Eq tag => [tag] -> Owned (Content tag) -> Bool
-hasAllTags tags (Owned _ _ content) = and $ (\tag -> tag `elem` _tags content) <$> tags
+hasAllTags tags (Owned _ content) = and $ (\tag -> tag `elem` _tags content) <$> tags

@@ -21,6 +21,9 @@ import Servant.Auth.Server (generateKey)
 -- toml
 import Toml (decodeFileExact)
 
+-- wai-extra
+import Network.Wai.Middleware.RequestLogger (logStdoutDev)
+
 -- warp
 import Network.Wai.Handler.Warp (run)
 
@@ -31,5 +34,5 @@ main = do
   connection <- acquire $ connectionString (database config)
   either
     (fail . unpack . fromMaybe "unable to connect to the database")
-    (\connection' -> generateKey >>= run (asInt . apiPort . api $ config) . app . appServices connection')
+    (\connection' -> generateKey >>= run (asInt . apiPort . api $ config) . logStdoutDev . app . appServices connection')
     connection

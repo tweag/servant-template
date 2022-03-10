@@ -22,6 +22,7 @@ import Colog.Core ((<&), LogAction, Severity(..))
 
 -- hasql
 import Hasql.Connection (Connection)
+import Hasql.Session (QueryError)
 
 -- jose
 import Crypto.JOSE.JWK (JWK)
@@ -51,14 +52,14 @@ type SeverityLogger = forall a. Show a => LogAction Handler (Severity, a)
 eitherTToHandler :: (e -> Handler a) -> ExceptT e IO a -> Handler a
 eitherTToHandler handleError = either handleError pure <=< liftIO . runExceptT
 
-connectedContentRepository :: SeverityLogger -> Connection -> ContentRepository Handler
-connectedContentRepository log = hoistContentRepository (eitherTToHandler $ ((log <&) . (Error,)) >> const (throwError err500)) . postgresContentRepository
+connectedContentRepository :: SeverityLogger -> ContentRepository (ExceptT QueryError IO) -> ContentRepository Handler
+connectedContentRepository log = hoistContentRepository (eitherTToHandler $ (>> throwError err500) . (log <&) . (Error ,))
 
-connectedUserRepository :: SeverityLogger -> Connection -> UserRepository Handler
-connectedUserRepository log = hoistUserRepository (eitherTToHandler $ ((log <&) . (Error,)) >> const (throwError err500)) . postgresUserRepository
+connectedUserRepository :: SeverityLogger -> UserRepository (ExceptT QueryError IO) -> UserRepository Handler
+connectedUserRepository log = hoistUserRepository (eitherTToHandler $ (>> throwError err500) . (log <&) . (Error ,))
 
-connectedAuthenticateUser :: SeverityLogger -> Connection -> Auth.AuthenticateUser Handler
-connectedAuthenticateUser log = Auth.hoistAuthenticateUser (eitherTToHandler handleAuthenticationError) . Auth.AuthenticateUser . Auth.authenticateUser
+connectedAuthenticateUser :: SeverityLogger -> UserRepository (ExceptT QueryError IO) -> PasswordManager Handler -> Auth.AuthenticateUser Handler
+connectedAuthenticateUser log userRepository' passwordManager' = Auth.hoistAuthenticateUser (eitherTToHandler handleAuthenticationError) . Auth.AuthenticateUser $ Auth.authenticateUser userRepository' passwordManager'
   where
     handleAuthenticationError :: Auth.AuthenticationError -> Handler a
     handleAuthenticationError (Auth.AuthenticationQueryError e) = do
@@ -80,10 +81,14 @@ encryptedPasswordManager log = hoistPasswordManager (eitherTToHandler handlePass
       throwError err401
 
 appServices :: Connection -> JWK -> AppServices
-appServices connection key = AppServices
-  { jwtSettings       = defaultJWTSettings key
-  , passwordManager   = encryptedPasswordManager (provideContext "PasswordManager" messageLogger) $ defaultJWTSettings key
-  , contentRepository = connectedContentRepository (provideContext "ContentRepository" messageLogger) connection
-  , userRepository    = connectedUserRepository (provideContext "UserRepository" messageLogger) connection
-  , authenticateUser  = connectedAuthenticateUser (provideContext "AuthenticateUser" messageLogger) connection
-  }
+appServices connection key =
+  let
+    passwordManager' = encryptedPasswordManager (provideContext "PasswordManager" messageLogger) $ defaultJWTSettings key
+    dbUserRepository = postgresUserRepository connection
+  in  AppServices
+    { jwtSettings       = defaultJWTSettings key
+    , passwordManager   = passwordManager'
+    , contentRepository = connectedContentRepository (provideContext "ContentRepository" messageLogger) (postgresContentRepository connection)
+    , userRepository    = connectedUserRepository (provideContext "UserRepository" messageLogger) dbUserRepository
+    , authenticateUser  = connectedAuthenticateUser (provideContext "AuthenticateUser" messageLogger) dbUserRepository passwordManager'
+    }

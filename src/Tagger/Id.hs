@@ -20,5 +20,6 @@ import Servant.Auth.JWT (FromJWT, ToJWT)
 import Data.UUID (UUID)
 
 newtype Id a = Id {getUUID :: UUID}
+  deriving stock (Eq, Ord, Show)
   deriving anyclass (FromJWT, ToJWT)
   deriving newtype (DBEq, DBType, FromJSON, ToJSON, ToSchema)

@@ -10,7 +10,7 @@ import Tagger.User (Password)
 import GHC.Generics (Generic)
 
 -- aeson
-import Data.Aeson (FromJSON)
+import Data.Aeson (FromJSON, ToJSON)
 
 -- openapi3
 import Data.OpenApi (ToSchema)
@@ -23,4 +23,4 @@ data Login = Login
   , password :: Password
   }
   deriving stock Generic
-  deriving anyclass (FromJSON, ToSchema)
+  deriving anyclass (FromJSON, ToJSON, ToSchema)

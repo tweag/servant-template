@@ -12,6 +12,13 @@ packages:
   original:
     hackage: opaleye-0.9.1.0
 - completed:
+    hackage: postgresql-error-codes-1.0.1@sha256:34ce40401dc21762996dadd38336436f40a09da95ad3309ba6dc506d707cff11,1413
+    pantry-tree:
+      size: 240
+      sha256: 2b8d529e883ae9ff4c1c98b05410edd6343b0ea2ec016bae256ff7d7ede3fc46
+  original:
+    hackage: postgresql-error-codes-1.0.1
+- completed:
     hackage: rel8-1.3.1.0@sha256:82292d07f590c92b256f512347bb410989501711d47fdd2b43823f6467169f03,5114
     pantry-tree:
       size: 9026
@@ -25,6 +32,20 @@ packages:
       sha256: da515b079d6e1d1aa41e5c04af988fe36ac295c7ec94b0d0f4a76bc7972a379c
   original:
     hackage: servant-0.19
+- completed:
+    hackage: servant-client-0.19@sha256:8c0c4ee78e1d95a0bee22602c24cff104a1ce3a309b24697d23e8bfc738d5755,4737
+    pantry-tree:
+      size: 1435
+      sha256: 247a61e92707e119160245713add81f1fffd328a595997917c299c0dbb1d3130
+  original:
+    hackage: servant-client-0.19
+- completed:
+    hackage: servant-client-core-0.19@sha256:58f14b579b0afa0d4ede8457d6d5dc6d222da1b556b81177779522edc054183a,3659
+    pantry-tree:
+      size: 1446
+      sha256: 02cced10bfcb14f15fe9afccc58da36decd56d0af12e333bada47c3414cd92ec
+  original:
+    hackage: servant-client-core-0.19
 - completed:
     hackage: servant-server-0.19@sha256:d9636357e6f3db963e35418456607d0020e4e0c21df72b93e50fd5b9aa252995,5506
     pantry-tree:
