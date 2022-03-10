@@ -7,7 +7,7 @@ import qualified Infrastructure.Persistence.Queries as DB (selectUserContents, a
 import Tagger.Content (Content, hasAllTags)
 import Tagger.ContentRepository (ContentRepository(..))
 import Tagger.Id (Id(Id))
-import Tagger.Owned (Owned)
+import Tagger.Owned (Owned(_content))
 import Tagger.Tag (Tag)
 import Tagger.User (User)
 
@@ -39,7 +39,7 @@ postgresSelectUserContentsByTags :: Connection -> Id User -> [Tag] -> ExceptT Qu
 postgresSelectUserContentsByTags connection userId tags = do
   userDBContents <- ExceptT $ run (DB.selectUserContents userId) connection
   let userContents = uncurry3 unserializeContent <$> userDBContents
-  pure $ filter (hasAllTags tags) userContents
+  pure $ filter (hasAllTags tags . _content) userContents
 
 -- steps:
 --  - generate UUID for content
