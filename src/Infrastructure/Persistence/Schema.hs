@@ -22,6 +22,8 @@ import Tagger.EncryptedPassword (EncryptedPassword)
 
 -- TAG
 
+-- |
+-- The database representation of a 'Tag'
 data Tag f = Tag
   { tagId   :: Column f (Id Domain.Tag)
   , tagName :: Column f Text
@@ -29,6 +31,8 @@ data Tag f = Tag
   deriving stock Generic
   deriving anyclass Rel8able
 
+-- |
+-- A description of the schema of the 'Tag' table
 tagSchema :: TableSchema (Tag Name)
 tagSchema = TableSchema
   { name    = "tags"
@@ -39,11 +43,15 @@ tagSchema = TableSchema
     }
   }
 
+-- |
+-- Allows to lift a 'Tag' with no context into the 'Expr' context
 litTag :: Tag Result -> Tag Expr
 litTag (Tag id' name') = Tag (lit id') (lit name')
 
 -- CONTENT
 
+-- |
+-- The database representation of a 'Content'
 data Content f = Content
   { contentId      :: Column f (Id (Domain.Content Domain.Tag))
   , contentContent :: Column f Text
@@ -52,6 +60,8 @@ data Content f = Content
   deriving stock Generic
   deriving anyclass Rel8able
 
+-- |
+-- A description of the schema of the 'Content' table
 contentSchema :: TableSchema (Content Name)
 contentSchema = TableSchema
   { name    = "contents"
@@ -63,11 +73,15 @@ contentSchema = TableSchema
     }
   }
 
+-- |
+-- Allows to lift a 'Content' with no context into the 'Expr' context
 litContent :: Content Result -> Content Expr
 litContent (Content id' content' userId') = Content (lit id') (lit content') (lit userId')
 
 -- CONTENTS_TAGS
 
+-- |
+-- The database representation of a connection between a 'Content' and a 'Tag'
 data ContentsTags f = ContentsTags
   { ctContentId :: Column f (Id (Domain.Content Domain.Tag))
   , ctTagId     :: Column f (Id Domain.Tag)
@@ -75,6 +89,8 @@ data ContentsTags f = ContentsTags
   deriving stock Generic
   deriving anyclass Rel8able
 
+-- |
+-- A description of the schema of the 'ContentsTags' table
 contentsTagsSchema :: TableSchema (ContentsTags Name)
 contentsTagsSchema = TableSchema
   { name    = "contents_tags"
@@ -87,6 +103,8 @@ contentsTagsSchema = TableSchema
 
 -- USERS
 
+-- |
+-- The database representation of a 'User'
 data User f = User
   { userId       :: Column f (Id Domain.User)
   , userName     :: Column f Text
@@ -95,6 +113,8 @@ data User f = User
   deriving stock Generic
   deriving anyclass Rel8able
 
+-- |
+-- A description of the schema of the 'User' table
 userSchema :: TableSchema (User Name)
 userSchema = TableSchema
   { name = "users"
@@ -106,5 +126,7 @@ userSchema = TableSchema
     }
   }
 
+-- |
+-- Allows to lift a 'User' with no context into the 'Expr' context
 litUser :: User Result -> User Expr
 litUser (User id' name' password) = User (lit id') (lit name') (lit password)

@@ -28,31 +28,29 @@ import Control.Monad.Trans.Except (ExceptT (ExceptT))
 -- uuid
 import Data.UUID.V4 (nextRandom)
 
+-- |
+-- A 'ContentRepository' based on PostgreSQL
 postgresContentRepository :: Connection -> ContentRepository (ExceptT QueryError IO)
 postgresContentRepository connection = ContentRepository
   { selectUserContentsByTags = postgresSelectUserContentsByTags connection
   , addContentWithTags       = postgresAddContentWithTags connection
   }
 
--- TODO: filter the contents on the db side
 postgresSelectUserContentsByTags :: Connection -> Id User -> [Tag] -> ExceptT QueryError IO [Owned (Content Tag)]
 postgresSelectUserContentsByTags connection userId tags = do
+  -- Retrieve the user's contents data from the database
   userDBContents <- ExceptT $ run (DB.selectUserContents userId) connection
+  -- Convert the contents data into their domain representation
   let userContents = uncurry3 unserializeContent <$> userDBContents
+  -- Filter only the contents indexed by the provided tags
   pure $ filter (hasAllTags tags . _content) userContents
 
--- steps:
---  - generate UUID for content
---  - generate UUIDs for tags
---  - transaction
---    - select tags from db
---    - replace generated UUID with the one coming from the database
---    - insert new tags
---    - insert content
---    - insert contents_tags
 postgresAddContentWithTags :: Connection -> Id User -> Content Tag -> ExceptT QueryError IO (Id (Content Tag))
 postgresAddContentWithTags connection userId content = do
+  -- Generate a UUID for the content
   contentUUID          <- liftIO nextRandom
+  -- Generate and associate a UUID to every tag
   contentWithTagsUUIDs <- liftIO $ forM content (\tag -> (, tag) . Id <$> nextRandom)
+  -- Run a transaction to add the content and its tags to the database
   ExceptT $ run (uncurry DB.addContentWithTags $ serializeContent (Id contentUUID) userId contentWithTagsUUIDs) connection
   pure $ Id contentUUID
