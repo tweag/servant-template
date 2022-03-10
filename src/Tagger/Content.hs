@@ -22,7 +22,7 @@ data Content tag = Content
   { _content :: Text
   , _tags :: [tag]
   }
-  deriving stock (Functor, Generic)
+  deriving stock (Eq, Show, Functor, Generic)
 
 instance Foldable Content where
   foldMap f = foldMap f . _tags

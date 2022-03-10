@@ -19,7 +19,7 @@ data Owned a = Owned
   { _userId  :: Id User
   , _content :: a
   }
-  deriving stock Generic
+  deriving stock (Eq, Show, Generic)
 
 instance FromJSON a => FromJSON (Owned a)
 

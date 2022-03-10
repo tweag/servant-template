@@ -12,5 +12,5 @@ import Data.OpenApi (ToSchema)
 import Data.Text (Text)
 
 newtype Tag = Tag { _name :: Text }
-  deriving stock Eq
+  deriving stock (Eq, Show)
   deriving newtype (ToSchema, FromJSON, ToJSON)
