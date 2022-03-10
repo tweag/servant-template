@@ -17,6 +17,6 @@ data ContentRepository m = ContentRepository
   }
 
 -- |
--- given a natural transformation between a context 'm' and a context 'n', it allows to change the context where 'ContentRepository' is operating
+-- Given a natural transformation between a context 'm' and a context 'n', it allows to change the context where 'ContentRepository' is operating
 hoistContentRepository :: (forall a. m a -> n a) -> ContentRepository m -> ContentRepository n
 hoistContentRepository f (ContentRepository select add) = ContentRepository ((f .) . select) ((f .) . add)
