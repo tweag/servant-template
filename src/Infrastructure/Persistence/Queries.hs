@@ -17,7 +17,7 @@ import Hasql.Session (Session, statement)
 import Hasql.Statement (Statement)
 
 -- hasql-transaction
-import qualified Hasql.Transaction as T (statement)
+import qualified Hasql.Transaction as Transaction (statement)
 import Hasql.Transaction.Sessions (transaction, IsolationLevel (Serializable), Mode (Write))
 
 -- rel8
@@ -105,11 +105,11 @@ removeAlreadyPresentTags allTags alreadyPresentTags = List.filter (\tag -> tagNa
 -- * inserts the 'ContentsTags' to link the 'Content' with its 'Tags'
 addContentWithTags :: Content Result -> [Tag Result] -> Session ()
 addContentWithTags content tags = transaction Serializable Write $ do
-  alreadyPresentTags <- T.statement () (selectTags tags)
+  alreadyPresentTags <- Transaction.statement () (selectTags tags)
   let newTags = litTag <$> removeAlreadyPresentTags tags alreadyPresentTags
-  T.statement () $ add tagSchema newTags
-  T.statement () $ add contentSchema [litContent content]
-  T.statement () $ add contentsTagsSchema (contentTag (litContent content) <$> (litTag <$> alreadyPresentTags) <> newTags)
+  Transaction.statement () $ add tagSchema newTags
+  Transaction.statement () $ add contentSchema [litContent content]
+  Transaction.statement () $ add contentsTagsSchema (contentTag (litContent content) <$> (litTag <$> alreadyPresentTags) <> newTags)
 
 -- SELECT USER BY USERNAME
 
