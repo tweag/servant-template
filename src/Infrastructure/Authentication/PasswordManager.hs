@@ -3,7 +3,7 @@
 
 module Infrastructure.Authentication.PasswordManager where
 
-import Infrastructure.Authentication.Login (Login(password), Password(asBytestring))
+import Infrastructure.Authentication.Credentials (Credentials(password), Password(asBytestring))
 import Infrastructure.Authentication.Token (Token(Token))
 import qualified Tagger.EncryptedPassword as Encrypted (validatePassword)
 import Tagger.EncryptedPassword (EncryptedPassword, encryptPassword)
@@ -27,9 +27,9 @@ import Control.Monad.Trans.Except (ExceptT(ExceptT))
 -- A 'PasswordManager' is the service dedicated at dealing with password and authentication tokens
 -- It is indexed by a context 'm' which wraps the results.
 data PasswordManager m = PasswordManager
-  { generatePassword :: Login -> m EncryptedPassword -- ^ given some 'Login' credentials, tries to encrypt the password
-  , generateToken    :: Id User -> m Token           -- ^ given a 'User' 'Id', tries to generate an authentication 'Token'
-  , validatePassword :: User -> Password -> Bool     -- ^ given a 'User' and a non excrypted 'Password', checks whether the password corresponds to the user's one
+  { generatePassword :: Credentials -> m EncryptedPassword -- ^ given some 'Credentials', tries to encrypt the password
+  , generateToken    :: Id User -> m Token                 -- ^ given a 'User' 'Id', tries to generate an authentication 'Token'
+  , validatePassword :: User -> Password -> Bool           -- ^ given a 'User' and a non excrypted 'Password', checks whether the password corresponds to the user's one
   }
 
 -- |
@@ -53,7 +53,7 @@ bcryptPasswordManager jwtSettings = PasswordManager
   , validatePassword = bcryptValidatePassword
   }
 
-bcryptGeneratePassword :: Login -> ExceptT PasswordManagerError IO EncryptedPassword
+bcryptGeneratePassword :: Credentials -> ExceptT PasswordManagerError IO EncryptedPassword
 bcryptGeneratePassword
   -- extract the password from the Login data
   =   password

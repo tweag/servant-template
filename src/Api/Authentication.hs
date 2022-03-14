@@ -6,7 +6,7 @@
 module Api.Authentication where
 
 import Infrastructure.Authentication.AuthenticateUser (AuthenticateUser(runAuthenticateUser))
-import Infrastructure.Authentication.Login (Login(username))
+import Infrastructure.Authentication.Credentials (Credentials(username))
 import Infrastructure.Authentication.PasswordManager (PasswordManager(generatePassword, generateToken))
 import Infrastructure.Authentication.Token (Token)
 import Tagger.Id (Id)
@@ -30,15 +30,15 @@ import Servant.Server.Generic (AsServer)
 -- |
 -- The endpoints required to perform authentication
 data AuthenticationAPI mode = AuthenticationAPI
-  { register :: mode :- "register" :> ReqBody '[JSON] Login :> Post '[JSON] (Id User) -- ^ Given some 'Login' data, registers a new 'User'
-  , login    :: mode :- "login"    :> ReqBody '[JSON] Login :> Post '[JSON] Token     -- ^ Given some 'Login' data, generates an authentication token
+  { register :: mode :- "register" :> ReqBody '[JSON] Credentials :> Post '[JSON] (Id User) -- ^ Given some 'Login' data, registers a new 'User'
+  , login    :: mode :- "login"    :> ReqBody '[JSON] Credentials :> Post '[JSON] Token     -- ^ Given some 'Login' data, generates an authentication token
   }
   deriving stock Generic
 
 instance HasOpenApi AuthenticationAPI where
   toOpenApi _
-    =  toOpenApi (Proxy :: Proxy ("register" :> ReqBody '[JSON] Login :> Post '[JSON] (Id User)))
-    <> toOpenApi (Proxy :: Proxy ("login"    :> ReqBody '[JSON] Login :> Post '[JSON] Token))
+    =  toOpenApi (Proxy :: Proxy ("register" :> ReqBody '[JSON] Credentials :> Post '[JSON] (Id User)))
+    <> toOpenApi (Proxy :: Proxy ("login"    :> ReqBody '[JSON] Credentials :> Post '[JSON] Token))
 
 authenticationServer :: PasswordManager Handler -> AuthenticateUser Handler -> UserRepository Handler -> AuthenticationAPI AsServer
 authenticationServer passwordManager authenticateUser userRepository = AuthenticationAPI
@@ -46,14 +46,14 @@ authenticationServer passwordManager authenticateUser userRepository = Authentic
   , login    = loginEndpoint passwordManager authenticateUser
   }
 
-registerEndpoint :: PasswordManager Handler -> UserRepository Handler -> Login -> Handler (Id User)
+registerEndpoint :: PasswordManager Handler -> UserRepository Handler -> Credentials -> Handler (Id User)
 registerEndpoint passwordManager userRepository login' = do
   -- hash the password
   hashedPassword <- generatePassword passwordManager login'
   -- store the new user into the database
   addUser userRepository (username login') hashedPassword
 
-loginEndpoint :: PasswordManager Handler -> AuthenticateUser Handler -> Login -> Handler Token
+loginEndpoint :: PasswordManager Handler -> AuthenticateUser Handler -> Credentials -> Handler Token
 loginEndpoint passwordManager authenticateUser login' = do
   -- try to authenticate the user
   user <- runAuthenticateUser authenticateUser login'
