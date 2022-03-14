@@ -34,7 +34,7 @@ unserializeContent :: DB.Content Result -> [DB.Tag Result] -> DB.User Result -> 
 unserializeContent content tags user = Owned
   { O._content = Content
     { _content = contentContent content
-    , _tags    = unserilizeTag <$> tags
+    , _tags    = unserializeTag <$> tags
     }
   , O._userId = userId user
   }
@@ -51,8 +51,8 @@ serializeTag uuid tag = DB.Tag
 
 -- |
 -- Transform from the database representation of a 'Tag' to its domain representation
-unserilizeTag :: DB.Tag Result -> Tag
-unserilizeTag tag = Tag (tagName tag)
+unserializeTag :: DB.Tag Result -> Tag
+unserializeTag tag = Tag (tagName tag)
 
 -- USER
 
