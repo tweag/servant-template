@@ -1,6 +1,7 @@
 {-# LANGUAGE DeriveFunctor #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DerivingVia #-}
+{-# LANGUAGE NamedFieldPuns #-}
 
 module Tagger.Content where
 
@@ -19,7 +20,7 @@ import Data.Text (Text)
 -- |
 -- A 'Content' is just a text indexed by a list of 'tag's
 data Content tag = Content
-  { _content :: Text
+  { _message :: Text
   , _tags :: [tag]
   }
   deriving stock (Eq, Show, Functor, Generic)
@@ -28,7 +29,7 @@ instance Foldable Content where
   foldMap f = foldMap f . _tags
 
 instance Traversable Content where
-  traverse f (Content content tags) = Content content <$> traverse f tags
+  traverse f Content{_message, _tags} = Content _message <$> traverse f _tags
 
 instance ToSchema tag => ToSchema (Content tag)
 

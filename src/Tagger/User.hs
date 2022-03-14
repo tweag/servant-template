@@ -1,5 +1,6 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DerivingStrategies #-}
+{-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Tagger.User where
@@ -30,6 +31,6 @@ data User = User
 -- |
 -- We need to be careful to hide the password (even if it is encrypted) when we expose an 'User'
 instance ToJSON User where
-  toJSON (User name _) = object ["_name" .= name]
+  toJSON User{_name} = object ["_name" .= _name]
 
 instance ToSchema User

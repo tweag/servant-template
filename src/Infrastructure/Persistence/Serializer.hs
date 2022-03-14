@@ -23,7 +23,7 @@ serializeContent contentId' userId' content = (dbContent, dbTags)
   where
     dbContent = DB.Content
       { contentId      = contentId'
-      , contentContent = _content content
+      , contentContent = _message content
       , contentUserId  = userId'
       }
     dbTags = uncurry serializeTag <$> _tags content
@@ -33,7 +33,7 @@ serializeContent contentId' userId' content = (dbContent, dbTags)
 unserializeContent :: DB.Content Result -> [DB.Tag Result] -> DB.User Result -> Owned (Content Tag)
 unserializeContent content tags user = Owned
   { O._content = Content
-    { _content = contentContent content
+    { _message = contentContent content
     , _tags    = unserializeTag <$> tags
     }
   , O._userId = userId user

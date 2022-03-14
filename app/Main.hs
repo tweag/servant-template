@@ -4,7 +4,7 @@ module Main where
 
 import Api.Application (app)
 import Api.AppServices (appServices)
-import Api.Config (api, apiPort, asInt, configCodec, connectionString, database)
+import Api.Config (api, apiPort, configCodec, connectionString, database, getPort)
 
 -- base
 import Data.Maybe (fromMaybe)
@@ -43,7 +43,7 @@ main = do
       -- we setup the application services
       let services = appServices connection' key
       -- we retrieve the port from configuration
-      let port = asInt . apiPort . api $ config
+      let port = getPort . apiPort . api $ config
       -- eventually, we expose the application on the port, using the application services, logging requests on standard output
       run port . logStdoutDev . app $ services)
     connection

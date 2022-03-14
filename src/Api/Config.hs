@@ -1,5 +1,6 @@
 {-# LANGUAGE DerivingStrategies #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Api.Config where
@@ -14,16 +15,16 @@ import Data.Text (Text, unpack)
 import Toml (TomlCodec, (.=), text, table)
 import qualified Toml (diwrap, int)
 
-newtype Host = Host Text
+newtype Host = Host {getHost :: Text}
 
-newtype Port = Port {asInt :: Int}
+newtype Port = Port {getPort :: Int}
   deriving newtype Show
 
-newtype DBName = DBName Text
+newtype DBName = DBName {getDBName :: Text}
 
-newtype User = User Text
+newtype User = User {getUser :: Text}
 
-newtype Password = Password Text
+newtype Password = Password {getPassword :: Text}
 
 -- |
 -- The configuration parameters needed to connect to a database
@@ -38,12 +39,12 @@ data DatabaseConfig = DatabaseConfig
 -- |
 -- Compute the connection string given a 'DatabaseConfig'
 connectionString :: DatabaseConfig -> ByteString
-connectionString (DatabaseConfig (Host host') port' (DBName dbname') (User user') (Password password')) = pack
-  $  "host="     <> unpack host'     <> " "
-  <> "port="     <> show port'       <> " "
-  <> "dbname="   <> unpack dbname'   <> " "
-  <> "user="     <> unpack user'     <> " "
-  <> "password=" <> unpack password'
+connectionString DatabaseConfig{host, port, dbname, user, password} = pack
+  $  "host="     <> unpack (getHost host)     <> " "
+  <> "port="     <> show port                 <> " "
+  <> "dbname="   <> unpack (getDBName dbname) <> " "
+  <> "user="     <> unpack (getUser user)     <> " "
+  <> "password=" <> unpack (getPassword password)
 
 -- |
 -- A bidirectional codec for 'DatabaseConfig'

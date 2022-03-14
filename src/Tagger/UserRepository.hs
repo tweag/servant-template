@@ -1,3 +1,4 @@
+{-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE RankNTypes #-}
 
 module Tagger.UserRepository where
@@ -28,4 +29,4 @@ data UserRepository m = UserRepository
 -- |
 -- Given a natural transformation between a context 'm' and a context 'n', it allows to change the context where 'UserRepository' is operating
 hoistUserRepository :: (forall a. m a -> n a) -> UserRepository m -> UserRepository n
-hoistUserRepository f (UserRepository getUserByName' addUser') = UserRepository (f . getUserByName') ((f .) . addUser')
+hoistUserRepository f UserRepository{getUserByName, addUser} = UserRepository (f . getUserByName) ((f .) . addUser)

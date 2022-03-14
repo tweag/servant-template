@@ -1,8 +1,9 @@
+{-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE RankNTypes #-}
 
 module Infrastructure.Authentication.AuthenticateUser where
 
-import Infrastructure.Authentication.Credentials (Credentials(Credentials))
+import Infrastructure.Authentication.Credentials (Credentials(..))
 import Infrastructure.Authentication.PasswordManager (PasswordManager(validatePassword))
 import Tagger.Id (Id)
 import Tagger.User (User)
@@ -39,8 +40,7 @@ data AuthenticationError
 -- Concrete implementation of 'AuthenticateUser'.
 -- Depends on a 'UserRepository' and a 'PasswordManager'
 authenticateUser :: UserRepository (ExceptT QueryError IO) -> PasswordManager n -> Credentials -> ExceptT AuthenticationError IO (Id User)
-authenticateUser userRepository passwordManager (Credentials username password) = do
-  -- retrieve the user from the repository
+authenticateUser userRepository passwordManager Credentials{username, password} = do
   eitherIdAndUser <- withExceptT AuthenticationQueryError $ getUserByName userRepository username
   idAndUser       <- except $ first AuthenticationSelectUserError eitherIdAndUser
   -- check whether the provided password is the correct one

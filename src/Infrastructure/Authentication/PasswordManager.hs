@@ -1,4 +1,5 @@
 {-# LANGUAGE DerivingStrategies #-}
+{-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE RankNTypes #-}
 
 module Infrastructure.Authentication.PasswordManager where
@@ -35,7 +36,8 @@ data PasswordManager m = PasswordManager
 -- |
 -- Given a natural transformation between a context 'm' and a context 'n', it allows to change the context where 'PasswordManager' is operating
 hoistPasswordManager :: (forall a. m a -> n a) -> PasswordManager m -> PasswordManager n
-hoistPasswordManager f (PasswordManager generate verify validate) = PasswordManager (f . generate) (f . verify) validate
+hoistPasswordManager f PasswordManager{generatePassword, generateToken, validatePassword} =
+  PasswordManager (f . generatePassword) (f . generateToken) validatePassword
 
 -- |
 -- How the 'PasswordManager' operations can fail
