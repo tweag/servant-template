@@ -4,11 +4,12 @@
 
 module Infrastructure.Authentication.PasswordManager where
 
-import Infrastructure.Authentication.Credentials (Credentials(password), Password(asBytestring))
+import qualified Infrastructure.Authentication.Credentials as Credentials (password)
+import Infrastructure.Authentication.Credentials (Credentials, Password(asBytestring))
 import Infrastructure.Authentication.Token (Token(Token))
 import qualified Tagger.EncryptedPassword as Encrypted (validatePassword)
 import Tagger.EncryptedPassword (EncryptedPassword, encryptPassword)
-import Tagger.User (User(_password))
+import Tagger.User (User(password))
 import Tagger.Id (Id)
 
 -- base
@@ -57,8 +58,8 @@ bcryptPasswordManager jwtSettings = PasswordManager
 
 bcryptGeneratePassword :: Credentials -> ExceptT PasswordManagerError IO EncryptedPassword
 bcryptGeneratePassword
-  -- extract the password from the Login data
-  =   password
+  -- extract the password from the Credentials
+  =   Credentials.password
   -- convert it to bytestring
   >>> asBytestring
   -- try to encrypt it
@@ -77,4 +78,4 @@ bcryptGenerateToken jwtSettings userId = ExceptT $ do
   pure $ bimap FailedJWTCreation Token token
 
 bcryptValidatePassword :: User -> Password -> Bool
-bcryptValidatePassword user password' = Encrypted.validatePassword (_password user) (asBytestring password')
+bcryptValidatePassword user password' = Encrypted.validatePassword (password user) (asBytestring password')

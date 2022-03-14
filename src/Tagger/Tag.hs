@@ -13,6 +13,6 @@ import Data.Text (Text)
 
 -- |
 -- A 'Tag' is a newtype wrapper around some 'Text', used to index a 'Tagger.Content.Content'
-newtype Tag = Tag { _name :: Text }
+newtype Tag = Tag { name :: Text }
   deriving stock (Eq, Show)
   deriving newtype (ToSchema, FromJSON, ToJSON)
