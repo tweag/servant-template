@@ -33,7 +33,7 @@ inMemoryContentRepository contentsMap = ContentRepository
 inMemorySelectUserContentsByTags :: TVar (Map (Id (Content Tag)) (Owned (Content Tag))) -> Id User -> [Tag] -> ExceptT QueryError IO [Owned (Content Tag)]
 inMemorySelectUserContentsByTags contentsMap userId tags = liftIO . atomically $ do
   contents <- readTVar contentsMap
-  let userContentsWithTags = filter ((&&) <$> ((== userId) . _userId) <*> hasAllTags tags) contents
+  let userContentsWithTags = filter ((&&) <$> ((== userId) . _userId) <*> (hasAllTags tags . _content)) contents
   pure $ elems userContentsWithTags
 
 inMemoryAddContentWithTags :: TVar (Map (Id (Content Tag)) (Owned (Content Tag))) -> Id User -> Content Tag -> ExceptT QueryError IO (Id (Content Tag))

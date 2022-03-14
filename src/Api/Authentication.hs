@@ -10,7 +10,7 @@ import Infrastructure.Authentication.Login (Login(username))
 import Infrastructure.Authentication.PasswordManager (PasswordManager(generatePassword, generateToken))
 import Infrastructure.Authentication.Token (Token)
 import Tagger.Id (Id)
-import Tagger.User (asBytestring, User)
+import Tagger.User (User)
 import Tagger.UserRepository (UserRepository(addUser))
 
 -- base
@@ -27,9 +27,11 @@ import Servant.OpenApi (HasOpenApi(toOpenApi))
 -- servant-server
 import Servant.Server.Generic (AsServer)
 
+-- |
+-- The endpoints required to perform authentication
 data AuthenticationAPI mode = AuthenticationAPI
-  { register :: mode :- "register" :> ReqBody '[JSON] Login :> Post '[JSON] (Id User)
-  , login    :: mode :- "login"    :> ReqBody '[JSON] Login :> Post '[JSON] Token
+  { register :: mode :- "register" :> ReqBody '[JSON] Login :> Post '[JSON] (Id User) -- ^ Given some 'Login' data, registers a new 'User'
+  , login    :: mode :- "login"    :> ReqBody '[JSON] Login :> Post '[JSON] Token     -- ^ Given some 'Login' data, generates an authentication token
   }
   deriving stock Generic
 
@@ -46,10 +48,14 @@ authenticationServer passwordManager authenticateUser userRepository = Authentic
 
 registerEndpoint :: PasswordManager Handler -> UserRepository Handler -> Login -> Handler (Id User)
 registerEndpoint passwordManager userRepository login' = do
+  -- hash the password
   hashedPassword <- generatePassword passwordManager login'
-  addUser userRepository (username login') (asBytestring hashedPassword)
+  -- store the new user into the database
+  addUser userRepository (username login') hashedPassword
 
 loginEndpoint :: PasswordManager Handler -> AuthenticateUser Handler -> Login -> Handler Token
 loginEndpoint passwordManager authenticateUser login' = do
+  -- try to authenticate the user
   user <- runAuthenticateUser authenticateUser login'
+  -- if the user authenticated, generate an authentication token
   generateToken passwordManager user

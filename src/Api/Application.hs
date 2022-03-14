@@ -39,6 +39,8 @@ import Network.Wai (Application)
 
 type API = NamedRoutes ApplicationAPI
 
+-- |
+-- Collects all the API groups exposed by the application
 data ApplicationAPI mode = ApplicationAPI
   { tagger         :: mode :- Auth '[JWT] (Id User) :> NamedRoutes TaggerAPI
   , docs           :: mode :- DocsAPI
@@ -47,11 +49,16 @@ data ApplicationAPI mode = ApplicationAPI
   }
   deriving stock Generic
 
+-- |
+-- For the endpoints which actually require authentication, checks whether the request provides a valid authentication token.
+-- Otherwise it returns a 401 response
 authenticatedTaggerServer :: ContentRepository Handler -> AuthResult (Id User) -> TaggerAPI AsServer
 authenticatedTaggerServer contentRepository = \case
   (Authenticated userId) -> taggerServer userId contentRepository
   _                      -> throwAll err401
 
+-- |
+-- Setup all the application server, providing the services needed by the various endpoints
 server :: AppServices -> ApplicationAPI AsServer
 server (AppServices _ passwordManager contentRepository userRepository authenticateUser) = ApplicationAPI
   { tagger         = authenticatedTaggerServer contentRepository

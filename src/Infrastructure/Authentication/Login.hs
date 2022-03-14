@@ -4,20 +4,38 @@
 
 module Infrastructure.Authentication.Login where
 
-import Tagger.User (Password)
-
 -- base
+import Data.Proxy (Proxy(Proxy))
 import GHC.Generics (Generic)
 
 -- aeson
-import Data.Aeson (FromJSON, ToJSON)
+import Data.Aeson (FromJSON (parseJSON), ToJSON(toJSON))
+
+-- bytestring
+import Data.ByteString (ByteString)
 
 -- openapi3
-import Data.OpenApi (ToSchema)
+import Data.OpenApi (ToSchema(declareNamedSchema))
 
 -- text
 import Data.Text (Text)
+import Data.Text.Encoding (encodeUtf8, decodeUtf8)
 
+-- |
+-- A newtype wrapper over 'ByteString' to represent a non encrypted password
+newtype Password = Password {asBytestring :: ByteString}
+
+instance FromJSON Password where
+  parseJSON json = Password . encodeUtf8 <$> parseJSON json
+
+instance ToJSON Password where
+  toJSON (Password s) = toJSON $ decodeUtf8 s
+
+instance ToSchema Password where
+  declareNamedSchema _ = declareNamedSchema (Proxy :: Proxy Text)
+
+-- |
+-- 'Login' data required to register and authenticate
 data Login = Login
   { username :: Text
   , password :: Password

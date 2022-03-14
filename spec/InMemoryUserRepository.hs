@@ -2,17 +2,15 @@
 
 module InMemoryUserRepository where
 
+import Tagger.EncryptedPassword (EncryptedPassword)
 import Tagger.Id (Id(Id))
-import Tagger.User (Password(Password), User(..))
+import Tagger.User (User(..))
 import Tagger.UserRepository (SelectUserError(..), UserRepository(..))
 
 -- base
 import Control.Monad.IO.Class (liftIO)
 import GHC.Conc (TVar, atomically, readTVar, writeTVar)
 import Prelude hiding (filter)
-
--- bytestrings
-import Data.ByteString.Char8 (ByteString)
 
 -- containers
 import Data.Map.Lazy (Map, assocs, filter, insert, size)
@@ -61,14 +59,14 @@ duplicateNameError name = QueryError
     (Just $ "Key (name)=(" <> encodeUtf8 name <> ") already exists")
     Nothing)
 
-inMemoryAddUser :: TVar (Map (Id User) User) -> Text -> ByteString -> ExceptT QueryError IO (Id User)
+inMemoryAddUser :: TVar (Map (Id User) User) -> Text -> EncryptedPassword -> ExceptT QueryError IO (Id User)
 inMemoryAddUser userMap name password = do
   userId <- Id <$> liftIO nextRandom
   queryError <- liftIO . atomically $ do
     users <- readTVar userMap
     let usersWithName = filter ((== name) . _name) users
     if   null usersWithName
-    then writeTVar userMap (insert userId (User name (Password password)) users) >> pure Nothing
+    then writeTVar userMap (insert userId (User name password) users) >> pure Nothing
     else pure . Just $ duplicateNameError name
   case queryError of
     Just qe -> throwError qe

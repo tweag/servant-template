@@ -4,41 +4,31 @@
 
 module Tagger.User where
 
+import Tagger.EncryptedPassword (EncryptedPassword)
+
 -- base
-import Data.Data (Proxy(Proxy))
 import GHC.Generics (Generic)
 
 -- aeson
-import Data.Aeson (ToJSON(toJSON), FromJSON(parseJSON), (.=), object)
+import Data.Aeson (ToJSON(toJSON), (.=), object)
 
--- bytestring
-import Data.ByteString (ByteString)
 
 -- openapi3
-import Data.OpenApi (ToSchema(declareNamedSchema))
+import Data.OpenApi (ToSchema)
 
 -- text
 import Data.Text (Text)
-import Data.Text.Encoding (encodeUtf8, decodeUtf8)
 
-newtype Password = Password {asBytestring :: ByteString}
-  deriving stock (Eq, Show, Read, Generic)
-
-instance FromJSON Password where
-  parseJSON json = Password . encodeUtf8 <$> parseJSON json
-
-instance ToJSON Password where
-  toJSON (Password s) = toJSON $ decodeUtf8 s
-
-instance ToSchema Password where
-  declareNamedSchema _ = declareNamedSchema (Proxy :: Proxy Text)
-
+-- |
+-- A 'User' contains a 'Text' and an 'EncryptedPassword'
 data User = User
   { _name :: Text
-  , _password :: Password
+  , _password :: EncryptedPassword
   }
   deriving stock (Eq, Show, Read, Generic)
 
+-- |
+-- We need to be careful to hide the password (even if it is encrypted) when we expose an 'User'
 instance ToJSON User where
   toJSON (User name _) = object ["_name" .= name]
 

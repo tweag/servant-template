@@ -29,10 +29,21 @@ import Network.Wai.Handler.Warp (run)
 
 main:: IO ()
 main = do
+  -- extract application configuration from `config.toml` file
   eitherConfig <- decodeFileExact configCodec "./config.toml"
   config <- either (\errors -> fail $ "unable to parse configuration: " <> show errors) pure eitherConfig
+  -- acquire the connection to the database
   connection <- acquire $ connectionString (database config)
   either
     (fail . unpack . fromMaybe "unable to connect to the database")
-    (\connection' -> generateKey >>= run (asInt . apiPort . api $ config) . logStdoutDev . app . appServices connection')
+    -- if we were able to connect to the database we run the application
+    (\connection' -> do
+      -- first we generate a JSON Web Key
+      key <- generateKey
+      -- we setup the application services
+      let services = appServices connection' key
+      -- we retrieve the port from configuration
+      let port = asInt . apiPort . api $ config
+      -- eventually, we expose the application on the port, using the application services, logging requests on standard output
+      run port . logStdoutDev . app $ services)
     connection

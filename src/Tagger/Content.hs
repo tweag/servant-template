@@ -4,8 +4,6 @@
 
 module Tagger.Content where
 
-import Tagger.Owned (Owned(Owned))
-
 -- base
 import GHC.Generics (Generic)
 
@@ -18,6 +16,8 @@ import Data.OpenApi (ToSchema)
 -- text
 import Data.Text (Text)
 
+-- |
+-- A 'Content' is just a text indexed by a list of 'tag's
 data Content tag = Content
   { _content :: Text
   , _tags :: [tag]
@@ -36,5 +36,7 @@ instance FromJSON tag => FromJSON (Content tag)
 
 instance ToJSON tag => ToJSON (Content tag)
 
-hasAllTags :: Eq tag => [tag] -> Owned (Content tag) -> Bool
-hasAllTags tags (Owned _ content) = and $ (\tag -> tag `elem` _tags content) <$> tags
+-- |
+-- checks whether a 'Content' is indexed by all the provided 'tag's
+hasAllTags :: Eq tag => [tag] -> Content tag -> Bool
+hasAllTags tags content = and $ (\tag -> tag `elem` _tags content) <$> tags

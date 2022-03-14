@@ -19,6 +19,8 @@ import Data.OpenApi (ToSchema(declareNamedSchema))
 import Data.Text (Text)
 import Data.Text.Encoding (decodeUtf8, encodeUtf8)
 
+-- |
+-- An authentication 'Token'
 newtype Token = Token ByteString
   deriving newtype Show
 

@@ -22,6 +22,8 @@ import Servant.OpenApi (toOpenApi)
 -- servant-server
 import Servant ((:>), Get, JSON, Server)
 
+-- |
+-- A single endpoint to expose the OpenAPI documentation of the application
 type DocsAPI = "docs" :> Get '[JSON] OpenApi
 
 docsServer :: Server DocsAPI

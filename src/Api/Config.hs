@@ -25,6 +25,8 @@ newtype User = User Text
 
 newtype Password = Password Text
 
+-- |
+-- The configuration parameters needed to connect to a database
 data DatabaseConfig = DatabaseConfig
   { host     :: Host
   , port     :: Port
@@ -33,6 +35,8 @@ data DatabaseConfig = DatabaseConfig
   , password :: Password
   }
 
+-- |
+-- Compute the connection string given a 'DatabaseConfig'
 connectionString :: DatabaseConfig -> ByteString
 connectionString (DatabaseConfig (Host host') port' (DBName dbname') (User user') (Password password')) = pack
   $  "host="     <> unpack host'     <> " "
@@ -41,6 +45,8 @@ connectionString (DatabaseConfig (Host host') port' (DBName dbname') (User user'
   <> "user="     <> unpack user'     <> " "
   <> "password=" <> unpack password'
 
+-- |
+-- A bidirectional codec for 'DatabaseConfig'
 databaseConfigCodec :: TomlCodec DatabaseConfig
 databaseConfigCodec = DatabaseConfig
   <$> Toml.diwrap (Toml.text "host")     .= host
@@ -49,16 +55,24 @@ databaseConfigCodec = DatabaseConfig
   <*> Toml.diwrap (Toml.text "user")     .= user
   <*> Toml.diwrap (Toml.text "password") .= password
 
+-- |
+-- The configuration parameters needed to expose the API
 newtype ApiConfig = ApiConfig {apiPort :: Port}
 
+-- |
+-- A bidirectional codec for 'ApiConfig'
 apiConfigCodec :: TomlCodec ApiConfig
 apiConfigCodec = Toml.diwrap $ Toml.int "port"
 
+-- |
+-- The whole config needed by the application
 data Config = Config
   { database :: DatabaseConfig
   , api      :: ApiConfig
   }
 
+-- |
+-- A bidirectional codec for 'Config'
 configCodec :: TomlCodec Config
 configCodec = Config
   <$> Toml.table databaseConfigCodec "database" .= database

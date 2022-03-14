@@ -28,9 +28,11 @@ import Servant.OpenApi (HasOpenApi(toOpenApi))
 import Servant (Handler)
 import Servant.Server.Generic (AsServer)
 
+-- |
+-- The main endpoints of the application API
 data TaggerAPI mode = TaggerAPI
-  { addContent  :: mode :- "add-content"  :> ReqBody '[JSON] (Content Tag) :> Post '[JSON] (Id (Content Tag))
-  , getContents :: mode :- "get-contents" :> ReqBody '[JSON] [Tag]         :> Get  '[JSON] [Owned (Content Tag)]
+  { addContent  :: mode :- "add-content"  :> ReqBody '[JSON] (Content Tag) :> Post '[JSON] (Id (Content Tag))    -- ^ Add a new 'Content'
+  , getContents :: mode :- "get-contents" :> ReqBody '[JSON] [Tag]         :> Get  '[JSON] [Owned (Content Tag)] -- ^ Retrieve all the 'User' 'Content's indexed by the provided 'Tag's
   }
   deriving stock Generic
 
