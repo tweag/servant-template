@@ -28,6 +28,7 @@ dependencies:
   - lens
   - mtl
   - openapi3
+  - optparse-applicative
   - rel8
   - servant
   - servant-auth
