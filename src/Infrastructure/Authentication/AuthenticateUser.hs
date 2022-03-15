@@ -5,15 +5,13 @@ module Infrastructure.Authentication.AuthenticateUser where
 
 import Infrastructure.Authentication.Credentials (Credentials(..))
 import Infrastructure.Authentication.PasswordManager (PasswordManager(validatePassword))
+import Infrastructure.Persistence.PostgresUserRepository (UserRepositoryError)
 import Tagger.Id (Id)
 import Tagger.User (User)
 import Tagger.UserRepository (SelectUserError, UserRepository(getUserByName))
 
 -- base
 import Data.Bifunctor (Bifunctor(first))
-
--- hasql
-import Hasql.Session (QueryError)
 
 -- transformers
 import Control.Monad.Trans.Except (ExceptT, withExceptT, except, throwE)
@@ -32,14 +30,14 @@ hoistAuthenticateUser f (AuthenticateUser auth) = AuthenticateUser $ f . auth
 -- How 'authenticateUser' can actually fail
 data AuthenticationError
   = AuthenticationSelectUserError SelectUserError -- ^ the provided 'Credentials' data do not correspond to a unique user
-  | AuthenticationQueryError QueryError           -- ^ the interaction with the database somehow failed
+  | AuthenticationQueryError UserRepositoryError  -- ^ the interaction with the database somehow failed
   | AuthenticationPasswordVerificationFailed      -- ^ the password provided in the 'Credentials' data is not correct
   deriving Show
 
 -- |
 -- Concrete implementation of 'AuthenticateUser'.
 -- Depends on a 'UserRepository' and a 'PasswordManager'
-authenticateUser :: UserRepository (ExceptT QueryError IO) -> PasswordManager n -> Credentials -> ExceptT AuthenticationError IO (Id User)
+authenticateUser :: UserRepository (ExceptT UserRepositoryError IO) -> PasswordManager n -> Credentials -> ExceptT AuthenticationError IO (Id User)
 authenticateUser userRepository passwordManager Credentials{username, password} = do
   eitherIdAndUser <- withExceptT AuthenticationQueryError $ getUserByName userRepository username
   idAndUser       <- except $ first AuthenticationSelectUserError eitherIdAndUser

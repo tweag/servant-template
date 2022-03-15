@@ -31,7 +31,7 @@ import Test.Hspec (Spec, around, describe, it, runIO, shouldMatchList, shouldSat
 import Network.HTTP.Client (defaultManagerSettings, newManager)
 
 -- http-types
-import Network.HTTP.Types.Status (Status, internalServerError500, unauthorized401)
+import Network.HTTP.Types.Status (Status, unauthorized401, forbidden403)
 
 -- servant-auth-client
 import qualified Servant.Auth.Client.Internal as Servant (Token(Token))
@@ -94,7 +94,7 @@ spec = around withTaggerApp $ do
       it "should not register two users with the same name" $ \port -> do
         _        <- registerUser (clientEnv port) (Credentials "marcosh" (Password "password"))
         response <- registerUser (clientEnv port) (Credentials "marcosh" (Password "password1"))
-        response `shouldSatisfy` hasStatus internalServerError500
+        response `shouldSatisfy` hasStatus forbidden403
 
       it "should register two users with different names" $ \port -> do
         _        <- registerUser (clientEnv port) (Credentials "marcosh" (Password "password"))
