@@ -52,6 +52,7 @@ executables:
       - hasql
       - jose
       - transformers
+      - wai-cors
       - wai-extra
       - warp
 
