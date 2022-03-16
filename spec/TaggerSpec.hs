@@ -12,6 +12,7 @@ import Tagger.Content (Content(Content))
 import Tagger.Id (Id)
 import Tagger.Owned (Owned(Owned))
 import Tagger.Tag (Tag(Tag))
+import Tagger.User (User)
 import TestServices (testServices)
 
 -- base
