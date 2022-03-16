@@ -10,6 +10,7 @@ import InputOptions (inputOptionsParser, InputOptions (configPath, jwkPath))
 
 -- base
 import Control.Exception (catch)
+import Data.Function ((&))
 import Data.Maybe (fromMaybe)
 import Prelude hiding (writeFile)
 
@@ -30,6 +31,9 @@ import Servant.Auth.Server (fromSecret, generateSecret, readKey)
 
 -- toml
 import Toml (decodeFileExact)
+
+-- wai-cors
+import Network.Wai.Middleware.Cors (cors, simpleCorsResourcePolicy, corsRequestHeaders)
 
 -- wai-extra
 import Network.Wai.Middleware.RequestLogger (logStdoutDev)
@@ -56,8 +60,17 @@ main = do
       let services = appServices connection' key
       -- we retrieve the port from configuration
       let port = getPort . apiPort . api $ config
-      -- eventually, we expose the application on the port, using the application services, logging requests on standard output
-      run port . logStdoutDev . app $ services)
+      -- we create our application
+      let application
+            -- we pass in the required services
+            = app services
+            -- manage CORS for browser interaction
+            & cors (const . Just $ simpleCorsResourcePolicy {corsRequestHeaders = ["Content-Type"]})
+            -- we setup logging for the incoming requests
+            & logStdoutDev
+      -- eventually, we run the application on the port
+      run port application)
+      --run port . logStdoutDev . app $ services)
     connection
 
 jwtKey :: FilePath -> IO JWK
