@@ -1,77 +1,37 @@
 module Main exposing (..)
 
-import Credentials exposing (..)
+import Anonymous exposing (..)
 
 -- elm/browser
-import Browser
+import Browser exposing (..)
 
--- elm/html
 import Html exposing (..)
-
--- elm/json
-import Json.Decode exposing (..)
 
 -- MAIN
 
 main : Program () Model Msg
-main =
-  Browser.element
-    { init = init
-    , view = view
-    , update = update
-    , subscriptions = subscriptions
-    }
+main = element
+  { init = init
+  , view = view
+  , update = update
+  , subscriptions = subscriptions
+  }
 
 -- MODEL
 
-type alias UserId = String
-
-type alias Token = String
-
-type alias Model =
-  { register : Credentials
-  , login    : Credentials
-  , registerSubmit : Submit UserId
-  , loginSubmit : Submit Token
-  }
+type Model
+  = Anonymous Anonymous.Model
+  | LoggedIn Token
 
 init : () -> ( Model, Cmd Msg )
-init _ =
-  ( { register = emptyCredentials
-    , login = emptyCredentials
-    , registerSubmit = NotYetSubmitted
-    , loginSubmit = NotYetSubmitted
-    }
-  , Cmd.none
-  )
+init _ = Tuple.mapFirst Anonymous (Anonymous.init ())
 
 -- UPDATE
 
-type Msg
-  = RegisterData CredentialsMessage
-  | LoginData CredentialsMessage
-  | Register (SubmitMessage UserId)
-  | Login (SubmitMessage Token)
-
-updateModelWithRegisterSubmit : Model -> Submit UserId -> Model
-updateModelWithRegisterSubmit model registerSubmit = { model | registerSubmit = registerSubmit }
-
-updateModelWithLoginSubmit : Model -> Submit Token -> Model
-updateModelWithLoginSubmit model loginSubmit = { model | loginSubmit = loginSubmit}
-
 update : Msg -> Model -> ( Model, Cmd Msg )
-update msg model =
-  case msg of
-    RegisterData credentialsMessage -> ( { model | register = updateCredentials credentialsMessage model.register }, Cmd.none )
-    LoginData credentialsMessage    -> ( { model | login = updateCredentials credentialsMessage model.login }, Cmd.none )
-    Register registerMessage        -> Tuple.mapBoth
-      (updateModelWithRegisterSubmit model)
-      (Cmd.map Register)
-      (updateSubmit userIdDecoder "http://localhost:8080/register" model.register registerMessage model.registerSubmit)
-    Login loginMessage              -> Tuple.mapBoth
-      ( updateModelWithLoginSubmit model )
-      (Cmd.map Login)
-      (updateSubmit tokenDecoder "http://localhost:8080/login" model.login loginMessage model.loginSubmit)
+update msg model = case model of
+  Anonymous anonymousModel -> Tuple.mapFirst Anonymous (Anonymous.update msg anonymousModel)
+  LoggedIn token           -> ( LoggedIn token, Cmd.none )
 
 -- SUBSCRIPTIONS
 
@@ -82,22 +42,6 @@ subscriptions _ =
 -- VIEW
 
 view : Model -> Html Msg
-view model = div []
-  [ h1 [] [ text "Tagger" ]
-  , div []
-    [ h2 [] [ text "Register User" ]
-    , credentialsForm RegisterData Register model.register
-    ]
-  , div []
-    [ h2 [] [ text "Login" ]
-    , credentialsForm LoginData Login model.login
-    ]
-  ]
-
--- HTTP
-
-userIdDecoder : Decoder UserId
-userIdDecoder = Json.Decode.string
-
-tokenDecoder : Decoder Token
-tokenDecoder = Json.Decode.string
+view model = case model of
+  Anonymous anonymousModel -> Anonymous.view anonymousModel
+  LoggedIn _               -> div [] []
