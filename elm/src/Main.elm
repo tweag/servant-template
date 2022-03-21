@@ -6,6 +6,8 @@ import Anonymous exposing (..)
 import Browser exposing (..)
 
 import Html exposing (..)
+import Credentials exposing (Submit(..))
+import Credentials exposing (SubmitMessage(..))
 
 -- MAIN
 
@@ -28,9 +30,14 @@ init _ = Tuple.mapFirst Anonymous (Anonymous.init ())
 
 -- UPDATE
 
+updateAnonymous : Msg -> Anonymous.Model -> ( Model, Cmd Msg )
+updateAnonymous msg anonymousModel = case msg of
+  Login ( Succeeded token ) -> ( LoggedIn token, Cmd.none )
+  _                         -> Tuple.mapFirst Anonymous (Anonymous.update msg anonymousModel)
+
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model = case model of
-  Anonymous anonymousModel -> Tuple.mapFirst Anonymous (Anonymous.update msg anonymousModel)
+  Anonymous anonymousModel -> updateAnonymous msg anonymousModel
   LoggedIn token           -> ( LoggedIn token, Cmd.none )
 
 -- SUBSCRIPTIONS
