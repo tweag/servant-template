@@ -1,6 +1,7 @@
 module Main exposing (..)
 
 import Anonymous exposing (..)
+import Logged exposing (..)
 
 -- elm/browser
 import Browser exposing (..)
@@ -26,19 +27,24 @@ type Model
   | LoggedIn Token
 
 init : () -> ( Model, Cmd Msg )
-init _ = Tuple.mapFirst Anonymous (Anonymous.init ())
+init _ = Tuple.mapBoth Anonymous ( Cmd.map AnonymousMsg ) ( Anonymous.init () )
 
 -- UPDATE
 
-updateAnonymous : Msg -> Anonymous.Model -> ( Model, Cmd Msg )
+type Msg
+  = AnonymousMsg Anonymous.Msg
+  | LoggedInMsg Logged.Msg
+
+updateAnonymous : Anonymous.Msg -> Anonymous.Model -> ( Model, Cmd Msg )
 updateAnonymous msg anonymousModel = case msg of
   Login ( Succeeded token ) -> ( LoggedIn token, Cmd.none )
-  _                         -> Tuple.mapFirst Anonymous (Anonymous.update msg anonymousModel)
+  _                         -> Tuple.mapBoth Anonymous ( Cmd.map AnonymousMsg ) (Anonymous.update msg anonymousModel)
 
 update : Msg -> Model -> ( Model, Cmd Msg )
-update msg model = case model of
-  Anonymous anonymousModel -> updateAnonymous msg anonymousModel
-  LoggedIn token           -> ( LoggedIn token, Cmd.none )
+update msg model = case ( msg, model ) of
+  ( AnonymousMsg anonymousMsg, Anonymous anonymousModel ) -> updateAnonymous anonymousMsg anonymousModel
+  ( LoggedInMsg _            , LoggedIn token )           -> ( LoggedIn token, Cmd.none )
+  _                                                       -> ( model, Cmd.none )
 
 -- SUBSCRIPTIONS
 
@@ -50,5 +56,5 @@ subscriptions _ =
 
 view : Model -> Html Msg
 view model = case model of
-  Anonymous anonymousModel -> Anonymous.view anonymousModel
+  Anonymous anonymousModel -> Html.map AnonymousMsg ( Anonymous.view anonymousModel )
   LoggedIn _               -> div [] []
