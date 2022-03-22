@@ -23,6 +23,14 @@ type alias Content =
   , tags    : List Tag
   }
 
+type alias Model =
+  { token : Token
+  , contents : List Content
+  }
+
+init : Token -> Model
+init token = Model token []
+
 -- UPDATE
 
 type Msg
@@ -48,7 +56,7 @@ retrieveContents token tags = Http.request
   , headers = [ header "Authorization" ( String.append "Bearer " token ) ]
   , url     = Url.toString ( retrieveUrl tags )
   , body    = emptyBody
-  , expect  = expectJson handleContentsResponse ( list contentDecoder )
+  , expect  = expectJson handleContentsResponse ( list wrappedContentDecoder )
   , timeout = Nothing
   , tracker = Nothing
   }
@@ -65,4 +73,8 @@ tagDecoder = map Tag
 contentDecoder : Decoder Content
 contentDecoder = map2 Content
   ( field "message" string )
-  ( field "tags"    ( list tagDecoder ))
+  ( field "tags"    ( list ( Json.Decode.map Tag string )))
+
+wrappedContentDecoder : Decoder Content
+wrappedContentDecoder = Json.Decode.map identity
+  ( field "content" contentDecoder )
