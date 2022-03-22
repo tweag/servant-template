@@ -18,7 +18,8 @@ import GHC.Generics (Generic)
 import Prelude hiding (getContents)
 
 -- servant
-import Servant.API (type (:>), Get, Post, JSON, ReqBody)
+-- servant
+import Servant.API (type (:>), Get, Post, JSON, ReqBody, QueryParams)
 import Servant.API.Generic ((:-))
 
 -- servant-openapi3
@@ -32,14 +33,14 @@ import Servant.Server.Generic (AsServer)
 -- The main endpoints of the application API
 data TaggerAPI mode = TaggerAPI
   { addContent  :: mode :- "add-content"  :> ReqBody '[JSON] (Content Tag) :> Post '[JSON] (Id (Content Tag))    -- ^ Add a new 'Content'
-  , getContents :: mode :- "get-contents" :> ReqBody '[JSON] [Tag]         :> Get  '[JSON] [Owned (Content Tag)] -- ^ Retrieve all the 'User' 'Content's indexed by the provided 'Tag's
+  , getContents :: mode :- "get-contents" :> QueryParams "tag" Tag         :> Get  '[JSON] [Owned (Content Tag)] -- ^ Retrieve all the 'User' 'Content's indexed by the provided 'Tag's
   }
   deriving stock Generic
 
 instance HasOpenApi TaggerAPI where
   toOpenApi _
     =  toOpenApi (Proxy :: Proxy ("add-content"  :> ReqBody '[JSON] (Content Tag) :> Post '[JSON] (Id (Content Tag))))
-    <> toOpenApi (Proxy :: Proxy ("get-contents" :> ReqBody '[JSON] [Tag]         :> Get  '[JSON] [Owned (Content Tag)]))
+    <> toOpenApi (Proxy :: Proxy ("get-contents" :> QueryParams "tag" Tag        :> Get  '[JSON] [Owned (Content Tag)]))
 
 taggerServer :: Id User -> ContentRepository Handler -> TaggerAPI AsServer
 taggerServer userId contentRepository = TaggerAPI
