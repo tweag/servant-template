@@ -65,7 +65,7 @@ main = do
             -- we pass in the required services
             = app services
             -- manage CORS for browser interaction
-            & cors (const . Just $ simpleCorsResourcePolicy {corsRequestHeaders = ["Content-Type"]})
+            & cors (const . Just $ simpleCorsResourcePolicy {corsRequestHeaders = ["Authorization", "Content-Type"]})
             -- we setup logging for the incoming requests
             & logStdoutDev
       -- eventually, we run the application on the port
