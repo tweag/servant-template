@@ -37,7 +37,7 @@ type Msg
 
 updateAnonymous : Anonymous.Msg -> Anonymous.Model -> ( Model, Cmd Msg )
 updateAnonymous msg anonymousModel = case msg of
-  Login ( Succeeded token ) -> ( LoggedIn token, Cmd.none )
+  Login ( Succeeded token ) -> ( LoggedIn token, Cmd.map LoggedInMsg ( retrieveContents token [] ) )
   _                         -> Tuple.mapBoth Anonymous ( Cmd.map AnonymousMsg ) (Anonymous.update msg anonymousModel)
 
 update : Msg -> Model -> ( Model, Cmd Msg )
