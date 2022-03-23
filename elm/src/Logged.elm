@@ -58,7 +58,8 @@ viewContent content = tr []
 
 view : Model -> Html msg
 view model = div []
-  [ table []
+  [ h2 [] [ text "Contents" ]
+  , table []
     [ thead []
       [ tr []
         [ th [] [ text "content" ]
@@ -67,6 +68,7 @@ view model = div []
       ]
     , tbody [] ( List.map viewContent model.contents )
     ]
+  , h2 [] [ text "Add content" ]
   ]
 
 -- HTTP
