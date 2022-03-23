@@ -1,9 +1,11 @@
 module Logged exposing (..)
 
 import Anonymous exposing (Token)
+import Helper exposing (viewInput)
 
 -- elm/html
 import Html exposing (..)
+import Html.Events exposing (..)
 
 -- elm/http
 import Http exposing (..)
@@ -29,21 +31,32 @@ type alias Content =
 type alias Model =
   { token : Token
   , contents : List Content
+  , newContent : String
+  , newTag : String
+  , newTags : List Tag
   }
 
 init : Token -> Model
-init token = Model token []
+init token = Model token [] "" "" []
 
 -- UPDATE
 
 type Msg
   = FetchSuccessful (List Content)
   | FetchFailed Http.Error
+  | NewContent String
+  | NewTag String
+  | SubmitTag
+  | SubmitContent
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model = case msg of
   FetchSuccessful contents -> ( { model | contents = contents }, Cmd.none )
   FetchFailed _            -> ( model, Cmd.none )
+  NewContent newContent    -> ( { model | newContent = newContent }, Cmd.none )
+  NewTag newTag            -> ( { model | newTag = newTag }, Cmd.none )
+  SubmitTag                -> ( { model | newTags = ( Tag model.newTag ) :: model.newTags, newTag = "" }, Cmd.none )
+  SubmitContent            -> ( model, Cmd.none )
 
 -- VIEW
 
@@ -56,7 +69,7 @@ viewContent content = tr []
   , td [] ( List.map viewTag content.tags )
   ]
 
-view : Model -> Html msg
+view : Model -> Html Msg
 view model = div []
   [ h2 [] [ text "Contents" ]
   , table []
@@ -68,7 +81,18 @@ view model = div []
       ]
     , tbody [] ( List.map viewContent model.contents )
     ]
-  , h2 [] [ text "Add content" ]
+  , div []
+    [ h2 [] [ text "Add content" ]
+    , viewInput "text" "Content" model.newContent NewContent
+    , div []
+      [ h3 [] [ text "Tags" ]
+      , div []
+        ( List.map viewTag model.newTags )
+      , viewInput "text" "New tag" model.newTag NewTag
+      , button [ onClick SubmitTag ] [ text "Add tag" ]
+      ]
+    , button [ onClick SubmitContent ] [ text "Add content" ]
+    ]
   ]
 
 -- HTTP
