@@ -61,5 +61,5 @@ view model = div []
   [ h1 [] [ text "Tagger" ]
   , case model of
     Anonymous anonymousModel -> Html.map AnonymousMsg ( Anonymous.view anonymousModel )
-    LoggedIn logged          -> Logged.view logged
+    LoggedIn logged          -> Html.map LoggedInMsg ( Logged.view logged )
   ]
