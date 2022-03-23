@@ -1,14 +1,16 @@
 module Main exposing (..)
 
 import Anonymous exposing (..)
+import Credentials exposing (Submit(..))
+import Credentials exposing (SubmitMessage(..))
 import Logged exposing (..)
 
 -- elm/browser
 import Browser exposing (..)
 
+-- elm/html
 import Html exposing (..)
-import Credentials exposing (Submit(..))
-import Credentials exposing (SubmitMessage(..))
+import Tuple exposing (mapBoth)
 
 -- MAIN
 
@@ -43,7 +45,7 @@ updateAnonymous msg anonymousModel = case msg of
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model = case ( msg, model ) of
   ( AnonymousMsg anonymousMsg, Anonymous anonymousModel ) -> updateAnonymous anonymousMsg anonymousModel
-  ( LoggedInMsg _            , LoggedIn token )           -> ( LoggedIn token, Cmd.none )
+  ( LoggedInMsg loggedMsg    , LoggedIn logged )          -> mapBoth LoggedIn ( Cmd.map LoggedInMsg ) ( Logged.update loggedMsg logged )
   _                                                       -> ( model, Cmd.none )
 
 -- SUBSCRIPTIONS
@@ -57,4 +59,4 @@ subscriptions _ =
 view : Model -> Html Msg
 view model = case model of
   Anonymous anonymousModel -> Html.map AnonymousMsg ( Anonymous.view anonymousModel )
-  LoggedIn _               -> div [] []
+  LoggedIn logged          -> Logged.view logged
