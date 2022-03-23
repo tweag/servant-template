@@ -63,8 +63,7 @@ update msg model =
 
 view : Model -> Html Msg
 view model = div []
-  [ h1 [] [ text "Tagger" ]
-  , div []
+  [ div []
     [ h2 [] [ text "Register User" ]
     , credentialsForm RegisterData Register model.register
     ]
