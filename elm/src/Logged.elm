@@ -2,6 +2,9 @@ module Logged exposing (..)
 
 import Anonymous exposing (Token)
 
+-- elm/html
+import Html exposing (..)
+
 -- elm/http
 import Http exposing (..)
 
@@ -34,9 +37,37 @@ init token = Model token []
 -- UPDATE
 
 type Msg
-  = Fetch
-  | FetchSuccessful (List Content)
+  = FetchSuccessful (List Content)
   | FetchFailed Http.Error
+
+update : Msg -> Model -> ( Model, Cmd Msg )
+update msg model = case msg of
+  FetchSuccessful contents -> ( { model | contents = contents }, Cmd.none )
+  FetchFailed _            -> ( model, Cmd.none )
+
+-- VIEW
+
+viewTag : Tag -> Html msg
+viewTag tag = div [] [ text tag.name ]
+
+viewContent : Content -> Html msg
+viewContent content = tr []
+  [ td [] [ text content.message ]
+  , td [] ( List.map viewTag content.tags )
+  ]
+
+view : Model -> Html msg
+view model = div []
+  [ table []
+    [ thead []
+      [ tr []
+        [ th [] [ text "content" ]
+        , th [] [ text "tags" ]
+        ]
+      ]
+    , tbody [] ( List.map viewContent model.contents )
+    ]
+  ]
 
 -- HTTP
 
@@ -53,7 +84,7 @@ retrieveUrl tags =
 retrieveContents : Token -> List Tag -> Cmd Msg
 retrieveContents token tags = Http.request
   { method  = "GET"
-  , headers = [ header "Authorization" ( String.append "Bearer " token ) ]
+  , headers = [ Http.header "Authorization" ( String.append "Bearer " token ) ]
   , url     = Url.toString ( retrieveUrl tags )
   , body    = emptyBody
   , expect  = expectJson handleContentsResponse ( list wrappedContentDecoder )
@@ -67,7 +98,7 @@ handleContentsResponse result = case result of
   Err error -> FetchFailed error
 
 tagDecoder : Decoder Tag
-tagDecoder = map Tag
+tagDecoder = Json.Decode.map Tag
   ( field "name" string )
 
 contentDecoder : Decoder Content
