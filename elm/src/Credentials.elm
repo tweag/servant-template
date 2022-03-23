@@ -1,5 +1,7 @@
 module Credentials exposing (..)
 
+import Helper exposing (..)
+
 -- elm/html
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -64,10 +66,6 @@ credentialsForm liftModel liftMessage credentials = div []
     ])
   , button [ onClick (liftMessage Submit) ] [ text "Submit" ]
   ]
-
-viewInput : String -> String -> String -> (String -> msg) -> Html msg
-viewInput t p v toMsg =
-  input [ type_ t, placeholder p, Html.Attributes.value v, onInput toMsg ] []
 
 -- HTTP
 
