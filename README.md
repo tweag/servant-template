@@ -98,3 +98,9 @@ stack haddock
 ### OpenApi documentation
 
 You can access the OpenAPI documentation just by visiting the `docs` endpoint
+
+## Frontend
+
+This repository contains also a client [Elm](https://elm-lang.org/) application to interact in a human-friendly way with the Tagger api.
+
+You can find more details in [elm/README.md](elm/README.md).
