@@ -1,7 +1,7 @@
 module Logged exposing (..)
 
-import Anonymous exposing (Token)
-import Helper exposing (viewInput)
+import Anonymous exposing (..)
+import Helper exposing (..)
 
 -- elm/html
 import Html exposing (..)
@@ -16,7 +16,7 @@ import Json.Encode exposing (..)
 
 -- elm/url
 import Url exposing (..)
-import Url.Builder exposing (toQuery)
+import Url.Builder exposing (..)
 
 -- MODEL
 
@@ -32,13 +32,15 @@ type alias Content =
 type alias Model =
   { token : Token
   , contents : List Content
+  , filters : List Tag
+  , newFilter : String
   , newContent : String
   , newTag : String
   , newTags : List Tag
   }
 
 init : Token -> Model
-init token = Model token [] "" "" []
+init token = Model token [] [] "" "" "" []
 
 -- UPDATE
 
@@ -46,6 +48,8 @@ type Msg
   = FetchSuccessful (List Content)
   | FetchFailed Http.Error
   | NewContent String
+  | NewFilter String
+  | SubmitFilter
   | NewTag String
   | SubmitTag
   | SubmitContent
@@ -58,6 +62,12 @@ update msg model = case msg of
   FetchFailed _            -> ( model, Cmd.none )
   NewContent newContent    -> ( { model | newContent = newContent }, Cmd.none )
   NewTag newTag            -> ( { model | newTag = newTag }, Cmd.none )
+  NewFilter newFilter      -> ( { model | newFilter = newFilter }, Cmd.none )
+  SubmitFilter             ->
+    let
+      filters = ( Tag model.newFilter ) :: model.filters
+    in
+      ( { model | filters = filters, newFilter = "" }, retrieveContents model.token filters )
   SubmitTag                -> ( { model | newTags = ( Tag model.newTag ) :: model.newTags, newTag = "" }, Cmd.none )
   SubmitContent            -> ( model, addContent model.token ( Content model.newContent model.newTags ) )
   SubmitSuccessful content -> ( { model | contents = content :: model.contents }, Cmd.none )
@@ -77,14 +87,21 @@ viewContent content = tr []
 view : Model -> Html Msg
 view model = div []
   [ h2 [] [ text "Contents" ]
-  , table []
-    [ thead []
-      [ tr []
-        [ th [] [ text "content" ]
-        , th [] [ text "tags" ]
+  , div []
+    [ h3 [] [ text "Filters" ]
+    , div []
+      ( List.map viewTag model.filters )
+    , viewInput "text" "Filter by tag" model.newFilter NewFilter
+    , button [ onClick SubmitFilter ] [ text "Add filter" ]
+    , table []
+      [ thead []
+        [ tr []
+          [ th [] [ text "content" ]
+          , th [] [ text "tags" ]
+          ]
         ]
+      , tbody [] ( List.map viewContent model.contents )
       ]
-    , tbody [] ( List.map viewContent model.contents )
     ]
   , div []
     [ h2 [] [ text "Add content" ]
@@ -102,15 +119,12 @@ view model = div []
 
 -- HTTP
 
-retrieveUrl : List Tag -> Url
-retrieveUrl tags =
-  { protocol = Http
-  , host     = "localhost"
-  , port_    = Just 8080
-  , path     = "/get-contents"
-  , query    = Just ( toQuery ( List.map ( \{name} -> Url.Builder.string "tag" name) tags ) )
-  , fragment = Nothing
-  }
+retrieveUrl : List Tag -> String
+retrieveUrl tags = Url.Builder.custom
+  ( CrossOrigin "http://localhost:8080" )
+  [ "get-contents" ]
+  ( List.map ( \tag -> Url.Builder.string "tag" tag.name ) tags )
+  Nothing
 
 authorization : Token -> Header
 authorization token = Http.header "Authorization" ( String.append "Bearer " token )
@@ -119,7 +133,7 @@ retrieveContents : Token -> List Tag -> Cmd Msg
 retrieveContents token tags = Http.request
   { method  = "GET"
   , headers = [ authorization token ]
-  , url     = Url.toString ( retrieveUrl tags )
+  , url     = retrieveUrl tags
   , body    = emptyBody
   , expect  = expectJson handleContentsResponse ( Json.Decode.list wrappedContentDecoder )
   , timeout = Nothing
