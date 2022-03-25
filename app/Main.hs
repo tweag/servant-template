@@ -9,7 +9,7 @@ import Api.Config (api, apiPort, configCodec, connectionString, database, getPor
 import InputOptions (inputOptionsParser, InputOptions (configPath, jwkPath))
 
 -- base
-import Control.Exception (catch, SomeException)
+import Control.Exception (catch)
 import Data.Maybe (fromMaybe)
 import Prelude hiding (writeFile)
 
@@ -63,7 +63,7 @@ main = do
 jwtKey :: FilePath -> IO JWK
 jwtKey path = do
   -- try to retrieve the JWK from file
-  catch (readKey path) $ \(_ :: SomeException) -> do
+  catch (readKey path) $ \(_ :: IOError) -> do
     -- if the file does not exist or does not contain a valid key, we generate one
     key <- generateSecret
     -- and we store it
