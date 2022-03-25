@@ -7,8 +7,9 @@ A modern template for a [Servant](https://haskell-servant.github.io/).
 The projects aims to provide a template for a Servant project featuring:
 
 - database interaction with [rel8](https://hackage.haskell.org/package/rel8);
-- authentication with [servant-auth](https://hackage.haskell.org/package/servant-auth);
-- logging on an external server such as [Sentry](https://hackage.haskell.org/package/servant-auth);
+- JWT authentication with [servant-auth](https://hackage.haskell.org/package/servant-auth);
+- loggin with [co-log-core](https://hackage.haskell.org/package/co-log-core);
+- TOML configuration using [tomland](https://hackage.haskell.org/package/tomland);
 - first class records in Servant API using [NamedRecords](https://hackage.haskell.org/package/servant-0.19/changelog).
 
 ## The application
@@ -16,6 +17,10 @@ The projects aims to provide a template for a Servant project featuring:
 The application allows users to categorify contents by tags. Any content can have many tags and any tag could be used for several contents.
 
 It allows also to retrieve contents by a set of tags.
+
+### Architecture
+
+A more in depth description of the architecture of the application can be found in [ARCHITECTURE.md].
 
 ### Configuration
 
@@ -75,6 +80,14 @@ In the root of the project you can find a `docker-compose.yml` file which provid
 
 You can initialise the schema of the database by running the `schema.sql` which is also provided.
 
-## Openapi documentation
+## Documentation
+
+You can generate the documentation of the project using
+
+```
+stack haddock
+```
+
+### OpenApi documentation
 
 You can access the OpenAPI documentation just by visiting the `docs` endpoint
