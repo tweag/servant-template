@@ -25,9 +25,9 @@ import Url.Builder exposing (..)
 type alias Model =
   { token : Token
   , contents : List Content
-  , filters : Tags
+  , filters : Tags.Model
   , newContent : String
-  , newTags : Tags
+  , newTags : Tags.Model
   }
 
 init : Token -> Model
@@ -47,20 +47,14 @@ type Msg
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model = case msg of
-  FetchSuccessful contents       -> ( { model | contents = contents }, Cmd.none )
-  FetchFailed _                  -> ( model, Cmd.none )
-  NewContent newContent          -> ( { model | newContent = newContent }, Cmd.none )
-  NewFilter (Tags.NewTag newTag) -> ( { model | filters = Tags newTag model.filters.tags }, Cmd.none )
-  NewFilter Submit               ->
-    let
-      filters = ( Tag model.filters.newTag ) :: model.filters.tags
-    in
-      ( { model | filters = Tags "" filters }, retrieveContents model.token filters )
-  NewTag (Tags.NewTag newTag)    -> ( { model | newTags = Tags newTag model.newTags.tags }, Cmd.none )
-  NewTag Submit                  -> ( { model | newTags = Tags "" ( ( Tag model.newTags.newTag ) :: model.newTags.tags) }, Cmd.none )
-  SubmitContent                  -> ( model, addContent model.token ( Content model.newContent model.newTags.tags ) )
-  SubmitSuccessful content       -> ( { model | contents = content :: model.contents }, Cmd.none )
-  SubmitFailed                   -> ( model, Cmd.none )
+  FetchSuccessful contents -> ( { model | contents = contents }, Cmd.none )
+  FetchFailed _            -> ( model, Cmd.none )
+  NewContent newContent    -> ( { model | newContent = newContent }, Cmd.none )
+  NewFilter filterMsg      -> Tuple.mapFirst ( \filters -> { model | filters = filters } ) ( Tags.update ( retrieveContents model.token ) filterMsg model.filters )
+  NewTag tagMsg            -> Tuple.mapFirst ( \newTags -> { model | newTags = newTags } ) ( Tags.update ( always ( Cmd.none ) ) tagMsg model.newTags )
+  SubmitContent            -> ( model, addContent model.token ( Content model.newContent model.newTags.tags ) )
+  SubmitSuccessful content -> ( { model | contents = content :: model.contents }, Cmd.none )
+  SubmitFailed             -> ( model, Cmd.none )
 
 -- VIEW
 
