@@ -2,6 +2,8 @@ module Logged exposing (..)
 
 import Anonymous exposing (..)
 import Helper exposing (..)
+import LoggedModel exposing (..)
+import Tags exposing (..)
 
 -- elm/html
 import Html exposing (..)
@@ -20,27 +22,16 @@ import Url.Builder exposing (..)
 
 -- MODEL
 
-type alias Tag =
-  { name : String
-  }
-
-type alias Content =
-  { message : String
-  , tags    : List Tag
-  }
-
 type alias Model =
   { token : Token
   , contents : List Content
-  , filters : List Tag
-  , newFilter : String
+  , filters : Tags
   , newContent : String
-  , newTag : String
-  , newTags : List Tag
+  , newTags : Tags
   }
 
 init : Token -> Model
-init token = Model token [] [] "" "" "" []
+init token = Model token [] Tags.init "" Tags.init
 
 -- UPDATE
 
@@ -61,15 +52,15 @@ update msg model = case msg of
   FetchSuccessful contents -> ( { model | contents = contents }, Cmd.none )
   FetchFailed _            -> ( model, Cmd.none )
   NewContent newContent    -> ( { model | newContent = newContent }, Cmd.none )
-  NewTag newTag            -> ( { model | newTag = newTag }, Cmd.none )
-  NewFilter newFilter      -> ( { model | newFilter = newFilter }, Cmd.none )
+  NewTag newTag            -> ( { model | newTags = Tags newTag model.newTags.tags }, Cmd.none )
+  NewFilter newFilter      -> ( { model | filters = Tags newFilter model.filters.tags }, Cmd.none )
   SubmitFilter             ->
     let
-      filters = ( Tag model.newFilter ) :: model.filters
+      filters = ( Tag model.filters.newTag ) :: model.filters.tags
     in
-      ( { model | filters = filters, newFilter = "" }, retrieveContents model.token filters )
-  SubmitTag                -> ( { model | newTags = ( Tag model.newTag ) :: model.newTags, newTag = "" }, Cmd.none )
-  SubmitContent            -> ( model, addContent model.token ( Content model.newContent model.newTags ) )
+      ( { model | filters = Tags "" filters }, retrieveContents model.token filters )
+  SubmitTag                -> ( { model | newTags = Tags "" ( ( Tag model.newTags.newTag ) :: model.newTags.tags) }, Cmd.none )
+  SubmitContent            -> ( model, addContent model.token ( Content model.newContent model.newTags.tags ) )
   SubmitSuccessful content -> ( { model | contents = content :: model.contents }, Cmd.none )
   SubmitFailed             -> ( model, Cmd.none )
 
@@ -90,8 +81,8 @@ view model = div []
   , div []
     [ h3 [] [ text "Filters" ]
     , div []
-      ( List.map viewTag model.filters )
-    , viewInput "text" "Filter by tag" model.newFilter NewFilter
+      ( List.map viewTag model.filters.tags )
+    , viewInput "text" "Filter by tag" model.filters.newTag NewFilter
     , button [ onClick SubmitFilter ] [ text "Add filter" ]
     , table []
       [ thead []
@@ -109,8 +100,8 @@ view model = div []
     , div []
       [ h3 [] [ text "Tags" ]
       , div []
-        ( List.map viewTag model.newTags )
-      , viewInput "text" "New tag" model.newTag NewTag
+        ( List.map viewTag model.newTags.tags )
+      , viewInput "text" "New tag" model.newTags.newTag NewTag
       , button [ onClick SubmitTag ] [ text "Add tag" ]
       ]
     , button [ onClick SubmitContent ] [ text "Add content" ]
