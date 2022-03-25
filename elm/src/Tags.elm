@@ -11,3 +11,9 @@ type alias Tags =
 
 init : Tags
 init = Tags "" []
+
+-- UPDATE
+
+type Msg
+  = NewTag String
+  | Submit

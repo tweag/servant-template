@@ -39,30 +39,28 @@ type Msg
   = FetchSuccessful (List Content)
   | FetchFailed Http.Error
   | NewContent String
-  | NewFilter String
-  | SubmitFilter
-  | NewTag String
-  | SubmitTag
+  | NewFilter Tags.Msg
+  | NewTag Tags.Msg
   | SubmitContent
   | SubmitSuccessful Content
   | SubmitFailed
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model = case msg of
-  FetchSuccessful contents -> ( { model | contents = contents }, Cmd.none )
-  FetchFailed _            -> ( model, Cmd.none )
-  NewContent newContent    -> ( { model | newContent = newContent }, Cmd.none )
-  NewTag newTag            -> ( { model | newTags = Tags newTag model.newTags.tags }, Cmd.none )
-  NewFilter newFilter      -> ( { model | filters = Tags newFilter model.filters.tags }, Cmd.none )
-  SubmitFilter             ->
+  FetchSuccessful contents       -> ( { model | contents = contents }, Cmd.none )
+  FetchFailed _                  -> ( model, Cmd.none )
+  NewContent newContent          -> ( { model | newContent = newContent }, Cmd.none )
+  NewFilter (Tags.NewTag newTag) -> ( { model | filters = Tags newTag model.filters.tags }, Cmd.none )
+  NewFilter Submit               ->
     let
       filters = ( Tag model.filters.newTag ) :: model.filters.tags
     in
       ( { model | filters = Tags "" filters }, retrieveContents model.token filters )
-  SubmitTag                -> ( { model | newTags = Tags "" ( ( Tag model.newTags.newTag ) :: model.newTags.tags) }, Cmd.none )
-  SubmitContent            -> ( model, addContent model.token ( Content model.newContent model.newTags.tags ) )
-  SubmitSuccessful content -> ( { model | contents = content :: model.contents }, Cmd.none )
-  SubmitFailed             -> ( model, Cmd.none )
+  NewTag (Tags.NewTag newTag)    -> ( { model | newTags = Tags newTag model.newTags.tags }, Cmd.none )
+  NewTag Submit                  -> ( { model | newTags = Tags "" ( ( Tag model.newTags.newTag ) :: model.newTags.tags) }, Cmd.none )
+  SubmitContent                  -> ( model, addContent model.token ( Content model.newContent model.newTags.tags ) )
+  SubmitSuccessful content       -> ( { model | contents = content :: model.contents }, Cmd.none )
+  SubmitFailed                   -> ( model, Cmd.none )
 
 -- VIEW
 
@@ -82,8 +80,8 @@ view model = div []
     [ h3 [] [ text "Filters" ]
     , div []
       ( List.map viewTag model.filters.tags )
-    , viewInput "text" "Filter by tag" model.filters.newTag NewFilter
-    , button [ onClick SubmitFilter ] [ text "Add filter" ]
+    , viewInput "text" "Filter by tag" model.filters.newTag ( NewFilter << Tags.NewTag )
+    , button [ onClick ( NewFilter Submit ) ] [ text "Add filter" ]
     , table []
       [ thead []
         [ tr []
@@ -101,8 +99,8 @@ view model = div []
       [ h3 [] [ text "Tags" ]
       , div []
         ( List.map viewTag model.newTags.tags )
-      , viewInput "text" "New tag" model.newTags.newTag NewTag
-      , button [ onClick SubmitTag ] [ text "Add tag" ]
+      , viewInput "text" "New tag" model.newTags.newTag ( NewTag << Tags.NewTag )
+      , button [ onClick ( NewTag Submit ) ] [ text "Add tag" ]
       ]
     , button [ onClick SubmitContent ] [ text "Add content" ]
     ]
