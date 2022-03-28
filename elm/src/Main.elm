@@ -4,6 +4,7 @@ import Anonymous exposing (..)
 import Credentials exposing (Submit(..))
 import Credentials exposing (SubmitMessage(..))
 import Logged exposing (..)
+import Style exposing (..)
 
 -- elm/browser
 import Browser exposing (..)
@@ -12,12 +13,15 @@ import Browser exposing (..)
 import Html exposing (..)
 import Tuple exposing (mapBoth)
 
+-- mgriffith/elm-ui
+import Element exposing (..)
+
 -- MAIN
 
 main : Program () Model Msg
 main = element
   { init = init
-  , view = view
+  , view = Element.layout [] << view
   , update = update
   , subscriptions = subscriptions
   }
@@ -56,10 +60,17 @@ subscriptions _ =
 
 -- VIEW
 
-view : Model -> Html Msg
-view model = div []
-  [ h1 [] [ text "Tagger" ]
+view : Model -> Element Msg
+view model = Element.column
+  [ Element.width fill
+  ]
+  [ Element.el
+    [ titleFont
+    , bigPadding
+    , centerX
+    ]
+    ( Element.text "Tagger" )
   , case model of
-    Anonymous anonymousModel -> Html.map AnonymousMsg ( Anonymous.view anonymousModel )
-    LoggedIn logged          -> Html.map LoggedInMsg ( Logged.view logged )
+    Anonymous anonymousModel -> Element.map AnonymousMsg ( Anonymous.view anonymousModel )
+    LoggedIn logged          -> Element.html ( Html.map LoggedInMsg ( Logged.view logged ) )
   ]
