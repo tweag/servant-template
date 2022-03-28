@@ -8,6 +8,9 @@ import Html exposing (..)
 -- elm/json
 import Json.Decode exposing (..)
 
+-- mgriffith/elm-ui
+import Element exposing (..)
+
 -- MODEL
 
 type alias UserId = String
@@ -15,8 +18,8 @@ type alias UserId = String
 type alias Token = String
 
 type alias Model =
-  { register : Credentials
-  , login    : Credentials
+  { register : Credentials.Model
+  , login    : Credentials.Model
   , registerSubmit : Submit UserId
   , loginSubmit : Submit Token
   }
@@ -61,16 +64,10 @@ update msg model =
 
 -- VIEW
 
-view : Model -> Html Msg
-view model = div []
-  [ div []
-    [ h2 [] [ text "Register User" ]
-    , credentialsForm RegisterData Register model.register
-    ]
-  , div []
-    [ h2 [] [ text "Login" ]
-    , credentialsForm LoginData Login model.login
-    ]
+view : Model -> Element Msg
+view model = Element.row [ Element.width fill ]
+  [ Credentials.view "Register User" RegisterData Register model.register
+  , Credentials.view "Login" LoginData Login model.login
   ]
 
 -- HTTP
