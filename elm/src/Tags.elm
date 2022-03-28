@@ -2,10 +2,15 @@ module Tags exposing (..)
 
 import Helper exposing (..)
 import LoggedModel exposing (..)
+import Style exposing (..)
 
--- elm/html
-import Html exposing (..)
-import Html.Events exposing (..)
+-- mgriffith/elm-ui
+import Element exposing (..)
+import Element.Background exposing (..)
+import Element.Border exposing (..)
+import Element.Events exposing (..)
+import Element.Input exposing (placeholder)
+import Element.Input exposing (labelAbove)
 
 -- MODEL
 
@@ -43,20 +48,33 @@ removeTag id tags = remove ( Tag id ) tags
 
 -- VIEW
 
-removable : String -> Html Msg -> Html Msg
-removable id html = div []
-  [ html
-  , div [ onClick ( Remove id ) ] [ text "x" ]
+removable : String -> Element Msg -> Element Msg
+removable id element = row []
+  [ element
+  , Element.el [ onClick ( Remove id ) ] ( Element.text "x" )
   ]
 
-viewRemovableTag : ( Tag -> Html Msg ) -> Tag -> Html Msg
+viewRemovableTag : ( Tag -> Element Msg ) -> Tag -> Element Msg
 viewRemovableTag viewTag tag = removable tag.name ( viewTag tag )
 
-view : ( Tag -> Html Msg ) -> String -> String -> String -> Model -> Html Msg
-view viewTag header filterText submitText model = div []
-  [ h3 [] [ text header ]
-  , div []
-    ( List.map ( viewRemovableTag viewTag ) model.tags )
-  , viewInput "text" filterText model.newTag NewTag
-  , button [ onClick Submit ] [ text submitText ]
+view : ( Tag -> Element Msg ) -> String -> String -> Model -> Element Msg
+view viewTag label submitText model = column []
+  [ Element.row [] ( List.map (viewRemovableTag viewTag) model.tags )
+  , Element.el [] ( Element.Input.text []
+    { onChange    = NewTag
+    , text        = model.newTag
+    , placeholder = Just ( placeholder [] ( Element.text label ) )
+    , label       = labelAbove [] ( Element.text label )
+    } )
+  , Element.Input.button -- TODO factor out button
+    [ Element.padding 5
+    , Element.Background.color blue
+    , Element.Border.color purple
+    , Element.Border.width 2
+    , Element.Border.rounded 10
+    , Element.focused [ Element.Background.color purple ]
+    ]
+    { onPress = Just Submit
+    , label   = Element.text "Submit"
+    }
   ]

@@ -20,6 +20,9 @@ import Json.Encode exposing (..)
 import Url exposing (..)
 import Url.Builder exposing (..)
 
+-- mgriffith/elm-ui
+import Element exposing (..)
+
 -- MODEL
 
 type alias Model =
@@ -58,35 +61,35 @@ update msg model = case msg of
 
 -- VIEW
 
-viewTag : Tag -> Html msg
-viewTag tag = div [] [ text tag.name ]
+viewTag : Tag -> Element msg
+viewTag tag = Element.el [] ( Element.text tag.name )
 
 viewContent : Content -> Html msg
 viewContent content = tr []
-  [ td [] [ text content.message ]
-  , td [] ( List.map viewTag content.tags )
+  [ td [] [ Html.text content.message ]
+  , td [] ( List.map ( viewTag >> Element.layout [] ) content.tags )
   ]
 
 view : Model -> Html Msg
 view model = div []
-  [ h2 [] [ text "Contents" ]
+  [ h2 [] [ Html.text "Contents" ]
   , div []
-    [ Html.map NewFilter ( Tags.view viewTag "Filters" "Filter by tag" "Add filter" model.filters )
-    , table []
+    [ Html.map NewFilter ( Element.layout [] ( Tags.view viewTag "Filter by tag" "Add filter" model.filters ) )
+    , Html.table []
       [ thead []
         [ tr []
-          [ th [] [ text "content" ]
-          , th [] [ text "tags" ]
+          [ th [] [ Html.text "content" ]
+          , th [] [ Html.text "tags" ]
           ]
         ]
       , tbody [] ( List.map viewContent model.contents )
       ]
     ]
   , div []
-    [ h2 [] [ text "Add content" ]
+    [ h2 [] [ Html.text "Add content" ]
     , viewInput "text" "Content" model.newContent NewContent
-    , Html.map NewTag ( Tags.view viewTag "Tags" "New tag" "Add tag" model.newTags )
-    , button [ onClick SubmitContent ] [ text "Add content" ]
+    , Html.map NewTag ( Element.layout [] ( Tags.view viewTag "New tag" "Add tag" model.newTags ) )
+    , button [ onClick SubmitContent ] [ Html.text "Add content" ]
     ]
   ]
 
