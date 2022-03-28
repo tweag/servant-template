@@ -71,11 +71,7 @@ view : Model -> Html Msg
 view model = div []
   [ h2 [] [ text "Contents" ]
   , div []
-    [ h3 [] [ text "Filters" ]
-    , div []
-      ( List.map viewTag model.filters.tags )
-    , viewInput "text" "Filter by tag" model.filters.newTag ( NewFilter << Tags.NewTag )
-    , button [ onClick ( NewFilter Submit ) ] [ text "Add filter" ]
+    [ Html.map NewFilter ( Tags.view viewTag "Filters" "Filter by tag" "Add filter" model.filters )
     , table []
       [ thead []
         [ tr []
@@ -89,13 +85,7 @@ view model = div []
   , div []
     [ h2 [] [ text "Add content" ]
     , viewInput "text" "Content" model.newContent NewContent
-    , div []
-      [ h3 [] [ text "Tags" ]
-      , div []
-        ( List.map viewTag model.newTags.tags )
-      , viewInput "text" "New tag" model.newTags.newTag ( NewTag << Tags.NewTag )
-      , button [ onClick ( NewTag Submit ) ] [ text "Add tag" ]
-      ]
+    , Html.map NewTag ( Tags.view viewTag "Tags" "New tag" "Add tag" model.newTags )
     , button [ onClick SubmitContent ] [ text "Add content" ]
     ]
   ]
