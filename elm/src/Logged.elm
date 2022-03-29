@@ -1,13 +1,9 @@
 module Logged exposing (..)
 
 import Anonymous exposing (..)
-import Helper exposing (..)
+import Component exposing (..)
 import LoggedModel exposing (..)
 import Tags exposing (..)
-
--- elm/html
-import Html exposing (..)
-import Html.Events exposing (..)
 
 -- elm/http
 import Http exposing (..)
@@ -20,8 +16,9 @@ import Json.Encode exposing (..)
 import Url exposing (..)
 import Url.Builder exposing (..)
 
--- mgriffith/elm-ui
+-- mdgriffith/elm-ui
 import Element exposing (..)
+import Element.Input exposing (..)
 
 -- MODEL
 
@@ -64,32 +61,34 @@ update msg model = case msg of
 viewTag : Tag -> Element msg
 viewTag tag = Element.el [] ( Element.text tag.name )
 
-viewContent : Content -> Html msg
-viewContent content = tr []
-  [ td [] [ Html.text content.message ]
-  , td [] ( List.map ( viewTag >> Element.layout [] ) content.tags )
-  ]
-
-view : Model -> Html Msg
-view model = div []
-  [ h2 [] [ Html.text "Contents" ]
-  , div []
-    [ Html.map NewFilter ( Element.layout [] ( Tags.view viewTag "Filter by tag" "Add filter" model.filters ) )
-    , Html.table []
-      [ thead []
-        [ tr []
-          [ th [] [ Html.text "content" ]
-          , th [] [ Html.text "tags" ]
-          ]
+view : Model -> Element Msg
+view model = row []
+  [ column []
+    [ el [] ( Element.text "Contents" )
+    , Element.map NewFilter ( Tags.view viewTag "Filter by tag" "Add filter" model.filters )
+    , Element.table []
+      { data = model.contents
+      , columns =
+        [ { header = Element.text "content"
+          , width = fill
+          , view = \content -> Element.text content.message
+          }
+        , { header = Element.text "tags"
+          , width = fill
+          , view = \content -> row [] ( List.map viewTag content.tags ) }
         ]
-      , tbody [] ( List.map viewContent model.contents )
-      ]
+      }
     ]
-  , div []
-    [ h2 [] [ Html.text "Add content" ]
-    , viewInput "text" "Content" model.newContent NewContent
-    , Html.map NewTag ( Element.layout [] ( Tags.view viewTag "New tag" "Add tag" model.newTags ) )
-    , button [ onClick SubmitContent ] [ Html.text "Add content" ]
+  , column []
+    [ el [] ( Element.text "Add content" )
+    , Element.Input.text []
+      { onChange = NewContent
+      , text = model.newContent
+      , placeholder = Just ( Element.Input.placeholder [] ( Element.text "New content" ) )
+      , label = labelAbove [] ( Element.text "New content" )
+      }
+    , Element.map NewTag ( Tags.view viewTag "New tag" "Add tag" model.newTags )
+    , Component.button SubmitContent "Add content"
     ]
   ]
 
