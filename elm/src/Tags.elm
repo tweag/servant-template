@@ -1,10 +1,10 @@
 module Tags exposing (..)
 
-import Helper exposing (..)
+import Component exposing (..)
 import LoggedModel exposing (..)
 import Style exposing (..)
 
--- mgriffith/elm-ui
+-- mdgriffith/elm-ui
 import Element exposing (..)
 import Element.Background exposing (..)
 import Element.Border exposing (..)
@@ -46,6 +46,14 @@ update onSubmit msg model = case msg of
 removeTag : String -> List Tag -> List Tag
 removeTag id tags = remove ( Tag id ) tags
 
+remove : a -> List a -> List a
+remove value list = case list of
+  []               -> []
+  ( head :: tail ) ->
+    if   head == value
+    then remove value tail
+    else head :: remove value tail
+
 -- VIEW
 
 removable : String -> Element Msg -> Element Msg
@@ -66,15 +74,5 @@ view viewTag label submitText model = column []
     , placeholder = Just ( placeholder [] ( Element.text label ) )
     , label       = labelAbove [] ( Element.text label )
     } )
-  , Element.Input.button -- TODO factor out button
-    [ Element.padding 5
-    , Element.Background.color blue
-    , Element.Border.color purple
-    , Element.Border.width 2
-    , Element.Border.rounded 10
-    , Element.focused [ Element.Background.color purple ]
-    ]
-    { onPress = Just Submit
-    , label   = Element.text "Submit"
-    }
+  , Component.button Submit submitText
   ]

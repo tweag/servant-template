@@ -9,11 +9,10 @@ import Style exposing (..)
 -- elm/browser
 import Browser exposing (..)
 
--- elm/html
-import Html exposing (..)
+-- elm/core
 import Tuple exposing (mapBoth)
 
--- mgriffith/elm-ui
+-- mdgriffith/elm-ui
 import Element exposing (..)
 
 -- MAIN
@@ -72,5 +71,5 @@ view model = Element.column
     ( Element.text "Tagger" )
   , case model of
     Anonymous anonymousModel -> Element.map AnonymousMsg ( Anonymous.view anonymousModel )
-    LoggedIn logged          -> Element.html ( Html.map LoggedInMsg ( Logged.view logged ) )
+    LoggedIn logged          -> Element.map LoggedInMsg ( Logged.view logged )
   ]

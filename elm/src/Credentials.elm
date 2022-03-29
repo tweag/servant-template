@@ -1,12 +1,7 @@
 module Credentials exposing (..)
 
-import Helper exposing (..)
+import Component exposing (..)
 import Style exposing (..)
-
--- elm/html
-import Html exposing (..)
-import Html.Attributes exposing (..)
-import Html.Events exposing (..)
 
 -- elm/http
 import Http exposing (..)
@@ -93,17 +88,7 @@ view title liftModel liftMessage credentials = column
         , show        = False
         }
       ] )
-    , Element.map liftMessage ( Element.Input.button
-      [ Element.padding 5
-      , Element.Background.color blue
-      , Element.Border.color purple
-      , Element.Border.width 2
-      , Element.Border.rounded 10
-      , Element.focused [ Element.Background.color purple ]
-      ]
-      { onPress = Just Submit
-      , label   = Element.text "Submit"
-      } )
+    , Element.map liftMessage ( Component.button Submit "Submit" )
     ]
   ]
 
