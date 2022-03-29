@@ -2,13 +2,10 @@ module Anonymous exposing (..)
 
 import Credentials exposing (..)
 
--- elm/html
-import Html exposing (..)
-
 -- elm/json
 import Json.Decode exposing (..)
 
--- mgriffith/elm-ui
+-- mdgriffith/elm-ui
 import Element exposing (..)
 
 -- MODEL
