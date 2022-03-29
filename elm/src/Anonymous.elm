@@ -1,5 +1,6 @@
 module Anonymous exposing (..)
 
+import Component exposing (..)
 import Credentials exposing (..)
 
 -- elm/json
@@ -62,7 +63,7 @@ update msg model =
 -- VIEW
 
 view : Model -> Element Msg
-view model = Element.row [ Element.width fill ]
+view model = Component.mainRow
   [ Credentials.view "Register User" RegisterData Register model.register
   , Credentials.view "Login" LoginData Login model.login
   ]
