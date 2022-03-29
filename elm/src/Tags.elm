@@ -57,22 +57,28 @@ remove value list = case list of
 -- VIEW
 
 removable : String -> Element Msg -> Element Msg
-removable id element = row []
+removable id element = row
+  [ normalSpacing ]
   [ element
-  , Element.el [ onClick ( Remove id ) ] ( Element.text "x" )
+  , Element.el
+    ( ( onClick ( Remove id ) ) :: buttonStyle )
+    ( Element.text "x" )
   ]
 
 viewRemovableTag : ( Tag -> Element Msg ) -> Tag -> Element Msg
 viewRemovableTag viewTag tag = removable tag.name ( viewTag tag )
 
 view : ( Tag -> Element Msg ) -> String -> String -> Model -> Element Msg
-view viewTag label submitText model = column []
-  [ Element.row [] ( List.map (viewRemovableTag viewTag) model.tags )
-  , Element.el [] ( Element.Input.text []
+view viewTag label submitText model = column
+  [ normalSpacing
+  , Element.centerX
+  ]
+  [ Element.el [] ( Element.Input.text []
     { onChange    = NewTag
     , text        = model.newTag
     , placeholder = Just ( placeholder [] ( Element.text label ) )
     , label       = labelAbove [] ( Element.text label )
     } )
   , Component.button Submit submitText
+  , Element.row [ normalSpacing ] ( List.map (viewRemovableTag viewTag) model.tags )
   ]

@@ -3,6 +3,7 @@ module Logged exposing (..)
 import Anonymous exposing (..)
 import Component exposing (..)
 import LoggedModel exposing (..)
+import Style exposing (..)
 import Tags exposing (..)
 
 -- elm/http
@@ -18,6 +19,7 @@ import Url.Builder exposing (..)
 
 -- mdgriffith/elm-ui
 import Element exposing (..)
+import Element.Border exposing (..)
 import Element.Input exposing (..)
 
 -- MODEL
@@ -59,28 +61,38 @@ update msg model = case msg of
 -- VIEW
 
 viewTag : Tag -> Element msg
-viewTag tag = Element.el [] ( Element.text tag.name )
+viewTag tag = Element.el
+  [ normalPadding
+  , normalSpacing
+  ]
+  ( Element.text tag.name )
 
 view : Model -> Element Msg
-view model = row []
-  [ column []
-    [ el [] ( Element.text "Contents" )
+view model = Component.mainRow
+  [ Component.mainColumn
+    [ Component.columnTitle "Contents"
     , Element.map NewFilter ( Tags.view viewTag "Filter by tag" "Add filter" model.filters )
-    , Element.table []
+    , Element.table
+      [ normalPadding
+      ]
       { data = model.contents
       , columns =
-        [ { header = Element.text "content"
+        [ { header = tableHeader "Content"
           , width = fill
-          , view = \content -> Element.text content.message
+          , view = \content -> Element.el
+            ( normalPadding :: tableRowStyle )
+            ( Element.text content.message )
           }
-        , { header = Element.text "tags"
+        , { header = tableHeader "Tags"
           , width = fill
-          , view = \content -> row [] ( List.map viewTag content.tags ) }
+          , view = \content -> Element.el
+            tableRowStyle
+            ( row [] ( List.map viewTag content.tags ) ) }
         ]
       }
     ]
-  , column []
-    [ el [] ( Element.text "Add content" )
+  , Component.mainColumn
+    [ Component.columnTitle "Add content"
     , Element.Input.text []
       { onChange = NewContent
       , text = model.newContent
