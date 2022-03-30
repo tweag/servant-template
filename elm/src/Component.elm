@@ -2,6 +2,9 @@ module Component exposing (..)
 
 import Style exposing (..)
 
+-- elm/html
+import Html.Attributes exposing (id)
+
 -- mdgriffith/elm-ui
 import Element exposing (..)
 import Element.Background exposing (..)
@@ -12,12 +15,13 @@ import Element.Font
 mainRow : List ( Element msg ) -> Element msg
 mainRow elements = row [ Element.width fill ] elements
 
-mainColumn : List ( Element msg ) -> Element msg
-mainColumn elements = column
+mainColumn : String -> List ( Element msg ) -> Element msg
+mainColumn identifier elements = column
   [ normalPadding
   , bigSpacing
   , Element.width fill
   , alignTop
+  , htmlAttribute ( id identifier )
   ]
   elements
 

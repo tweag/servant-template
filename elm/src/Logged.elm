@@ -73,6 +73,7 @@ viewTag tag = Element.el
 view : Model -> Element Msg
 view model = Component.mainRow
   [ Component.mainColumn
+    "contents"
     [ Component.columnTitle "Contents"
     , Element.map NewFilter ( Tags.view viewTag "Filter by tag" "Add filter" model.filters )
     , Element.table
@@ -95,6 +96,7 @@ view model = Component.mainRow
       }
     ]
   , Component.mainColumn
+    "add-content"
     [ Component.columnTitle "Add content"
     , Element.Input.text []
       { onChange = NewContent
