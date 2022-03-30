@@ -51,12 +51,12 @@ type SubmitMessage a
   | Failed Http.Error
   | Succeeded a
 
-updateSubmit : Decoder a -> String -> Model -> SubmitMessage a -> Submit a -> ( Submit a, Cmd (SubmitMessage a) )
-updateSubmit decoder url credentials submitMessage model =
+updateSubmit : Decoder a -> String -> Model -> SubmitMessage a -> Submit a -> ( { model : Model, submitState : Submit a }, Cmd (SubmitMessage a) )
+updateSubmit decoder url credentials submitMessage submitState =
   case submitMessage of
-    Submit          -> ( model, submit decoder url credentials )
-    Failed error    -> ( Failure error, Cmd.none )
-    Succeeded value -> ( Successful value, Cmd.none )
+    Submit          -> ( { model = emptyCredentials, submitState = submitState      }, submit decoder url credentials )
+    Failed error    -> ( { model = credentials     , submitState = Failure error    }, Cmd.none )
+    Succeeded value -> ( { model = credentials     , submitState = Successful value }, Cmd.none )
 
 -- VIEW
 
