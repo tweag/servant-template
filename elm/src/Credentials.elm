@@ -60,8 +60,9 @@ updateSubmit decoder url credentials submitMessage model =
 
 -- VIEW
 
-view : String -> (CredentialsMessage -> msg) -> (SubmitMessage a -> msg) -> Model -> Element msg
-view title liftModel liftMessage credentials = Component.mainColumn
+view : String -> String -> (CredentialsMessage -> msg) -> (SubmitMessage a -> msg) -> Model -> Element msg
+view identifier title liftModel liftMessage credentials = Component.mainColumn
+  identifier
   [ Component.columnTitle title
   , column
     [ normalSpacing

@@ -64,8 +64,8 @@ update msg model =
 
 view : Model -> Element Msg
 view model = Component.mainRow
-  [ Credentials.view "Register User" RegisterData Register model.register
-  , Credentials.view "Login" LoginData Login model.login
+  [ Credentials.view "register" "Register User" RegisterData Register model.register
+  , Credentials.view "login"    "Login"         LoginData    Login    model.login
   ]
 
 -- HTTP
