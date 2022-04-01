@@ -31,7 +31,7 @@ import Data.Text.Encoding (encodeUtf8, decodeUtf8)
 -- |
 -- An 'EncryptedPassword' is a newtype wrapping a 'Bytestring'.
 -- We do not export the constructor to enforce that an 'EncryptedPassword' is built using 'encryptPassword'
-newtype EncryptedPassword = EncryptedPassword {asBytestring :: ByteString}
+newtype EncryptedPassword = EncryptedPassword { asBytestring :: ByteString }
   deriving stock (Eq, Show, Read, Generic)
   deriving newtype (DBEq, DBType)
 

@@ -2,12 +2,13 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DerivingStrategies #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeOperators #-}
 
 module Api.Application where
 
-import Api.AppServices (AppServices (AppServices, jwtSettings))
+import Api.AppServices (AppServices(..))
 import Api.Authentication (AuthenticationAPI, authenticationServer)
 import Api.Docs (DocsAPI, docsServer)
 import Api.Healthcheck (HealthcheckAPI, healthcheckServer)
@@ -60,7 +61,7 @@ authenticatedTaggerServer contentRepository = \case
 -- |
 -- Setup all the application server, providing the services needed by the various endpoints
 server :: AppServices -> ApplicationAPI AsServer
-server (AppServices _ passwordManager contentRepository userRepository authenticateUser) = ApplicationAPI
+server AppServices{passwordManager, contentRepository, userRepository, authenticateUser} = ApplicationAPI
   { tagger         = authenticatedTaggerServer contentRepository
   , docs           = docsServer
   , healthcheck    = healthcheckServer

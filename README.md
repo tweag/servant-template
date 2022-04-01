@@ -24,7 +24,7 @@ A more in depth description of the architecture of the application can be found 
 
 ### Configuration
 
-Configuration of the application is managed using [TOML](https://toml.io). The application requires a configuration file in [config.toml](config.toml), with the following format:
+Configuration of the application is managed using [TOML](https://toml.io). The application requires a configuration file with the following format:
 
 ```toml
 [database]
@@ -37,6 +37,8 @@ Configuration of the application is managed using [TOML](https://toml.io). The a
 [api]
   port = 8080
 ```
+
+By default the file is located in `config.toml`, but the path is actually configurable with the `config` option.
 
 ### Authentication
 
@@ -73,6 +75,11 @@ stack exec servant-template-exe
 ```
 
 which will expose the service on port defined in configuration.
+
+The executable accepts two options:
+
+- `--config`, which allows to customize the path of the configuration file
+- `--jwk`, which allows to customize the path of the file where the JWK is stored
 
 ### Database
 

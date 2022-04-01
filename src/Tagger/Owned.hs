@@ -18,8 +18,8 @@ import Data.OpenApi (ToSchema)
 -- |
 -- 'Owned' is a data type used to associate a 'User' to a content via its 'Id'
 data Owned a = Owned
-  { _userId  :: Id User
-  , _content :: a
+  { userId  :: Id User
+  , content :: a
   }
   deriving stock (Eq, Show, Generic)
 

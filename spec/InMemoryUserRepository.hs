@@ -2,6 +2,7 @@
 
 module InMemoryUserRepository where
 
+import Infrastructure.Persistence.PostgresUserRepository (UserRepositoryError(DuplicateUserName))
 import Tagger.EncryptedPassword (EncryptedPassword)
 import Tagger.Id (Id(Id))
 import Tagger.User (User(..))
@@ -34,40 +35,40 @@ import Control.Monad.Trans.Except (ExceptT)
 -- uuid
 import Data.UUID.V4 (nextRandom)
 
-inMemoryUserRepository :: TVar (Map (Id User) User) -> UserRepository (ExceptT QueryError IO)
+inMemoryUserRepository :: TVar (Map (Id User) User) -> UserRepository (ExceptT UserRepositoryError IO)
 inMemoryUserRepository userMap = UserRepository
   { getUserByName = inMemoryGetUserByName userMap
   , addUser       = inMemoryAddUser userMap
   }
 
-inMemoryGetUserByName :: TVar (Map (Id User) User) -> Text -> ExceptT QueryError IO (Either SelectUserError (Id User, User))
-inMemoryGetUserByName userMap name = liftIO . atomically $ do
+inMemoryGetUserByName :: TVar (Map (Id User) User) -> Text -> ExceptT UserRepositoryError IO (Either SelectUserError (Id User, User))
+inMemoryGetUserByName userMap name' = liftIO . atomically $ do
   users <- readTVar userMap
-  let usersWithName = filter ((== name) . _name) users
+  let usersWithName = filter ((== name') . name) users
   case size usersWithName of
     0 -> pure $ Left NoUser
     1 -> pure . Right . head $ assocs usersWithName
     _ -> pure $ Left MoreThanOneUser
 
-duplicateNameError :: Text -> QueryError
-duplicateNameError name = QueryError
+duplicateNameError :: Text -> UserRepositoryError
+duplicateNameError name' = DuplicateUserName $ QueryError
   "insert user"
   []
   (ResultError $ ServerError
     unique_violation
     "duplicate key value violates unique constraint"
-    (Just $ "Key (name)=(" <> encodeUtf8 name <> ") already exists")
+    (Just $ "Key (name)=(" <> encodeUtf8 name' <> ") already exists")
     Nothing)
 
-inMemoryAddUser :: TVar (Map (Id User) User) -> Text -> EncryptedPassword -> ExceptT QueryError IO (Id User)
-inMemoryAddUser userMap name password = do
+inMemoryAddUser :: TVar (Map (Id User) User) -> Text -> EncryptedPassword -> ExceptT UserRepositoryError IO (Id User)
+inMemoryAddUser userMap name' password' = do
   userId <- Id <$> liftIO nextRandom
   queryError <- liftIO . atomically $ do
     users <- readTVar userMap
-    let usersWithName = filter ((== name) . _name) users
+    let usersWithName = filter ((== name') . name) users
     if   null usersWithName
-    then writeTVar userMap (insert userId (User name password) users) >> pure Nothing
-    else pure . Just $ duplicateNameError name
+    then writeTVar userMap (insert userId (User name' password') users) >> pure Nothing
+    else pure . Just $ duplicateNameError name'
   case queryError of
     Just qe -> throwError qe
     Nothing -> pure userId

@@ -1,13 +1,15 @@
 {-# LANGUAGE DerivingStrategies #-}
+{-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE RankNTypes #-}
 
 module Infrastructure.Authentication.PasswordManager where
 
-import Infrastructure.Authentication.Login (Login(password), Password(asBytestring))
+import qualified Infrastructure.Authentication.Credentials as Credentials (password)
+import Infrastructure.Authentication.Credentials (Credentials, Password(asBytestring))
 import Infrastructure.Authentication.Token (Token(Token))
 import qualified Tagger.EncryptedPassword as Encrypted (validatePassword)
 import Tagger.EncryptedPassword (EncryptedPassword, encryptPassword)
-import Tagger.User (User(_password))
+import Tagger.User (User(password))
 import Tagger.Id (Id)
 
 -- base
@@ -27,15 +29,16 @@ import Control.Monad.Trans.Except (ExceptT(ExceptT))
 -- A 'PasswordManager' is the service dedicated at dealing with password and authentication tokens
 -- It is indexed by a context 'm' which wraps the results.
 data PasswordManager m = PasswordManager
-  { generatePassword :: Login -> m EncryptedPassword -- ^ given some 'Login' credentials, tries to encrypt the password
-  , generateToken    :: Id User -> m Token           -- ^ given a 'User' 'Id', tries to generate an authentication 'Token'
-  , validatePassword :: User -> Password -> Bool     -- ^ given a 'User' and a non excrypted 'Password', checks whether the password corresponds to the user's one
+  { generatePassword :: Credentials -> m EncryptedPassword -- ^ given some 'Credentials', tries to encrypt the password
+  , generateToken    :: Id User -> m Token                 -- ^ given a 'User' 'Id', tries to generate an authentication 'Token'
+  , validatePassword :: User -> Password -> Bool           -- ^ given a 'User' and a non excrypted 'Password', checks whether the password corresponds to the user's one
   }
 
 -- |
 -- Given a natural transformation between a context 'm' and a context 'n', it allows to change the context where 'PasswordManager' is operating
 hoistPasswordManager :: (forall a. m a -> n a) -> PasswordManager m -> PasswordManager n
-hoistPasswordManager f (PasswordManager generate verify validate) = PasswordManager (f . generate) (f . verify) validate
+hoistPasswordManager f PasswordManager{generatePassword, generateToken, validatePassword} =
+  PasswordManager (f . generatePassword) (f . generateToken) validatePassword
 
 -- |
 -- How the 'PasswordManager' operations can fail
@@ -53,10 +56,10 @@ bcryptPasswordManager jwtSettings = PasswordManager
   , validatePassword = bcryptValidatePassword
   }
 
-bcryptGeneratePassword :: Login -> ExceptT PasswordManagerError IO EncryptedPassword
+bcryptGeneratePassword :: Credentials -> ExceptT PasswordManagerError IO EncryptedPassword
 bcryptGeneratePassword
-  -- extract the password from the Login data
-  =   password
+  -- extract the password from the Credentials
+  =   Credentials.password
   -- convert it to bytestring
   >>> asBytestring
   -- try to encrypt it
@@ -75,4 +78,4 @@ bcryptGenerateToken jwtSettings userId = ExceptT $ do
   pure $ bimap FailedJWTCreation Token token
 
 bcryptValidatePassword :: User -> Password -> Bool
-bcryptValidatePassword user password' = Encrypted.validatePassword (_password user) (asBytestring password')
+bcryptValidatePassword user password' = Encrypted.validatePassword (password user) (asBytestring password')

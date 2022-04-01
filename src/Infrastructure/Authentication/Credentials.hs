@@ -2,7 +2,7 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DerivingStrategies #-}
 
-module Infrastructure.Authentication.Login where
+module Infrastructure.Authentication.Credentials where
 
 -- base
 import Data.Proxy (Proxy(Proxy))
@@ -34,9 +34,7 @@ instance ToJSON Password where
 instance ToSchema Password where
   declareNamedSchema _ = declareNamedSchema (Proxy :: Proxy Text)
 
--- |
--- 'Login' data required to register and authenticate
-data Login = Login
+data Credentials = Credentials
   { username :: Text
   , password :: Password
   }
