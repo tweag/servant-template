@@ -1,17 +1,14 @@
 resolver:
-  url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/18/26.yaml
+  url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/19/1.yaml
 
 packages:
   - .
 
 extra-deps:
-  - opaleye-0.9.1.0
+  - co-log-core-0.3.1.0
   - postgresql-error-codes-1.0.1
-  - rel8-1.3.1.0
-  - servant-0.19
-  - servant-client-0.19
-  - servant-client-core-0.19
-  - servant-server-0.19
+  - tomland-1.3.3.1
+  - validation-selective-0.1.0.1
   - git: git@github.com:haskell-servant/servant.git
     commit: d05da71f09be08131d29a2c17f613a4bd71faea2
     subdirs:
