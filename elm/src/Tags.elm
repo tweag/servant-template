@@ -4,6 +4,9 @@ import Component exposing (..)
 import LoggedModel exposing (..)
 import Style exposing (..)
 
+-- elm/core
+import Set exposing (..)
+
 -- mdgriffith/elm-ui
 import Element exposing (..)
 import Element.Background exposing (..)
@@ -16,11 +19,11 @@ import Element.Input exposing (labelAbove)
 
 type alias Model =
   { newTag : String
-  , tags : List Tag
+  , tags : Set Tag
   }
 
 init : Model
-init = Model "" []
+init = Model "" empty
 
 -- UPDATE
 
@@ -29,30 +32,19 @@ type Msg
   | Submit
   | Remove String
 
-update : ( List Tag -> Cmd msg ) -> Msg -> Model -> ( Model, Cmd msg )
+update : ( Set Tag -> Cmd msg ) -> Msg -> Model -> ( Model, Cmd msg )
 update onSubmit msg model = case msg of
   NewTag newTag -> ( { model | newTag = newTag }, Cmd.none )
   Submit        ->
     let
-      tags = ( Tag model.newTag ) :: model.tags
+      tags = insert model.newTag model.tags
     in
       ( { model | newTag = "", tags = tags }, onSubmit tags )
   Remove id     ->
     let
-      tags = removeTag id model.tags
+      tags = remove id model.tags
     in
       ( { model | tags = tags }, onSubmit tags )
-
-removeTag : String -> List Tag -> List Tag
-removeTag id tags = remove ( Tag id ) tags
-
-remove : a -> List a -> List a
-remove value list = case list of
-  []               -> []
-  ( head :: tail ) ->
-    if   head == value
-    then remove value tail
-    else head :: remove value tail
 
 -- VIEW
 
@@ -66,7 +58,7 @@ removable id element = row
   ]
 
 viewRemovableTag : ( Tag -> Element Msg ) -> Tag -> Element Msg
-viewRemovableTag viewTag tag = removable tag.name ( viewTag tag )
+viewRemovableTag viewTag tag = removable tag ( viewTag tag )
 
 view : ( Tag -> Element Msg ) -> String -> String -> Model -> Element Msg
 view viewTag label submitText model = column
@@ -80,5 +72,5 @@ view viewTag label submitText model = column
     , label       = labelAbove [] ( Element.text label )
     } )
   , Component.button Submit submitText
-  , Element.row [ normalSpacing ] ( List.map (viewRemovableTag viewTag) model.tags )
+  , Element.row [ normalSpacing ] ( List.map (viewRemovableTag viewTag) ( toList model.tags ) )
   ]
