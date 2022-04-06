@@ -10,6 +10,7 @@ import Style exposing (..)
 import Browser exposing (..)
 
 -- elm/core
+import Set exposing (..)
 import Tuple exposing (mapBoth)
 
 -- mdgriffith/elm-ui
@@ -42,7 +43,7 @@ type Msg
 
 updateAnonymous : Anonymous.Msg -> Anonymous.Model -> ( Model, Cmd Msg )
 updateAnonymous msg anonymousModel = case msg of
-  Login ( Succeeded token ) -> ( LoggedIn ( Logged.init token ), Cmd.map LoggedInMsg ( retrieveContents token [] ) )
+  Login ( Succeeded token ) -> ( LoggedIn ( Logged.init token ), Cmd.map LoggedInMsg ( retrieveContents token empty ) )
   _                         -> Tuple.mapBoth Anonymous ( Cmd.map AnonymousMsg ) (Anonymous.update msg anonymousModel)
 
 update : Msg -> Model -> ( Model, Cmd Msg )

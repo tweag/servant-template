@@ -6,6 +6,9 @@ import LoggedModel exposing (..)
 import Style exposing (..)
 import Tags exposing (..)
 
+-- elm/core
+import Set exposing (..)
+
 -- elm/http
 import Http exposing (..)
 
@@ -65,7 +68,7 @@ viewTag tag = Element.el
   [ normalPadding
   , normalSpacing
   ]
-  ( Element.text tag.name )
+  ( Element.text tag )
 
 view : Model -> Element Msg
 view model = Component.mainRow
@@ -87,7 +90,7 @@ view model = Component.mainRow
           , width = fill
           , view = \content -> Element.el
             tableRowStyle
-            ( row [] ( List.map viewTag content.tags ) ) }
+            ( row [] ( List.map viewTag ( toList content.tags ) ) ) }
         ]
       }
     ]
@@ -106,17 +109,17 @@ view model = Component.mainRow
 
 -- HTTP
 
-retrieveUrl : List Tag -> String
+retrieveUrl : Set Tag -> String
 retrieveUrl tags = Url.Builder.custom
   ( CrossOrigin "http://localhost:8080" )
   [ "get-contents" ]
-  ( List.map ( \tag -> Url.Builder.string "tag" tag.name ) tags )
+  ( List.map ( \tag -> Url.Builder.string "tag" tag ) ( toList tags ) )
   Nothing
 
 authorization : Token -> Header
 authorization token = Http.header "Authorization" ( String.append "Bearer " token )
 
-retrieveContents : Token -> List Tag -> Cmd Msg
+retrieveContents : Token -> Set Tag -> Cmd Msg
 retrieveContents token tags = Http.request
   { method  = "GET"
   , headers = [ authorization token ]
@@ -133,13 +136,12 @@ handleContentsResponse result = case result of
   Err error -> FetchFailed error
 
 tagDecoder : Decoder Tag
-tagDecoder = Json.Decode.map Tag
-  ( field "name" Json.Decode.string )
+tagDecoder = field "name" Json.Decode.string
 
 contentDecoder : Decoder Content
 contentDecoder = map2 Content
   ( field "message" Json.Decode.string )
-  ( field "tags"    ( Json.Decode.list ( Json.Decode.map Tag Json.Decode.string )))
+  ( field "tags"    ( Json.Decode.map fromList ( Json.Decode.list ( Json.Decode.string ) ) ) )
 
 wrappedContentDecoder : Decoder Content
 wrappedContentDecoder = Json.Decode.map identity
@@ -162,10 +164,10 @@ handleNewContentResponse content result = case result of
   Ok () -> SubmitSuccessful content
 
 tagEncoder : Tag -> Json.Encode.Value
-tagEncoder tag = Json.Encode.string tag.name
+tagEncoder tag = Json.Encode.string tag
 
 contentEncoder : Content -> Json.Encode.Value
 contentEncoder content = Json.Encode.object
   [ ( "message", Json.Encode.string content.message )
-  , ( "tags", Json.Encode.list tagEncoder content.tags)
+  , ( "tags", Json.Encode.list tagEncoder ( toList content.tags ) )
   ]
