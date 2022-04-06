@@ -9,6 +9,9 @@ import Tags exposing (..)
 -- elm/core
 import Set exposing (..)
 
+-- elm/html
+import Html.Attributes exposing (id)
+
 -- elm/http
 import Http exposing (..)
 
@@ -72,12 +75,14 @@ viewTag tag = Element.el
 
 view : Model -> Element Msg
 view model = Component.mainRow
+  "logged"
   [ Component.mainColumn
     "contents"
     [ Component.columnTitle "Contents"
-    , Element.map NewFilter ( Tags.view viewTag "Filter by tag" "Add filter" model.filters )
+    , Element.map NewFilter ( Tags.view viewTag "Filter by tag" "Add filter" "filter-by-tag" model.filters )
     , Element.table
       [ normalPadding
+      , htmlAttribute (id "contents-table")
       ]
       { data = model.contents
       , columns =
@@ -98,13 +103,14 @@ view model = Component.mainRow
   , Component.mainColumn
     "add-content"
     [ Component.columnTitle "Add content"
-    , Element.Input.text []
+    , Element.Input.text
+      [ htmlAttribute (id "new-content") ]
       { onChange = NewContent
       , text = model.newContent
       , placeholder = Just ( Element.Input.placeholder [] ( Element.text "New content" ) )
       , label = labelAbove [] ( Element.text "New content" )
       }
-    , Element.map NewTag ( Tags.view viewTag "New tag" "Add tag" model.newTags )
+    , Element.map NewTag ( Tags.view viewTag "New tag" "Add tag" "new-tag" model.newTags )
     , Component.button SubmitContent "Add content"
     ]
   ]
