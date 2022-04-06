@@ -7,6 +7,9 @@ import Style exposing (..)
 -- elm/core
 import Set exposing (..)
 
+-- elm/html
+import Html.Attributes exposing (class, id)
+
 -- mdgriffith/elm-ui
 import Element exposing (..)
 import Element.Background exposing (..)
@@ -48,22 +51,27 @@ update onSubmit msg model = case msg of
 
 -- VIEW
 
-removable : String -> Element Msg -> Element Msg
-removable id element = row
-  [ normalSpacing ]
+removable : String -> String -> Element Msg -> Element Msg
+removable identifier id element = row
+  [ normalSpacing
+  , htmlAttribute ( class identifier ) ]
   [ element
   , Element.el
-    ( ( onClick ( Remove id ) ) :: buttonStyle )
+    ( [ onClick ( Remove id )
+      , htmlAttribute ( class "remove" )
+      ]
+      ++ buttonStyle )
     ( Element.text "x" )
   ]
 
 viewRemovableTag : ( Tag -> Element Msg ) -> Tag -> Element Msg
-viewRemovableTag viewTag tag = removable tag ( viewTag tag )
+viewRemovableTag viewTag tag = removable "tag" tag ( viewTag tag )
 
-view : ( Tag -> Element Msg ) -> String -> String -> Model -> Element Msg
-view viewTag label submitText model = column
+view : ( Tag -> Element Msg ) -> String -> String -> String -> Model -> Element Msg
+view viewTag label submitText identifier model = column
   [ normalSpacing
   , Element.centerX
+  , htmlAttribute (id identifier)
   ]
   [ Element.el [] ( Element.Input.text []
     { onChange    = NewTag

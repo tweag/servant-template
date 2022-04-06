@@ -3,6 +3,9 @@ module Credentials exposing (..)
 import Component exposing (..)
 import Style exposing (..)
 
+-- elm/html
+import Html.Attributes exposing (class)
+
 -- elm/http
 import Http exposing (..)
 
@@ -71,13 +74,15 @@ view identifier title liftModel liftMessage credentials = Component.mainColumn
     [ Element.map liftModel ( column
       [ normalSpacing
       ]
-      [ Element.Input.username []
+      [ Element.Input.username
+        [ htmlAttribute ( class "username" ) ]
         { onChange    = Username
         , text        = credentials.username
         , placeholder = Just ( Element.Input.placeholder [] ( Element.text "Username" ) )
         , label       = labelAbove [] ( Element.text "Username" )
         }
-      , Element.Input.newPassword []
+      , Element.Input.newPassword
+        [ htmlAttribute ( class "password" ) ]
         { onChange    = Password
         , text        = credentials.password
         , placeholder = Just ( Element.Input.placeholder [] ( Element.text "Password" ) )

@@ -3,7 +3,7 @@ module Component exposing (..)
 import Style exposing (..)
 
 -- elm/html
-import Html.Attributes exposing (id)
+import Html.Attributes exposing (class, id)
 
 -- mdgriffith/elm-ui
 import Element exposing (..)
@@ -12,8 +12,12 @@ import Element.Border exposing (..)
 import Element.Input exposing (..)
 import Element.Font
 
-mainRow : List ( Element msg ) -> Element msg
-mainRow elements = row [ Element.width fill ] elements
+mainRow : String -> List ( Element msg ) -> Element msg
+mainRow identifier elements = row
+  [ Element.width fill
+  , htmlAttribute ( id identifier )
+  ]
+  elements
 
 mainColumn : String -> List ( Element msg ) -> Element msg
 mainColumn identifier elements = column
@@ -32,6 +36,7 @@ button : msg -> String -> Element msg
 button message label = Element.Input.button
     ( [ Element.padding 5
       , Element.focused [ Element.Background.color purple ]
+      , htmlAttribute ( class "button" )
       ] ++ buttonStyle )
     { onPress = Just message
     , label   = Element.text label

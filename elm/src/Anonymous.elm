@@ -64,6 +64,7 @@ update msg model =
 
 view : Model -> Element Msg
 view model = Component.mainRow
+  "anonymous"
   [ Credentials.view "register" "Register User" RegisterData Register model.register
   , Credentials.view "login"    "Login"         LoginData    Login    model.login
   ]
