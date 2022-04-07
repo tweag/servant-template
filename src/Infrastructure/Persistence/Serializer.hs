@@ -2,7 +2,7 @@ module Infrastructure.Persistence.Serializer where
 
 import qualified Infrastructure.Persistence.Schema as DB (Content(Content), Tag(Tag), User(User))
 import Infrastructure.Persistence.Schema (contentId, contentContent, contentUserId, tagId, tagName, userId, userName, userPassword)
-import Tagger.Content (Content(..))
+import Tagger.Content (Content(..), createContent)
 import Tagger.Id (Id)
 import qualified Tagger.Owned as Owned (content, userId)
 import Tagger.Owned (Owned(Owned))
@@ -32,10 +32,9 @@ serializeContent contentId' userId' content = (dbContent, dbTags)
 -- Transform from the database representation of a 'Content' to its domain representation
 unserializeContent :: DB.Content Result -> [DB.Tag Result] -> DB.User Result -> Owned (Content Tag)
 unserializeContent content tags' user = Owned
-  { Owned.content = Content
-    { message = contentContent content
-    , tags    = unserializeTag <$> tags'
-    }
+  { Owned.content = createContent
+    (contentContent content)
+    (unserializeTag <$> tags')
   , Owned.userId = userId user
   }
 
