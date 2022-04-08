@@ -30,6 +30,18 @@ filterByTag tag =
 removeTag :: ProbabilisticAction
 removeTag = click "#logged .tag .remove"
 
+addNewTag :: String -> ProbabilisticAction
+addNewTag tag =
+               focus "#logged #new-tag input"
+  `followedBy` enterText tag
+  `followedBy` click "#logged #new-tag .button"
+
+addNewContent :: String -> ProbabilisticAction
+addNewContent content =
+               focus "#logged input#new-content"
+  `followedBy` enterText content
+  `followedBy` click "#logged #add-content > .button"
+
 actions :: Actions
 actions =
   [ register "username" "password"
@@ -41,6 +53,12 @@ actions =
   , filterByTag "tag2"
   , filterByTag "tag3"
   , removeTag
+  , addNewTag "tag1"
+  , addNewTag "tag2"
+  , addNewTag "tag3"
+  , addNewContent "content1"
+  , addNewContent "content2"
+  , addNewContent "content3"
   ]
 
 proposition :: Boolean
