@@ -60,7 +60,7 @@ update msg model = case msg of
   NewContent newContent    -> ( { model | newContent = newContent }, Cmd.none )
   NewFilter filterMsg      -> Tuple.mapFirst ( \filters -> { model | filters = filters } ) ( Tags.update ( retrieveContents model.token ) filterMsg model.filters )
   NewTag tagMsg            -> Tuple.mapFirst ( \newTags -> { model | newTags = newTags } ) ( Tags.update ( always ( Cmd.none ) ) tagMsg model.newTags )
-  SubmitContent            -> ( model, addContent model.token ( Content model.newContent model.newTags.tags ) )
+  SubmitContent            -> ( { model | newContent = "" } , addContent model.token ( Content model.newContent model.newTags.tags ) )
   SubmitSuccessful content -> ( { model | contents = content :: model.contents }, Cmd.none )
   SubmitFailed             -> ( model, Cmd.none )
 
