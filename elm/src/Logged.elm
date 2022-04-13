@@ -8,9 +8,10 @@ import Tags exposing (..)
 
 -- elm/core
 import Set exposing (..)
+import String exposing (fromInt)
 
 -- elm/html
-import Html.Attributes exposing (id)
+import Html.Attributes exposing (attribute, class, id)
 
 -- elm/http
 import Http exposing (..)
@@ -70,6 +71,7 @@ viewTag : Tag -> Element msg
 viewTag tag = Element.el
   [ normalPadding
   , normalSpacing
+  , htmlAttribute ( class "tag" )
   ]
   ( Element.text tag )
 
@@ -80,7 +82,7 @@ view model = Component.mainRow
     "contents"
     [ Component.columnTitle "Contents"
     , Element.map NewFilter ( Tags.view viewTag "Filter by tag" "Add filter" "filter-by-tag" model.filters )
-    , Element.table
+    , Element.indexedTable
       [ normalPadding
       , htmlAttribute (id "contents-table")
       ]
@@ -88,14 +90,14 @@ view model = Component.mainRow
       , columns =
         [ { header = tableHeader "Content"
           , width = fill
-          , view = \content -> Element.el
-            ( normalPadding :: tableRowStyle )
+          , view = \i content -> Element.el
+            ( normalPadding :: htmlAttribute ( attribute "content-row" ( fromInt i ) ) :: tableRowStyle )
             ( Element.text content.message )
           }
         , { header = tableHeader "Tags"
           , width = fill
-          , view = \content -> Element.el
-            tableRowStyle
+          , view = \i content -> Element.el
+            ( htmlAttribute ( attribute "tag-row" ( fromInt i ) ) :: tableRowStyle )
             ( row [] ( List.map viewTag ( toList content.tags ) ) ) }
         ]
       }
