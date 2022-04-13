@@ -1,9 +1,16 @@
 module Tagger where
 
+import Data.Maybe
+import Data.Symbol
+
 import Quickstrom
+
+-- STARTING POINT
 
 readyWhen :: Selector
 readyWhen = "#title"
+
+-- ACTIONS
 
 register :: String -> String -> ProbabilisticAction
 register username password =
@@ -40,7 +47,9 @@ addNewContent :: String -> ProbabilisticAction
 addNewContent content =
                focus "#logged input#new-content"
   `followedBy` enterText content
-  `followedBy` click "#logged #add-content > .button"
+
+submitContent :: ProbabilisticAction
+submitContent = click "#logged #add-content > .button"
 
 actions :: Actions
 actions =
@@ -59,7 +68,47 @@ actions =
   , addNewContent "content1"
   , addNewContent "content2"
   , addNewContent "content3"
+  , submitContent
   ]
 
+-- MODEL
+
+type Tag = String
+
+type Content = {content :: String, tags :: Array Tag}
+
+contentRow :: Attribute "content-row"
+contentRow = attribute (SProxy :: SProxy "content-row")
+
+extractTags :: String -> Array Tag
+extractTags i = map _.textContent (queryAll ("#logged #contents-table [tag-row=\" <> i <> \"]") {textContent})
+
+extractContents :: Array Content
+extractContents = map
+  (\r -> {content : r.textContent, tags : extractTags (fromMaybe "" r.contentRow)})
+  (queryAll "#logged #contents-table [content-row]" {textContent, contentRow})
+
+-- INVARIANTS
+
 proposition :: Boolean
-proposition = true
+proposition = titleIsTagger && isAnonymous && always (remainAmonymous || logIn || remainLogged)
+  where
+    remainAmonymous :: Boolean
+    remainAmonymous = isAnonymous && next isAnonymous
+
+    logIn :: Boolean
+    logIn = isAnonymous && next isLogged
+
+    remainLogged :: Boolean
+    remainLogged = isLogged && next isLogged
+
+titleIsTagger :: Boolean
+titleIsTagger = always (title == Just "Tagger")
+  where
+    title = map _.textContent (queryOne "#title" {textContent})
+
+isAnonymous :: Boolean
+isAnonymous = isJust (queryOne "#anonymous" {})
+
+isLogged :: Boolean
+isLogged = isJust (queryOne "#logged" {})
