@@ -137,7 +137,7 @@ logIn = isAnonymous && next isLogged
 
 addFilter :: Boolean
 addFilter
-  =  Array.length extractFilters < next (Array.length extractFilters)
+  =  Array.length extractFilters <= next (Array.length extractFilters)
   && Array.length extractContents >= next (Array.length extractContents)
   && unchanged extractNewContent
   && unchanged extractNewTags
@@ -151,7 +151,7 @@ fillNewContent
 
 addNewContentTag :: Boolean
 addNewContentTag
-  =  Array.length extractNewTags < next (Array.length extractNewTags)
+  =  Array.length extractNewTags <= next (Array.length extractNewTags)
   && unchanged extractFilters
   && unchanged extractContents
   && unchanged extractNewContent
