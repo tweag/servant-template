@@ -29,6 +29,9 @@ import Element exposing (..)
 import Element.Border exposing (..)
 import Element.Input exposing (..)
 
+-- stoeffel/set-extra
+import Set.Extra exposing (subset)
+
 -- MODEL
 
 type alias Model =
@@ -54,6 +57,13 @@ type Msg
   | SubmitSuccessful Content
   | SubmitFailed
 
+-- add a content only if has the tags used as filters
+addFilteredContent : Content -> Model -> Model
+addFilteredContent content model =
+  if   subset model.filters.tags content.tags
+  then { model | contents = content :: model.contents }
+  else model
+
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model = case msg of
   FetchSuccessful contents -> ( { model | contents = contents }, Cmd.none )
@@ -61,8 +71,8 @@ update msg model = case msg of
   NewContent newContent    -> ( { model | newContent = newContent }, Cmd.none )
   NewFilter filterMsg      -> Tuple.mapFirst ( \filters -> { model | filters = filters } ) ( Tags.update ( retrieveContents model.token ) filterMsg model.filters )
   NewTag tagMsg            -> Tuple.mapFirst ( \newTags -> { model | newTags = newTags } ) ( Tags.update ( always ( Cmd.none ) ) tagMsg model.newTags )
-  SubmitContent            -> ( { model | newContent = "" } , addContent model.token ( Content model.newContent model.newTags.tags ) )
-  SubmitSuccessful content -> ( { model | contents = content :: model.contents }, Cmd.none )
+  SubmitContent            -> ( { model | newContent = "", newTags = Tags.init } , addContent model.token ( Content model.newContent model.newTags.tags ) )
+  SubmitSuccessful content -> ( addFilteredContent content model, Cmd.none )
   SubmitFailed             -> ( model, Cmd.none )
 
 -- VIEW

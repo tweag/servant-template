@@ -160,7 +160,7 @@ submitNewContent :: Boolean
 submitNewContent
   =  next extractNewContent == Just ""
   && next extractNewTags == []
-  && next (Array.length extractContents) == Array.length extractContents + 1
+  && ((next (Array.length extractContents) == Array.length extractContents + 1) || unchanged (Array.length extractContents))
   && unchanged extractFilters
 
 -- INVARIANTS
