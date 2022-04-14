@@ -1,6 +1,8 @@
 module Tagger where
 
+import Data.Array as Array
 import Data.Maybe
+import Data.String.CodeUnits as String
 import Data.Symbol
 
 import Quickstrom
@@ -35,7 +37,7 @@ filterByTag tag =
   `followedBy` click "#logged #filter-by-tag .button"
 
 removeTag :: ProbabilisticAction
-removeTag = click "#logged .tag .remove"
+removeTag = click "#logged .removable .tag .remove"
 
 addNewTag :: String -> ProbabilisticAction
 addNewTag tag =
@@ -77,6 +79,8 @@ type Tag = String
 
 type Content = {content :: String, tags :: Array Tag}
 
+-- QUERIES
+
 contentRow :: Attribute "content-row"
 contentRow = attribute (SProxy :: SProxy "content-row")
 
@@ -88,19 +92,29 @@ extractContents = map
   (\r -> {content : r.textContent, tags : extractTags (fromMaybe "" r.contentRow)})
   (queryAll "#logged #contents-table [content-row]" {textContent, contentRow})
 
--- INVARIANTS
+extractFilters :: Array Tag
+extractFilters = map _.textContent (queryAll "#logged #contents #filter-by-tag .tag" {textContent})
 
-proposition :: Boolean
-proposition = titleIsTagger && isAnonymous && always (remainAmonymous || logIn || remainLogged)
-  where
-    remainAmonymous :: Boolean
-    remainAmonymous = isAnonymous && next isAnonymous
+extractNewContent :: Maybe String
+extractNewContent = map _.value (queryOne "#logged #add-content #new-content" {value})
 
-    logIn :: Boolean
-    logIn = isAnonymous && next isLogged
+extractNewTags :: Array Tag
+extractNewTags = map _.textContent (queryAll "#logged #add-content #new-tag .tag" {textContent})
 
-    remainLogged :: Boolean
-    remainLogged = isLogged && next isLogged
+-- STATES
+
+anonymous :: Maybe Unit
+anonymous = map (const unit) (queryOne "#anonymous" {})
+
+logged :: Maybe {filters :: Array Tag, contents :: Array Content, newContent :: String, newTags :: Array Tag}
+logged = queryOne "#logged" {} *> (
+      (\filters contents newContent newTags -> {filters : filters, contents : contents, newContent : newContent, newTags : newTags})
+  <$> Just extractFilters
+  <*> Just extractContents
+  <*> extractNewContent
+  <*> Just extractNewTags)
+
+-- ASSERTIONS
 
 titleIsTagger :: Boolean
 titleIsTagger = always (title == Just "Tagger")
@@ -108,7 +122,58 @@ titleIsTagger = always (title == Just "Tagger")
     title = map _.textContent (queryOne "#title" {textContent})
 
 isAnonymous :: Boolean
-isAnonymous = isJust (queryOne "#anonymous" {})
+isAnonymous = isJust anonymous
 
 isLogged :: Boolean
-isLogged = isJust (queryOne "#logged" {})
+isLogged = isJust logged
+
+-- TRANSITIONS
+
+remainAmonymous :: Boolean
+remainAmonymous = isAnonymous && next isAnonymous
+
+logIn :: Boolean
+logIn = isAnonymous && next isLogged
+
+addFilter :: Boolean
+addFilter
+  =  Array.length extractFilters < next (Array.length extractFilters)
+  && Array.length extractContents >= next (Array.length extractContents)
+  && unchanged extractNewContent
+  && unchanged extractNewTags
+
+fillNewContent :: Boolean
+fillNewContent
+  =  map String.length extractNewContent < next (map String.length extractNewContent)
+  && unchanged extractFilters
+  && unchanged extractContents
+  && unchanged extractNewTags
+
+addNewContentTag :: Boolean
+addNewContentTag
+  =  Array.length extractNewTags < next (Array.length extractNewTags)
+  && unchanged extractFilters
+  && unchanged extractContents
+  && unchanged extractNewContent
+
+submitNewContent :: Boolean
+submitNewContent
+  =  next extractNewContent == Just ""
+  && next extractNewTags == []
+  && next (Array.length extractContents) == Array.length extractContents + 1
+  && unchanged extractFilters
+
+-- INVARIANTS
+
+proposition :: Boolean
+proposition
+  =  titleIsTagger
+  && isAnonymous
+  && always
+    (  remainAmonymous
+    || logIn
+    || addFilter
+    || fillNewContent
+    || addNewContentTag
+    || submitNewContent
+    )
