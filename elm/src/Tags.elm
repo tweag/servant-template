@@ -51,10 +51,10 @@ update onSubmit msg model = case msg of
 
 -- VIEW
 
-removable : String -> String -> Element Msg -> Element Msg
-removable identifier id element = row
+removable : String -> Element Msg -> Element Msg
+removable id element = row
   [ normalSpacing
-  , htmlAttribute ( class identifier ) ]
+  , htmlAttribute ( class "removable" ) ]
   [ element
   , Element.el
     ( [ onClick ( Remove id )
@@ -65,7 +65,7 @@ removable identifier id element = row
   ]
 
 viewRemovableTag : ( Tag -> Element Msg ) -> Tag -> Element Msg
-viewRemovableTag viewTag tag = removable "tag" tag ( viewTag tag )
+viewRemovableTag viewTag tag = removable tag ( viewTag tag )
 
 view : ( Tag -> Element Msg ) -> String -> String -> String -> Model -> Element Msg
 view viewTag label submitText identifier model = column
