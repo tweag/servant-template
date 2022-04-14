@@ -46,6 +46,9 @@ docker run --rm \
   --reporter=html \
   --html-report-directory=/spec/report \
   --tests=10 \
+  --max-actions=50 \
+  --max-trailing-state-changes=1 \
+  --trailing-state-change-timeout=500 \
   /spec/Tagger.spec.purs \
   http://localhost:8000
 ```
