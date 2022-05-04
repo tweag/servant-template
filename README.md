@@ -1,6 +1,6 @@
 # servant-template
 
-A modern template for a [Servant](https://haskell-servant.github.io/).
+A modern template for [Servant](https://haskell-servant.github.io/).
 
 ## Scope
 
@@ -20,7 +20,7 @@ It allows also to retrieve contents by a set of tags.
 
 ### Architecture
 
-A more in depth description of the architecture of the application can be found in [ARCHITECTURE.md].
+A more in depth description of the architecture of the application can be found in [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 ### Configuration
 
