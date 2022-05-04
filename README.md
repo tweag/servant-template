@@ -8,7 +8,7 @@ The projects aims to provide a template for a Servant project featuring:
 
 - database interaction with [rel8](https://hackage.haskell.org/package/rel8);
 - JWT authentication with [servant-auth](https://hackage.haskell.org/package/servant-auth);
-- loggin with [co-log-core](https://hackage.haskell.org/package/co-log-core);
+- logging with [co-log-core](https://hackage.haskell.org/package/co-log-core);
 - TOML configuration using [tomland](https://hackage.haskell.org/package/tomland);
 - first class records in Servant API using [NamedRecords](https://hackage.haskell.org/package/servant-0.19/changelog).
 
