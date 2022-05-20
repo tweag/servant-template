@@ -2,7 +2,7 @@
   host     = "localhost"
   port     = 5432
   dbname   = "tagger"
-  user     = "user"
+  user     = "tagger"
   password = "password"
 
 [api]

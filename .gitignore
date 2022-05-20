@@ -1,3 +1,4 @@
+.postgres
 .hie
 .stack-work
 *.cabal
