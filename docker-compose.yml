@@ -5,9 +5,9 @@ services:
     image: postgres:14-alpine
     container_name: postgres
     environment:
-      - POSTGRES_USER=user
-      - POSTGRES_PASSWORD=password
-      - POSTGRES_DB=tagger
+      - POSTGRES_USER=tagger-user
+      - POSTGRES_PASSWORD=tagger-pwd
+      - POSTGRES_DB=tagger-db
     volumes:
       - ./data:/var/lib/postgresql/data
     ports:
