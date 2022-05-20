@@ -2,15 +2,20 @@
 
 This folder contains a client application built with [Elm](https://elm-lang.org/), which allows to interact in a human-friendly way with the Tagger api.
 
-## Build
+## Building
 
 You can build the client application using
-
 ```
 elm make src/Main.elm
 ```
 
-Then, you can directly open `index.html` to interact with the application.
+## Serving for development
+
+```
+cd elm; elm-live src/Main.elm'
+```
+
+Then, you can directly go to `http://localhost:1234` (default port) to view the application.
 
 ## Workflow
 
