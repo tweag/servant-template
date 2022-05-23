@@ -1,0 +1,2 @@
+#!/bin/sh
+nix-shell --run 'cd elm; npx parcel index.html'

@@ -6,6 +6,7 @@ mkShell {
     haskellPackages.ormolu
     elmPackages.elm
     elmPackages.elm-language-server
+    nodePackages.npm
     stack
     postgresql
     zlib

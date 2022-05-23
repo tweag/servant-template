@@ -1,0 +1,4 @@
+#!/bin/sh
+
+# This will build the app for production
+nix-shell --run 'cd elm; npx parcel build index.html'
