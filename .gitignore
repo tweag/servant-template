@@ -1,3 +1,4 @@
+elm/elm-stuff/*
 .postgres
 .hie
 .stack-work
