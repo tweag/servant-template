@@ -3,75 +3,56 @@
 
 module Main where
 
-import Api.Application (app)
 import Api.AppServices (appServices)
-import Api.Config (api, apiPort, configCodec, connectionString, database, getPort)
-import InputOptions (inputOptionsParser, InputOptions (configPath, jwkPath))
-
--- base
+import Api.Application (app)
+import Api.Config (Config, apiConfig, apiPort, connectionString, dbConfig, getPort)
+import qualified Api.Config as Config
+import CLIOptions (CLIOptions (configPath, jwkPath))
+import qualified CLIOptions
 import Control.Exception (catch)
+import Crypto.JOSE.JWK (JWK)
+import Data.ByteString.Char8 (unpack, writeFile)
 import Data.Function ((&))
 import Data.Maybe (fromMaybe)
+import Hasql.Connection (Connection, ConnectionError, acquire)
+import Network.Wai (Middleware)
+import qualified Network.Wai.Handler.Warp as Warp
+import Network.Wai.Middleware.Cors (cors, corsRequestHeaders, simpleCorsResourcePolicy)
+import Network.Wai.Middleware.RequestLogger (logStdoutDev)
+import Servant.Auth.Server (fromSecret, generateSecret, readKey)
 import Prelude hiding (writeFile)
 
--- bytestring
-import Data.ByteString.Char8 (writeFile, unpack)
-
--- hasql
-import Hasql.Connection (acquire)
-
--- jose
-import Crypto.JOSE.JWK (JWK)
-
--- optparse-applicative
-import Options.Applicative ((<**>), execParser, helper, info, fullDesc)
-
--- servant-auth-server
-import Servant.Auth.Server (fromSecret, generateSecret, readKey)
-
--- toml
-import Toml (decodeFileExact)
-
--- wai-cors
-import Network.Wai.Middleware.Cors (cors, simpleCorsResourcePolicy, corsRequestHeaders)
-
--- wai-extra
-import Network.Wai.Middleware.RequestLogger (logStdoutDev)
-
--- warp
-import Network.Wai.Handler.Warp (run)
-
-main:: IO ()
+main :: IO ()
 main = do
-  -- parse input options
-  inputOptions <- execParser $ info (inputOptionsParser <**> helper) fullDesc
-  -- extract application configuration from file
-  eitherConfig <- decodeFileExact configCodec (configPath inputOptions)
-  config <- either (\errors -> fail $ "unable to parse configuration: " <> show errors) pure eitherConfig
-  -- acquire the connection to the database
-  connection <- acquire $ connectionString (database config)
+  inputOptions <- CLIOptions.parse
+  config <- Config.load (configPath inputOptions)
+  dbConnection <- setupDBConnection config
+  jsonWebKey <- setupJWK inputOptions
+
   either
     (fail . unpack . fromMaybe "unable to connect to the database")
-    -- if we were able to connect to the database we run the application
-    (\connection' -> do
-      -- first we generate a JSON Web Key
-      key <- jwtKey (jwkPath inputOptions)
-      -- we setup the application services
-      let services = appServices connection' key
-      -- we retrieve the port from configuration
-      let port = getPort . apiPort . api $ config
-      -- we create our application
-      let application
-            -- we pass in the required services
-            = app services
-            -- manage CORS for browser interaction
-            & cors (const . Just $ simpleCorsResourcePolicy {corsRequestHeaders = ["Authorization", "Content-Type"]})
-            -- we setup logging for the incoming requests
-            & logStdoutDev
-      -- eventually, we run the application on the port
-      run port application)
-      --run port . logStdoutDev . app $ services)
-    connection
+    (runApp jsonWebKey config)
+    dbConnection
+
+setupDBConnection :: Config -> IO (Either ConnectionError Connection)
+setupDBConnection =
+  acquire . connectionString . dbConfig
+
+runApp :: JWK -> Config -> Connection -> IO ()
+runApp jwk config dbConnection =
+  let services = appServices dbConnection jwk
+      port = getPort . apiPort . apiConfig $ config
+      application = app services & corsMiddleware & logStdoutDev
+   in Warp.run port application
+
+corsMiddleware :: Network.Wai.Middleware
+corsMiddleware =
+  let headers = ["Authorization", "Content-Type"]
+   in cors (const . Just $ simpleCorsResourcePolicy {corsRequestHeaders = headers})
+
+setupJWK :: CLIOptions -> IO JWK
+setupJWK =
+  jwtKey . jwkPath
 
 jwtKey :: FilePath -> IO JWK
 jwtKey path = do
