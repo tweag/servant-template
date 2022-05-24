@@ -1,0 +1,4 @@
+#!/bin/sh
+
+cmd="stack repl"
+bin/util/with-nix $cmd

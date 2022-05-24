@@ -2,14 +2,15 @@ with (import <nixpkgs> {});
 mkShell {
   name = "tagger-dev";
   buildInputs = with pkgs; [
-    haskellPackages.haskell-language-server
-    haskellPackages.ormolu
     elmPackages.elm
     elmPackages.elm-language-server
+    haskellPackages.haskell-language-server
+    haskellPackages.ormolu
     nodePackages.npm
-    stack
     postgresql
+    stack
+    watchexec
     zlib
   ];
-  shellHook = builtins.readFile ./bin/setupdb;
+  shellHook = builtins.readFile ./bin/db/setup;
 }

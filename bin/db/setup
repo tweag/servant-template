@@ -11,7 +11,7 @@ if [ ! -d $PGDATA ]; then
   initdb --auth=trust --no-locale --encoding=UTF8
 fi
 
-if ! pg_ctl status
+if ! pg_ctl status > /dev/null
 then
   pg_ctl start -l $PGLOG -o "--unix_socket_directories='$PGHOST'"
 

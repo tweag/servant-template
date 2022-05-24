@@ -1,2 +1,0 @@
-#!/bin/sh
-nix-shell --run 'stack repl'

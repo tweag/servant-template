@@ -52,26 +52,30 @@ Eventually, you should pass your token in the `Authorization` header for the rel
 
 ## Development
 
+The project provides scripts to manage the lifecycle of the application. If `nix` is available they will attempt to use it, otherwise it will fall back to the "raw" commands (i.e., using `stack build` directly).
+
 The project is using [Stack](https://docs.haskellstack.org/en/stable/README/).
 
-To build the project, run
+To build the API, run
 
 ```
-stack build
+bin/api/build
 ```
 
-The build requires the presence of the `pg_config` executable.
+> :information_source: This command forwards flags to `stack build`, so it could be run as `bin/api/build --file-watch`
+
+> :warning: Note for non-nix users: the build requires the presence of the `pg_config` executable which is made available by installing Postgresql. Nix would take care of this automatically.
 
 To run the tests, run
 
 ```
-stack test
+bin/api/test
 ```
 
 You can launch the web server using
 
 ```
-stack exec servant-template-exe
+bin/api/serve
 ```
 
 which will expose the service on port defined in configuration.
@@ -92,6 +96,8 @@ You can initialise the schema of the database by running the `schema.sql` which 
 You can generate the documentation of the project using
 
 ```
+nix-shell --run 'stack haddock'
+# or directly:
 stack haddock
 ```
 
@@ -103,4 +109,12 @@ You can access the OpenAPI documentation just by visiting the `docs` endpoint
 
 This repository contains also a client [Elm](https://elm-lang.org/) application to interact in a human-friendly way with the Tagger api.
 
-You can find more details in [elm/README.md](elm/README.md).
+You can find more details in [elm/README.md](elm/README.md), but there are convenience commands:
+
+```
+# builds the elm project
+bin/frontend/build
+
+# serves, reloading on file change
+bin/frontend/serve
+```
