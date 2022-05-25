@@ -5,49 +5,49 @@
 
 packages:
 - completed:
-    pantry-tree:
-      sha256: d4cc089c40c5052ee02f91eafa567e0a239908aabc561dfa6080ba3bfc8c25bd
-      size: 584
     hackage: co-log-core-0.3.1.0@sha256:9794bdedd1391decd0e22bdfe2b11abcb42e6cff7a4531e1f8882890828f4e63,3816
+    pantry-tree:
+      size: 584
+      sha256: d4cc089c40c5052ee02f91eafa567e0a239908aabc561dfa6080ba3bfc8c25bd
   original:
     hackage: co-log-core-0.3.1.0
 - completed:
-    pantry-tree:
-      sha256: 2b8d529e883ae9ff4c1c98b05410edd6343b0ea2ec016bae256ff7d7ede3fc46
-      size: 240
     hackage: postgresql-error-codes-1.0.1@sha256:34ce40401dc21762996dadd38336436f40a09da95ad3309ba6dc506d707cff11,1413
+    pantry-tree:
+      size: 240
+      sha256: 2b8d529e883ae9ff4c1c98b05410edd6343b0ea2ec016bae256ff7d7ede3fc46
   original:
     hackage: postgresql-error-codes-1.0.1
 - completed:
-    pantry-tree:
-      sha256: 0e3bdbd32955944c3ee9ff0f47dc765d25ab6be4a336c6d735eed8eb9bc8ce27
-      size: 6430
     hackage: tomland-1.3.3.1@sha256:83a8fd26a97164100541f7b26aa40ffdc6f230b21e94cbb3eae1fb7093c4356e,8924
+    pantry-tree:
+      size: 6430
+      sha256: 0e3bdbd32955944c3ee9ff0f47dc765d25ab6be4a336c6d735eed8eb9bc8ce27
   original:
     hackage: tomland-1.3.3.1
 - completed:
-    pantry-tree:
-      sha256: bf72fe4304690da4b5bc6e5218b0f90b5613e7d658f3ce31731816a423fcbca6
-      size: 696
     hackage: validation-selective-0.1.0.1@sha256:9a5aa8b801efc6a4ffb120e1b28e80c5f7d090043be56bba11222cd20c393044,3621
+    pantry-tree:
+      size: 696
+      sha256: bf72fe4304690da4b5bc6e5218b0f90b5613e7d658f3ce31731816a423fcbca6
   original:
     hackage: validation-selective-0.1.0.1
 - completed:
-    name: servant-auth-server
     subdir: servant-auth/servant-auth-server
-    pantry-tree:
-      sha256: 863179602fd64c564cd6d7a5ed328fed8525329e07e5d924f629ad78c4ff461a
-      size: 1469
-    commit: d05da71f09be08131d29a2c17f613a4bd71faea2
-    git: https://github.com/haskell-servant/servant.git
+    name: servant-auth-server
     version: 0.4.7.0
+    git: https://github.com/haskell-servant/servant.git
+    pantry-tree:
+      size: 1469
+      sha256: 863179602fd64c564cd6d7a5ed328fed8525329e07e5d924f629ad78c4ff461a
+    commit: d05da71f09be08131d29a2c17f613a4bd71faea2
   original:
     subdir: servant-auth/servant-auth-server
-    commit: d05da71f09be08131d29a2c17f613a4bd71faea2
     git: https://github.com/haskell-servant/servant.git
+    commit: d05da71f09be08131d29a2c17f613a4bd71faea2
 snapshots:
 - completed:
-    sha256: cbd5e8593869445794924668479b5bd9f1738d075898623dceacc13b2576b6e3
-    size: 617355
-    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/19/1.yaml
-  original: lts-19.1
+    size: 618506
+    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/19/8.yaml
+    sha256: f1c4aca9b9b81afbb9db55571acb0690cdc01ac97a178234de281f9dc075e95e
+  original: lts-19.8

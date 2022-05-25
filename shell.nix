@@ -1,6 +1,8 @@
-with (import <nixpkgs> {});
 let
-  stack-wrapped = pkgs.symlinkJoin {
+  sources = import ./nix/sources.nix;
+  pkgs = import sources.nixpkgs { };
+
+  stack-nix = pkgs.symlinkJoin {
     name = "stack";
     paths = [ pkgs.stack ];
     buildInputs = [ pkgs.makeWrapper ];
@@ -14,7 +16,7 @@ let
     '';
   };
 in
-mkShell {
+pkgs.mkShell {
   name = "tagger-dev";
   NIX_PATH = "nixpkgs=" + pkgs.path;
   buildInputs = with pkgs; [
@@ -24,7 +26,7 @@ mkShell {
     haskellPackages.ormolu
     nodePackages.npm
     postgresql
-    stack-wrapped
+    stack-nix
     watchexec
     zlib
   ];
