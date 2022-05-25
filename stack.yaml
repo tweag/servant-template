@@ -15,7 +15,3 @@ extra-deps:
       - servant-auth/servant-auth-server
 
 allow-newer: true
-
-nix:
-  enable: true
-  packages: [postgresql zlib]
