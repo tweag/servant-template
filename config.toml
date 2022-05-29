@@ -1,8 +1,8 @@
 [database]
   host     = "localhost"
   port     = 5432
-  dbname   = "tagger"
-  user     = "tagger"
+  dbname   = "tagger-dev"
+  user     = "tagger-user"
   password = "password"
 
 [api]

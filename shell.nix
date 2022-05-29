@@ -24,9 +24,11 @@ pkgs.mkShell {
     elmPackages.elm-language-server
     haskellPackages.haskell-language-server
     haskellPackages.ormolu
+    jq
     nodePackages.npm
     postgresql
     stack-nix
+    toml2json
     watchexec
     zlib
   ];

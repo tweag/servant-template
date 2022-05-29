@@ -4,8 +4,13 @@ export PGHOST=$PWD/.postgres
 export PGDATA=$PGHOST/data
 export PGDATABASE=postgres
 export PGLOG=$PGHOST/postgres.log
+export CONFIG=$PWD/config.toml
 
 mkdir -p $PGHOST
+
+dbuser=$(toml2json config.toml | jq .database.user -r)
+dbport=$(toml2json config.toml | jq .database.port -r)
+dbname=$(toml2json config.toml | jq .database.dbname -r)
 
 if [ ! -d $PGDATA ]; then
   initdb --auth=trust --no-locale --encoding=UTF8
@@ -15,15 +20,15 @@ if ! pg_ctl status > /dev/null
 then
   pg_ctl start -l $PGLOG -o "--unix_socket_directories='$PGHOST'"
 
-  echo "creating database"
-  psql --command 'create database tagger'
+  echo "[DB] Creating database \"$dbname\"..."
+  psql --command "create database \"$dbname\""
 
-  echo "creating user"
-  psql --command 'create user tagger;'
+  echo "[DB] Creating user \"$dbuser\"..."
+  psql --command "create user \"$dbuser\""
 
-  echo "granting privileges"
-  psql --command 'grant all privileges on database tagger to tagger;'
+  echo "[DB] Granting privileges to \"$dbuser\"..."
+  psql --command "grant all privileges on database \"$dbname\" to \"$dbuser\";"
 
-  echo "settings schema"
-  psql -U tagger -d tagger -f ./schema.sql;
+  echo "[DB] Applying schema..."
+  psql -U "$dbuser" -d "$dbname" -f ./schema.sql;
 fi
