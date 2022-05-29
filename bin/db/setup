@@ -4,13 +4,13 @@ export PGHOST=$PWD/.postgres
 export PGDATA=$PGHOST/data
 export PGDATABASE=postgres
 export PGLOG=$PGHOST/postgres.log
-export CONFIG=$PWD/config.toml
+export APPCONFIG=$PWD/config.toml
 
 mkdir -p $PGHOST
 
-dbuser=$(toml2json config.toml | jq .database.user -r)
-dbport=$(toml2json config.toml | jq .database.port -r)
-dbname=$(toml2json config.toml | jq .database.dbname -r)
+dbuser=$(toml2json $APPCONFIG | jq .database.user -r)
+dbport=$(toml2json $APPCONFIG | jq .database.port -r)
+dbname=$(toml2json $APPCONFIG | jq .database.dbname -r)
 
 if [ ! -d $PGDATA ]; then
   initdb --auth=trust --no-locale --encoding=UTF8
