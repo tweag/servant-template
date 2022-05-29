@@ -1,7 +1,4 @@
-elm/elm-stuff/*
-elm/dist/
-elm/.parcel-cache
-elm/node_modules
+.direnv
 .postgres
 .hie
 .stack-work

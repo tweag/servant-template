@@ -1,3 +1,6 @@
+.parcel-cache/
+node_modules/
+dist/
 elm-stuff
 spec/report
 index.html
