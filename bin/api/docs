@@ -1,0 +1,5 @@
+#!/bin/sh
+
+args=$@
+cmd="stack haddock"
+bin/util/with-nix $cmd
