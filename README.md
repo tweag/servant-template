@@ -30,8 +30,8 @@ Configuration of the application is managed using [TOML](https://toml.io). The a
 [database]
   host     = "localhost"
   port     = 5432
-  dbname   = "tagger"
-  user     = "tagger"
+  dbname   = "tagger-db"
+  user     = "tagger-user"
   password = "password"
 
 [api]
