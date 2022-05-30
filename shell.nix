@@ -25,7 +25,7 @@ pkgs.mkShell {
     haskellPackages.haskell-language-server
     haskellPackages.ormolu
     jq
-    nodePackages.npm
+    nodejs
     postgresql
     stack-nix
     toml2json
