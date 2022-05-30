@@ -1,4 +1,6 @@
 #!/bin/sh
 
-cmd="stack repl"
+args=$@
+cmd="stack repl $args"
+
 bin/util/with-nix $cmd
