@@ -30,9 +30,9 @@ Configuration of the application is managed using [TOML](https://toml.io). The a
 [database]
   host     = "localhost"
   port     = 5432
-  dbname   = "tagger-db"
-  user     = "tagger-user"
-  password = "password"
+  dbname   = "db-name"
+  user     = "db-user"
+  password = "db-password"
 
 [api]
   port = 8080
@@ -56,26 +56,55 @@ The project provides scripts to manage the lifecycle of the application. If `nix
 
 The project uses [Stack](https://docs.haskellstack.org/en/stable/README/). The convenience scripts are completely optional and the user is free to use the stack commands directly (e.g. `stack build`, `stack test`, etc.)
 
+### Setup
+Setting up the runtime dependencies for development, such as the database, is taken care of by the `bin/setup` script. This calls individual components' setup scripts such as `bin/db/setup` under the hood, if you prefer to call it directly without using `nix`.
+
+### Building the API
+
 To build the API, run
 
-```
-bin/api/build # or directly `stack build`
+```sh
+# With convenience script
+bin/api/build
+
+# With nix
+nix-shell --run 'stack build'
+
+# With stack
+stack build
 ```
 
-> :information_source: This command forwards options/flags to `stack build`, so it could be run as `bin/api/build --file-watch`
+> :information_source: The convenience script forwards options/flags to `stack build`, so it could be run as `bin/api/build --file-watch`
 
 > :warning: Note for non-nix users: the build requires the presence of the `pg_config` executable which is made available by installing Postgresql. Nix would take care of this automatically.
 
+
+### Running the API tests
 To run the tests, run
 
-```
-bin/api/test # or directly `stack test`
+```sh
+# With convenience script
+bin/api/test
+
+# With nix
+nix-shell --run 'stack test'
+
+# With Stack
+stack test
 ```
 
+### Serving the API for development
 You can launch the web server using
 
-```
-bin/api/serve # or directly (without hot-reloading) `stack exec servant-template-exe`
+```sh
+# With convenience script (with hot-reloading enabled)
+bin/api/serve
+
+# With nix
+nix-shell --run 'stack exec servant-template-exe'
+
+# With stack (without hot-reloading)
+stack exec servant-template-exe
 ```
 
 > :warning: Note for non-nix users: serving the API with hot-reloading requires the presence of the `watchexec` utility which is made available by the nix shell. Install it manually if you wish to use this script.
@@ -99,15 +128,17 @@ Alternatively, there is a setup script in `bin/db/setup` that will create a data
 
 You can generate the documentation of the project using
 
-```
+```sh
+# With convenience script
 bin/api/docs
-# or directly:
+
+# With Stack
 stack haddock
 ```
 
 ### OpenApi documentation
 
-You can access the OpenAPI documentation just by visiting the `docs` endpoint
+You can access the OpenAPI documentation just by visiting the `docs` endpoint (by default http://localhost:8080/docs)
 
 ## Frontend
 
