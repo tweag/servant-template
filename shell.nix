@@ -32,5 +32,4 @@ pkgs.mkShell {
     watchexec
     zlib
   ];
-  shellHook = builtins.readFile ./bin/db/setup;
 }
