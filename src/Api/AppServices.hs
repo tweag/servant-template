@@ -16,9 +16,9 @@ where
 import Control.Monad ((<=<))
 import Control.Monad.Except (throwError)
 import Control.Monad.IO.Class (liftIO)
+import qualified Tagger.Database as DB
 import Control.Monad.Trans.Except (ExceptT, runExceptT)
 import Crypto.JOSE.JWK (JWK)
-import Hasql.Connection (Connection)
 import Hasql.Session (QueryError)
 import qualified Infrastructure.Authentication.AuthenticateUser as Auth
 import Infrastructure.Authentication.PasswordManager
@@ -56,15 +56,15 @@ data AppServices = AppServices
 type Log = SeverityLogger Handler
 
 -- Creates all the services needed by the application, creating a different contexts for the logger of each service
-appServices :: Connection -> JWK -> AppServices
-appServices connection key =
+appServices :: DB.Handle -> JWK -> AppServices
+appServices dbHandle key =
   let logContext name = provideContext name messageLogger
       passwordManager' = encryptedPasswordManager (logContext "PasswordManager") $ defaultJWTSettings key
-      dbUserRepository = postgresUserRepository connection
+      dbUserRepository = postgresUserRepository dbHandle
    in AppServices
         { jwtSettings = defaultJWTSettings key,
           passwordManager = passwordManager',
-          contentRepository = connectedContentRepository (logContext "ContentRepository") (postgresContentRepository connection),
+          contentRepository = connectedContentRepository (logContext "ContentRepository") (postgresContentRepository dbHandle),
           userRepository = connectedUserRepository (logContext "UserRepository") dbUserRepository,
           authenticateUser = connectedAuthenticateUser (logContext "AuthenticateUser") dbUserRepository passwordManager'
         }

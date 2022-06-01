@@ -5,43 +5,35 @@ module Main where
 
 import Api.AppServices (appServices)
 import Api.Application (app)
-import Api.Config (Config, apiConfig, apiPort, connectionString, dbConfig, getPort)
+import Api.Config (Port (..), apiConfig, apiPort)
 import qualified Api.Config as Config
 import CLIOptions (CLIOptions (configPath, jwkPath))
 import qualified CLIOptions
 import Control.Exception (catch)
 import Crypto.JOSE.JWK (JWK)
-import Data.ByteString.Char8 (unpack, writeFile)
+import Data.ByteString.Char8 (writeFile)
 import Data.Function ((&))
-import Data.Maybe (fromMaybe)
-import Hasql.Connection (Connection, ConnectionError, acquire)
 import Network.Wai (Middleware)
 import qualified Network.Wai.Handler.Warp as Warp
 import Network.Wai.Middleware.Cors (cors, corsRequestHeaders, simpleCorsResourcePolicy)
 import Network.Wai.Middleware.RequestLogger (logStdoutDev)
 import Servant.Auth.Server (fromSecret, generateSecret, readKey)
 import Prelude hiding (writeFile)
+import qualified Tagger.Database as DB
 
 main :: IO ()
 main = do
   inputOptions <- CLIOptions.parse
   config <- Config.load (configPath inputOptions)
-  dbConnection <- setupDBConnection config
+  dbHandle <- DB.new (DB.parseConfig config)
   jsonWebKey <- setupJWK inputOptions
+  let port = apiPort . apiConfig $ config
 
-  either
-    (fail . unpack . fromMaybe "unable to connect to the database")
-    (runApp jsonWebKey config)
-    dbConnection
+  runApp jsonWebKey port dbHandle
 
-setupDBConnection :: Config -> IO (Either ConnectionError Connection)
-setupDBConnection =
-  acquire . connectionString . dbConfig
-
-runApp :: JWK -> Config -> Connection -> IO ()
-runApp jwk config dbConnection =
-  let services = appServices dbConnection jwk
-      port = getPort . apiPort . apiConfig $ config
+runApp :: JWK -> Port -> DB.Handle -> IO ()
+runApp jwk (Port port) dbHandle =
+  let services = appServices dbHandle jwk
       application = app services & corsMiddleware & logStdoutDev
    in Warp.run port application
 
