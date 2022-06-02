@@ -20,6 +20,6 @@ main = do
 
   let (Port port) = apiPort . apiConfig $ appConfig
       services = AppServices.start dbHandle jwk
-      application = Middleware.withMiddlewares (app services)
+      application = Middleware.apply (app services)
 
   Warp.run port application

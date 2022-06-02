@@ -1,14 +1,14 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Middleware (withMiddlewares) where
+module Middleware (apply) where
 
+import qualified Network.Wai as Wai (Application, Middleware)
 import Network.Wai.Middleware.Cors (cors, corsRequestHeaders, simpleCorsResourcePolicy)
 import Network.Wai.Middleware.RequestLogger (logStdoutDev)
-import qualified Network.Wai as Wai (Application, Middleware)
 
-withMiddlewares :: Wai.Application -> Wai.Application
-withMiddlewares =
- corsMiddleware . logStdoutDev
+apply :: Wai.Application -> Wai.Application
+apply =
+  corsMiddleware . logStdoutDev
 
 corsMiddleware :: Wai.Middleware
 corsMiddleware =
