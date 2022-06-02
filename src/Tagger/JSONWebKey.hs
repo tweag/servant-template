@@ -1,6 +1,6 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 
-module Tagger.JWK (setup, JWK) where
+module Tagger.JSONWebKey (setup, JWK) where
 
 import CLIOptions (CLIOptions (jwkPath))
 import Control.Exception (catch)
@@ -10,11 +10,8 @@ import Servant.Auth.Server (fromSecret, generateSecret, readKey)
 import Prelude hiding (writeFile)
 
 setup :: CLIOptions -> IO JWK
-setup =
-  jwtKey . jwkPath
-
-jwtKey :: FilePath -> IO JWK
-jwtKey path = do
+setup config = do
+  let path = jwkPath config
   -- try to retrieve the JWK from file
   catch (readKey path) $ \(_ :: IOError) -> do
     -- if the file does not exist or does not contain a valid key, we generate one

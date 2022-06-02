@@ -5,7 +5,7 @@
 
 module Api.AppServices
   ( AppServices (..),
-    appServices,
+    start,
     connectedContentRepository,
     connectedUserRepository,
     connectedAuthenticateUser,
@@ -56,8 +56,8 @@ data AppServices = AppServices
 type Log = SeverityLogger Handler
 
 -- Creates all the services needed by the application, creating a different contexts for the logger of each service
-appServices :: DB.Handle -> JWK -> AppServices
-appServices dbHandle key =
+start :: DB.Handle -> JWK -> AppServices
+start dbHandle key =
   let logContext name = provideContext name messageLogger
       passwordManager' = encryptedPasswordManager (logContext "PasswordManager") $ defaultJWTSettings key
       dbUserRepository = postgresUserRepository dbHandle

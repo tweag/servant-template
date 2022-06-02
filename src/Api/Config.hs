@@ -36,7 +36,6 @@ newtype User = User {getUser :: Text}
 
 newtype Password = Password {getPassword :: Text}
 
--- |
 -- Compute the connection string given a 'DatabaseConfig'
 connectionString :: DatabaseConfig -> ByteString
 connectionString DatabaseConfig{host, port, dbname, user, password} = pack
