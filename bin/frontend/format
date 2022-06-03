@@ -1,0 +1,3 @@
+#!/bin/sh
+
+bin/util/with-nix "find . -type f -name "*.elm" | xargs elm-format --yes"

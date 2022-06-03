@@ -41,9 +41,11 @@
         devShells.default = pkgs.mkShell {
             buildInputs = with pkgs; [
               elmPackages.elm
+              elmPackages.elm-format
               elmPackages.elm-live
               elmPackages.elm-language-server
               haskellPackages.haskell-language-server
+              haskellPackages.ormolu
               jq
               nodejs
               postgresql
