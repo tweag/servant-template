@@ -23,7 +23,6 @@ pkgs.mkShell {
     elmPackages.elm
     elmPackages.elm-language-server
     haskellPackages.haskell-language-server
-    haskellPackages.ormolu
     jq
     nodejs
     postgresql
