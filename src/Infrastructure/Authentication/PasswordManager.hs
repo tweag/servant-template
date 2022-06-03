@@ -36,8 +36,8 @@ data PasswordManager m = PasswordManager
 
 -- |
 -- Given a natural transformation between a context 'm' and a context 'n', it allows to change the context where 'PasswordManager' is operating
-hoistPasswordManager :: (forall a. m a -> n a) -> PasswordManager m -> PasswordManager n
-hoistPasswordManager f PasswordManager{generatePassword, generateToken, validatePassword} =
+hoist :: (forall a. m a -> n a) -> PasswordManager m -> PasswordManager n
+hoist f PasswordManager{generatePassword, generateToken, validatePassword} =
   PasswordManager (f . generatePassword) (f . generateToken) validatePassword
 
 -- |

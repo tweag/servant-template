@@ -4,13 +4,16 @@
 
 module Api.AppServices where
 
-import qualified Infrastructure.Authentication.AuthenticateUser as Auth (AuthenticateUser(AuthenticateUser), AuthenticationError(AuthenticationQueryError), authenticateUser, hoistAuthenticateUser)
-import Infrastructure.Authentication.PasswordManager (PasswordManager, PasswordManagerError(..), hoistPasswordManager, bcryptPasswordManager)
+import qualified Infrastructure.Authentication.AuthenticateUser as Auth (AuthenticateUser(AuthenticateUser), AuthenticationError(AuthenticationQueryError), authenticateUser, hoist)
+import qualified Infrastructure.Authentication.PasswordManager as PasswordManager
+import Infrastructure.Authentication.PasswordManager (PasswordManager, PasswordManagerError(..), bcryptPasswordManager)
 import Infrastructure.Logging.Logger (messageLogger, provideContext)
 import Infrastructure.Persistence.PostgresContentRepository (postgresContentRepository)
 import Infrastructure.Persistence.PostgresUserRepository (postgresUserRepository, UserRepositoryError (DuplicateUserName))
-import Tagger.ContentRepository (ContentRepository, hoistContentRepository)
-import Tagger.UserRepository (UserRepository, hoistUserRepository)
+import qualified Tagger.ContentRepository as ContentRepository
+import Tagger.ContentRepository (ContentRepository)
+import qualified Tagger.UserRepository as UserRepository
+import Tagger.UserRepository (UserRepository)
 
 -- base
 import Control.Monad ((<=<))
@@ -61,12 +64,12 @@ eitherTToHandler handleError = either handleError pure <=< liftIO . runExceptT
 -- |
 -- Lifts a 'ContentRepository' fo the 'Handler' monad, handling all errors by logging them and returning a 500 response
 connectedContentRepository :: SeverityLogger -> ContentRepository (ExceptT QueryError IO) -> ContentRepository Handler
-connectedContentRepository log = hoistContentRepository (eitherTToHandler $ (>> throwError err500) . (log <&) . (Error ,))
+connectedContentRepository log = ContentRepository.hoist (eitherTToHandler $ (>> throwError err500) . (log <&) . (Error ,))
 
 -- |
 -- Lifts a 'UserRepository' fo the 'Handler' monad, handling all errors by logging them and returning a 500 response
 connectedUserRepository :: SeverityLogger -> UserRepository (ExceptT UserRepositoryError IO) -> UserRepository Handler
-connectedUserRepository log = hoistUserRepository $ eitherTToHandler handleUserRepositoryError-- (eitherTToHandler $ (>> throwError err500) . (log <&) . (Error ,))
+connectedUserRepository log = UserRepository.hoist $ eitherTToHandler handleUserRepositoryError-- (eitherTToHandler $ (>> throwError err500) . (log <&) . (Error ,))
   where
     handleUserRepositoryError :: UserRepositoryError -> Handler a
     -- If the database error concerns a duplicate user, we return a 403 response
@@ -82,7 +85,7 @@ connectedUserRepository log = hoistUserRepository $ eitherTToHandler handleUserR
 -- Creates an 'AuthenticateUser' service injecting its dependencies and handling errors
 connectedAuthenticateUser :: SeverityLogger -> UserRepository (ExceptT UserRepositoryError IO) -> PasswordManager Handler -> Auth.AuthenticateUser Handler
 connectedAuthenticateUser log userRepository' passwordManager'
-  = Auth.hoistAuthenticateUser (eitherTToHandler handleAuthenticationError)
+  = Auth.hoist (eitherTToHandler handleAuthenticationError)
   . Auth.AuthenticateUser
   $ Auth.authenticateUser userRepository' passwordManager'
     where
@@ -99,7 +102,7 @@ connectedAuthenticateUser log userRepository' passwordManager'
 -- |
 -- Creates a 'PasswordManager' service injecting its dependencies and handling errors
 encryptedPasswordManager :: SeverityLogger -> JWTSettings -> PasswordManager Handler
-encryptedPasswordManager log = hoistPasswordManager (eitherTToHandler handlePasswordManagerError) . bcryptPasswordManager
+encryptedPasswordManager log = PasswordManager.hoist (eitherTToHandler handlePasswordManagerError) . bcryptPasswordManager
   where
     handlePasswordManagerError :: PasswordManagerError -> Handler a
     -- If there was a failure during password hashing, we return a 500 response
