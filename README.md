@@ -58,7 +58,18 @@ In summary, there are three equally valid ways of interacting with the project d
 - Directly (using your environment's `stack` and `elm` commands)
 
 ### Setup
+
+There are a few ways to setup the project and its dependencies, outlined below.
+
+#### With nix
 Setting up the runtime dependencies for development, such as the database, is taken care of by the `bin/setup` script. This calls individual components' setup scripts such as `bin/db/setup` under the hood, if you prefer to call it directly without using `nix`.
+
+#### Without nix
+Alternatively, there is a setup script in `bin/db/setup` that will create a database, user and load the schema required for a working development environment. This script assumes the existence of few packages (`toml2json`, `jq`, `postgres`, etc.) made available automatically by the nix-shell but should be usable if they are installed manually.
+
+#### With docker
+In the root of the project you can find a `docker-compose.yml` file which provides a Postgresql database and a web interface to it, exposed on port `8081`.
+You can initialise the schema of the database by running the `schema.sql` which is also provided.
 
 ### Building the API
 
@@ -115,14 +126,6 @@ The executable accepts two options:
 
 - `--config`, which allows to customize the path of the configuration file
 - `--jwk`, which allows to customize the path of the file where the JWK is stored
-
-### Database
-
-In the root of the project you can find a `docker-compose.yml` file which provides a Postgresql database and a web interface to it, exposed on port `8081`.
-
-You can initialise the schema of the database by running the `schema.sql` which is also provided.
-
-Alternatively, there is a setup script in `bin/db/setup` that will create a database, user and load the schema required for a working development environment. This script assumes the existence of few packages (`toml2json`, `jq`, `postgres`, etc.) made available by the nix-shell but should be usable if they are installed manually.
 
 ## Documentation
 
