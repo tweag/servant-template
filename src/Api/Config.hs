@@ -12,8 +12,8 @@ import Data.ByteString.Char8 (ByteString, pack)
 import Data.Text (Text, unpack)
 
 -- toml
-import Toml (TomlCodec, (.=), text, table)
-import qualified Toml (diwrap, int)
+import Toml (TomlCodec, (.=), text, table, decodeFileExact, diwrap, int)
+import Control.Monad.IO.Class (MonadIO)
 
 newtype Host = Host {getHost :: Text}
 
@@ -78,3 +78,10 @@ configCodec :: TomlCodec Config
 configCodec = Config
   <$> Toml.table databaseConfigCodec "database" .= database
   <*> Toml.table apiConfigCodec      "api"      .= api
+
+-- |
+-- Reads configuration file at given filepath
+load :: (MonadIO m, MonadFail m) => FilePath -> m Config
+load path = do
+  eitherConfig <- decodeFileExact configCodec path
+  either (\errors -> fail $ "unable to parse configuration: " <> show errors) pure eitherConfig

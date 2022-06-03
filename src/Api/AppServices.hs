@@ -116,8 +116,8 @@ encryptedPasswordManager log = PasswordManager.hoist (eitherTToHandler handlePas
 
 -- |
 -- Creates all the services needed by the application, creating a different contexts for the logger of each service
-appServices :: Connection -> JWK -> AppServices
-appServices connection key =
+start :: Connection -> JWK -> AppServices
+start connection key =
   let
     passwordManager' = encryptedPasswordManager (provideContext "PasswordManager" messageLogger) $ defaultJWTSettings key
     dbUserRepository = postgresUserRepository connection
