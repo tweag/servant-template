@@ -135,6 +135,9 @@ You can generate the documentation of the project using
 # With convenience script
 bin/api/docs
 
+# With nix
+nix-shell --run 'stack haddock'
+
 # With Stack
 stack haddock
 ```
