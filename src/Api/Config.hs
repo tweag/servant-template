@@ -3,7 +3,7 @@
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module Api.Config where
+module Api.Config(Config, api, apiPort, configCodec, connectionString, dbConfig, getPort) where
 
 -- bystestring
 import Data.ByteString.Char8 (ByteString, pack)
@@ -71,6 +71,11 @@ data Config = Config
   { database :: DatabaseConfig
   , api      :: ApiConfig
   }
+
+-- |
+-- More explicit alias for the database field
+dbConfig :: Config -> DatabaseConfig
+dbConfig = database
 
 -- |
 -- A bidirectional codec for 'Config'

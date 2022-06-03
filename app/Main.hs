@@ -5,20 +5,16 @@ module Main where
 
 import Api.Application (app)
 import Api.AppServices (appServices)
-import Api.Config (api, apiPort, configCodec, connectionString, database, getPort)
+import Api.Config (api, apiPort, configCodec, getPort)
 import InputOptions (inputOptionsParser, InputOptions (configPath, jwkPath))
 
 -- base
 import Control.Exception (catch)
 import Data.Function ((&))
-import Data.Maybe (fromMaybe)
 import Prelude hiding (writeFile)
 
 -- bytestring
-import Data.ByteString.Char8 (writeFile, unpack)
-
--- hasql
-import Hasql.Connection (acquire)
+import Data.ByteString.Char8 (writeFile)
 
 -- jose
 import Crypto.JOSE.JWK (JWK)
@@ -41,6 +37,8 @@ import Network.Wai.Middleware.RequestLogger (logStdoutDev)
 -- warp
 import Network.Wai.Handler.Warp (run)
 
+import qualified Tagger.Database as DB
+
 main:: IO ()
 main = do
   -- parse input options
@@ -48,30 +46,23 @@ main = do
   -- extract application configuration from file
   eitherConfig <- decodeFileExact configCodec (configPath inputOptions)
   config <- either (\errors -> fail $ "unable to parse configuration: " <> show errors) pure eitherConfig
+  key <- jwtKey (jwkPath inputOptions)
   -- acquire the connection to the database
-  connection <- acquire $ connectionString (database config)
-  either
-    (fail . unpack . fromMaybe "unable to connect to the database")
-    -- if we were able to connect to the database we run the application
-    (\connection' -> do
-      -- first we generate a JSON Web Key
-      key <- jwtKey (jwkPath inputOptions)
-      -- we setup the application services
-      let services = appServices connection' key
-      -- we retrieve the port from configuration
-      let port = getPort . apiPort . api $ config
-      -- we create our application
-      let application
-            -- we pass in the required services
-            = app services
-            -- manage CORS for browser interaction
-            & cors (const . Just $ simpleCorsResourcePolicy {corsRequestHeaders = ["Authorization", "Content-Type"]})
-            -- we setup logging for the incoming requests
-            & logStdoutDev
-      -- eventually, we run the application on the port
-      run port application)
-      --run port . logStdoutDev . app $ services)
-    connection
+  handle <- DB.new $ DB.parseConfig config
+  let services = appServices handle key
+  -- we retrieve the port from configuration
+  let port = getPort . apiPort . api $ config
+  -- we create our application
+  let application
+        -- we pass in the required services
+        = app services
+        -- manage CORS for browser interaction
+        & cors (const . Just $ simpleCorsResourcePolicy {corsRequestHeaders = ["Authorization", "Content-Type"]})
+        -- we setup logging for the incoming requests
+        & logStdoutDev
+  -- eventually, we run the application on the port
+  run port application
+  --run port . logStdoutDev . app $ services)
 
 jwtKey :: FilePath -> IO JWK
 jwtKey path = do

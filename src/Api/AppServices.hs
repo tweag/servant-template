@@ -21,7 +21,6 @@ import Prelude hiding (log)
 import Colog.Core ((<&), LogAction, Severity(..))
 
 -- hasql
-import Hasql.Connection (Connection)
 import Hasql.Session (QueryError)
 
 -- jose
@@ -38,6 +37,8 @@ import Servant (Handler, err500, err401, err403)
 
 -- transformers
 import Control.Monad.Trans.Except (ExceptT, runExceptT)
+
+import qualified Tagger.Database as DB
 
 -- |
 -- Collection of services needed by the application to work
@@ -113,15 +114,15 @@ encryptedPasswordManager log = hoistPasswordManager (eitherTToHandler handlePass
 
 -- |
 -- Creates all the services needed by the application, creating a different contexts for the logger of each service
-appServices :: Connection -> JWK -> AppServices
-appServices connection key =
+appServices :: DB.Handle -> JWK -> AppServices
+appServices handle key =
   let
     passwordManager' = encryptedPasswordManager (provideContext "PasswordManager" messageLogger) $ defaultJWTSettings key
-    dbUserRepository = postgresUserRepository connection
+    dbUserRepository = postgresUserRepository handle
   in  AppServices
     { jwtSettings       = defaultJWTSettings key
     , passwordManager   = passwordManager'
-    , contentRepository = connectedContentRepository (provideContext "ContentRepository" messageLogger) (postgresContentRepository connection)
+    , contentRepository = connectedContentRepository (provideContext "ContentRepository" messageLogger) (postgresContentRepository handle)
     , userRepository    = connectedUserRepository (provideContext "UserRepository" messageLogger) dbUserRepository
     , authenticateUser  = connectedAuthenticateUser (provideContext "AuthenticateUser" messageLogger) dbUserRepository passwordManager'
     }

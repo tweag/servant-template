@@ -19,8 +19,7 @@ import Control.Monad.IO.Class (liftIO)
 import Data.Tuple.Extra (uncurry3)
 
 -- hasql
-import Hasql.Connection (Connection)
-import Hasql.Session (run, QueryError)
+import Hasql.Session (QueryError)
 
 -- transformers
 import Control.Monad.Trans.Except (ExceptT (ExceptT))
@@ -28,29 +27,31 @@ import Control.Monad.Trans.Except (ExceptT (ExceptT))
 -- uuid
 import Data.UUID.V4 (nextRandom)
 
+import qualified Tagger.Database as DB
+
 -- |
 -- A 'ContentRepository' based on PostgreSQL
-postgresContentRepository :: Connection -> ContentRepository (ExceptT QueryError IO)
+postgresContentRepository :: DB.Handle -> ContentRepository (ExceptT QueryError IO)
 postgresContentRepository connection = ContentRepository
   { selectUserContentsByTags = postgresSelectUserContentsByTags connection
   , addContentWithTags       = postgresAddContentWithTags connection
   }
 
-postgresSelectUserContentsByTags :: Connection -> Id User -> [Tag] -> ExceptT QueryError IO [Owned (Content Tag)]
-postgresSelectUserContentsByTags connection userId tags = do
+postgresSelectUserContentsByTags :: DB.Handle -> Id User -> [Tag] -> ExceptT QueryError IO [Owned (Content Tag)]
+postgresSelectUserContentsByTags handle userId tags = do
   -- Retrieve the user's contents data from the database
-  userDBContents <- ExceptT $ run (DB.selectUserContents userId) connection
+  userDBContents <- ExceptT $ DB.runQuery handle  (DB.selectUserContents userId)
   -- Convert the contents data into their domain representation
   let userContents = uncurry3 unserializeContent <$> userDBContents
   -- Filter only the contents indexed by the provided tags
   pure $ filter (hasAllTags tags . content) userContents
 
-postgresAddContentWithTags :: Connection -> Id User -> Content Tag -> ExceptT QueryError IO (Id (Content Tag))
-postgresAddContentWithTags connection userId content' = do
+postgresAddContentWithTags :: DB.Handle -> Id User -> Content Tag -> ExceptT QueryError IO (Id (Content Tag))
+postgresAddContentWithTags handle userId content' = do
   -- Generate a UUID for the content
   contentUUID          <- liftIO nextRandom
   -- Generate and associate a UUID to every tag
   contentWithTagsUUIDs <- liftIO $ forM content' (\tag -> (, tag) . Id <$> nextRandom)
   -- Run a transaction to add the content and its tags to the database
-  ExceptT $ run (uncurry DB.addContentWithTags $ serializeContent (Id contentUUID) userId contentWithTagsUUIDs) connection
+  ExceptT $ DB.runQuery handle (uncurry DB.addContentWithTags $ serializeContent (Id contentUUID) userId contentWithTagsUUIDs)
   pure $ Id contentUUID

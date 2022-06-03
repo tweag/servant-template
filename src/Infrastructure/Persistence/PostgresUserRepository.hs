@@ -19,8 +19,7 @@ import Data.Bifunctor (second)
 import Data.ByteString (isInfixOf)
 
 -- hasql
-import Hasql.Connection (Connection)
-import Hasql.Session (QueryError (QueryError), run, CommandError (ResultError), ResultError (ServerError))
+import Hasql.Session (QueryError (QueryError), CommandError (ResultError), ResultError (ServerError))
 
 -- text
 import Data.Text (Text)
@@ -30,6 +29,8 @@ import Control.Monad.Trans.Except (ExceptT(ExceptT), withExceptT)
 
 -- uuid
 import Data.UUID.V4 (nextRandom)
+
+import qualified Tagger.Database as DB
 
 -- We want to distinguish the `QueryError` coming from the violation of the "users_name_key" unique constraints
 data UserRepositoryError
@@ -44,23 +45,23 @@ liftAddUserError queryError              = OtherError queryError
 
 -- |
 -- A 'UserRepository' based on PostgreSQL
-postgresUserRepository :: Connection -> UserRepository (ExceptT UserRepositoryError IO)
-postgresUserRepository connection = UserRepository
-  { getUserByName = postgresGetUserByName connection
-  , addUser       = postgresAddUser connection
+postgresUserRepository :: DB.Handle -> UserRepository (ExceptT UserRepositoryError IO)
+postgresUserRepository handle = UserRepository
+  { getUserByName = postgresGetUserByName handle
+  , addUser       = postgresAddUser handle
   }
 
-postgresGetUserByName :: Connection -> Text -> ExceptT UserRepositoryError IO (Either SelectUserError (Id User, User))
-postgresGetUserByName connection name = withExceptT OtherError . ExceptT $ do
+postgresGetUserByName :: DB.Handle -> Text -> ExceptT UserRepositoryError IO (Either SelectUserError (Id User, User))
+postgresGetUserByName handle name = withExceptT OtherError . ExceptT $ do
   -- Try to retrieve the user with the provided name from the database
-  eitherUser <- run (Query.selectUserByName name) connection
+  eitherUser <- DB.runQuery handle (Query.selectUserByName name)
   -- Adjust the happy path format
   pure $ second (userId &&& unserializeUser) <$> eitherUser
 
-postgresAddUser :: Connection -> Text -> EncryptedPassword -> ExceptT UserRepositoryError IO (Id User)
-postgresAddUser connection name password = do
+postgresAddUser :: DB.Handle -> Text -> EncryptedPassword -> ExceptT UserRepositoryError IO (Id User)
+postgresAddUser handle name password = do
   -- Generate the UUID for the user
   userId' <- liftIO nextRandom
   -- Actually add the user to the database, differentiating the `UserRepositoryError` cases
-  withExceptT liftAddUserError . ExceptT $ run (Query.addUser . litUser $ serializeUser (Id userId') (User name password)) connection
+  withExceptT liftAddUserError . ExceptT $ DB.runQuery handle (Query.addUser . litUser $ serializeUser (Id userId') (User name password))
   pure $ Id userId'
