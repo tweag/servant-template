@@ -57,6 +57,8 @@ In summary, there are three equally valid ways of interacting with the project d
 - Through the nix-shell (using `nix-shell --run 'stack'` and `nix-shell --run 'elm make ...'` and letting `nix` take care of making the dependencies available)
 - Directly (using your environment's `stack` and `elm` commands)
 
+> :information_source: If `direnv` is installed, it is also possible to use it with `nix`. The provided `.envrc` file is already configured to use `nix` and only needs to be enabled by issuing `direnv allow` in the project root once.
+
 ### Setup
 
 There are a few ways to setup the project and its dependencies, outlined below.
