@@ -21,9 +21,11 @@ pkgs.mkShell {
   NIX_PATH = "nixpkgs=" + pkgs.path;
   buildInputs = with pkgs; [
     elmPackages.elm
-    elmPackages.elm-live
+    elmPackages.elm-format
     elmPackages.elm-language-server
+    elmPackages.elm-live
     haskellPackages.haskell-language-server
+    haskellPackages.ormolu
     jq
     nodejs
     postgresql
