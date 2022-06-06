@@ -3,7 +3,7 @@
   port     = 5432
   dbname   = "tagger-db"
   user     = "tagger-user"
-  password = "password"
+  password = "tagger-pwd"
 
 [api]
   port = 8080
