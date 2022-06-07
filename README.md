@@ -161,10 +161,26 @@ This repository contains also a client [Elm](https://elm-lang.org/) application 
 
 You can find more details in [elm/README.md](elm/README.md), but there are convenience commands:
 
-```
-# builds the elm project
+### Building the project
+```sh
+# With convenience script
 bin/frontend/build
 
-# serves, reloading on file change
+# With nix
+nix-shell --run 'cd elm; npx parcel build index.html'
+
+# With npm
+cd elm; npx parcel build index.html
+```
+
+### Serve project for development
+```sh
+# With convenience script
 bin/frontend/serve
+
+# With nix
+nix-shell --run 'cd elm; npx parcel index.html'
+
+# With npm
+cd elm; npx parcel index.html
 ```

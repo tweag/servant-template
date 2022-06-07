@@ -1,3 +1,5 @@
 #!/bin/sh
-cmd='cd elm; npx parcel index.html'
+
+args=$@
+cmd="cd elm; npx parcel index.html $args"
 bin/util/with-nix $cmd
