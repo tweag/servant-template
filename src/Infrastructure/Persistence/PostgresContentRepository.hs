@@ -32,9 +32,9 @@ import qualified Infrastructure.Database as DB
 -- |
 -- A 'ContentRepository' based on PostgreSQL
 postgresContentRepository :: DB.Handle -> ContentRepository (ExceptT QueryError IO)
-postgresContentRepository connection = ContentRepository
-  { selectUserContentsByTags = postgresSelectUserContentsByTags connection
-  , addContentWithTags       = postgresAddContentWithTags connection
+postgresContentRepository handle = ContentRepository
+  { selectUserContentsByTags = postgresSelectUserContentsByTags handle
+  , addContentWithTags       = postgresAddContentWithTags handle
   }
 
 postgresSelectUserContentsByTags :: DB.Handle -> Id User -> [Tag] -> ExceptT QueryError IO [Owned (Content Tag)]
