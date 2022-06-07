@@ -3,9 +3,7 @@
 module Infrastructure.Database
   ( Config (..),
     Handle,
-    parseConfig,
-    new,
-    close,
+    withHandle,
     runQuery,
   )
 where
@@ -15,6 +13,7 @@ import Data.ByteString.Char8 (ByteString, unpack)
 import Data.Maybe (fromMaybe)
 import Hasql.Connection (Connection, acquire)
 import Hasql.Session (QueryError, Session, run)
+import Control.Exception (bracket)
 
 newtype Config = Config
   { connectionString :: ByteString
@@ -38,6 +37,14 @@ parseConfig =
 
 close :: Handle -> IO ()
 close = const $ pure ()
+
+withHandle :: AppConfig.Config -> (Handle -> IO a) -> IO a
+withHandle config f = do
+  bracket
+    (new . parseConfig $ config)
+    close
+    f
+
 
 runQuery :: Handle -> Session a -> IO (Either QueryError a)
 runQuery handle query =

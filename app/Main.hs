@@ -46,23 +46,26 @@ main = do
   -- extract application configuration from file
   eitherConfig <- decodeFileExact configCodec (configPath inputOptions)
   config <- either (\errors -> fail $ "unable to parse configuration: " <> show errors) pure eitherConfig
-  key <- jwtKey (jwkPath inputOptions)
-  -- acquire the connection to the database
-  handle <- DB.new $ DB.parseConfig config
-  let services = appServices handle key
-  -- we retrieve the port from configuration
-  let port = getPort . apiPort . api $ config
-  -- we create our application
-  let application
-        -- we pass in the required services
-        = app services
-        -- manage CORS for browser interaction
-        & cors (const . Just $ simpleCorsResourcePolicy {corsRequestHeaders = ["Authorization", "Content-Type"]})
-        -- we setup logging for the incoming requests
-        & logStdoutDev
-  -- eventually, we run the application on the port
-  run port application
-  --run port . logStdoutDev . app $ services)
+  -- acquire a database handle and yield it to the block
+  DB.withHandle config (\dbHandle -> do
+    -- first we generate a JSON Web Key
+    key <- jwtKey (jwkPath inputOptions)
+    -- we start the app dependencies
+    let services = appServices dbHandle key
+    -- we retrieve the port from configuration
+    let port = getPort . apiPort . api $ config
+    -- we create our application
+    let application
+          -- we pass in the required services
+          = app services
+          -- manage CORS for browser interaction
+          & cors (const . Just $ simpleCorsResourcePolicy {corsRequestHeaders = ["Authorization", "Content-Type"]})
+          -- we setup logging for the incoming requests
+          & logStdoutDev
+    -- eventually, we run the application on the port
+    run port application
+    )
+
 
 jwtKey :: FilePath -> IO JWK
 jwtKey path = do
