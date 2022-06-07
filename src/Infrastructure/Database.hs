@@ -6,7 +6,6 @@ module Infrastructure.Database
     parseConfig,
     new,
     close,
-    withHandle,
     runQuery,
   )
 where
@@ -38,10 +37,7 @@ parseConfig =
   Config . (AppConfig.connectionString . AppConfig.database)
 
 close :: Handle -> IO ()
-close = undefined
-
-withHandle :: Config -> (Handle -> IO a) -> IO a
-withHandle = undefined
+close = const $ pure ()
 
 runQuery :: Handle -> Session a -> IO (Either QueryError a)
 runQuery handle query =
