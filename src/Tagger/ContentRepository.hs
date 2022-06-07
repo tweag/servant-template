@@ -19,6 +19,6 @@ data ContentRepository m = ContentRepository
 
 -- |
 -- Given a natural transformation between a context 'm' and a context 'n', it allows to change the context where 'ContentRepository' is operating
-hoistContentRepository :: (forall a. m a -> n a) -> ContentRepository m -> ContentRepository n
-hoistContentRepository f ContentRepository{selectUserContentsByTags, addContentWithTags} =
+hoist :: (forall a. m a -> n a) -> ContentRepository m -> ContentRepository n
+hoist f ContentRepository{selectUserContentsByTags, addContentWithTags} =
   ContentRepository ((f .) . selectUserContentsByTags) ((f .) . addContentWithTags)

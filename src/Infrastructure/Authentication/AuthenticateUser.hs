@@ -23,8 +23,8 @@ newtype AuthenticateUser m = AuthenticateUser {runAuthenticateUser :: Credential
 
 -- |
 -- Given a natural transformation between a context 'm' and a context 'n', it allows to change the context where 'AuthenticateUser' is operating
-hoistAuthenticateUser :: (forall a. m a -> n a) -> AuthenticateUser m -> AuthenticateUser n
-hoistAuthenticateUser f (AuthenticateUser auth) = AuthenticateUser $ f . auth
+hoist :: (forall a. m a -> n a) -> AuthenticateUser m -> AuthenticateUser n
+hoist f (AuthenticateUser auth) = AuthenticateUser $ f . auth
 
 -- |
 -- How 'authenticateUser' can actually fail
