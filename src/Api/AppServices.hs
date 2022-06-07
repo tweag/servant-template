@@ -38,7 +38,7 @@ import Servant (Handler, err500, err401, err403)
 -- transformers
 import Control.Monad.Trans.Except (ExceptT, runExceptT)
 
-import qualified Tagger.Database as DB
+import qualified Infrastructure.Database as DB
 
 -- |
 -- Collection of services needed by the application to work

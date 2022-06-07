@@ -30,7 +30,7 @@ import Control.Monad.Trans.Except (ExceptT(ExceptT), withExceptT)
 -- uuid
 import Data.UUID.V4 (nextRandom)
 
-import qualified Tagger.Database as DB
+import qualified Infrastructure.Database as DB
 
 -- We want to distinguish the `QueryError` coming from the violation of the "users_name_key" unique constraints
 data UserRepositoryError

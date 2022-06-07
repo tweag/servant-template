@@ -37,7 +37,7 @@ import Network.Wai.Middleware.RequestLogger (logStdoutDev)
 -- warp
 import Network.Wai.Handler.Warp (run)
 
-import qualified Tagger.Database as DB
+import qualified Infrastructure.Database as DB
 
 main:: IO ()
 main = do

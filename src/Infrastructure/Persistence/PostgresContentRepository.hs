@@ -27,7 +27,7 @@ import Control.Monad.Trans.Except (ExceptT (ExceptT))
 -- uuid
 import Data.UUID.V4 (nextRandom)
 
-import qualified Tagger.Database as DB
+import qualified Infrastructure.Database as DB
 
 -- |
 -- A 'ContentRepository' based on PostgreSQL

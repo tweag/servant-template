@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Tagger.Database
+module Infrastructure.Database
   ( Config (..),
     Handle,
     parseConfig,
