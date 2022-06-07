@@ -3,7 +3,7 @@
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module Api.Config(Config, api, apiPort, configCodec, connectionString, dbConfig, getPort) where
+module Api.Config where
 
 -- bystestring
 import Data.ByteString.Char8 (ByteString, pack)
