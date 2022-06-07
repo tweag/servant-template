@@ -73,11 +73,6 @@ data Config = Config
   }
 
 -- |
--- More explicit alias for the database field
-dbConfig :: Config -> DatabaseConfig
-dbConfig = database
-
--- |
 -- A bidirectional codec for 'Config'
 configCodec :: TomlCodec Config
 configCodec = Config

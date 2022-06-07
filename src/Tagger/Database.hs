@@ -11,7 +11,6 @@ module Tagger.Database
   )
 where
 
-import Api.Config (dbConfig)
 import qualified Api.Config as AppConfig
 import Data.ByteString.Char8 (ByteString, unpack)
 import Data.Maybe (fromMaybe)
@@ -36,7 +35,7 @@ new config = do
 
 parseConfig :: AppConfig.Config -> Config
 parseConfig =
-  Config . (AppConfig.connectionString . dbConfig)
+  Config . (AppConfig.connectionString . AppConfig.database)
 
 close :: Handle -> IO ()
 close = undefined
