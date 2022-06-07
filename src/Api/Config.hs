@@ -79,6 +79,7 @@ configCodec = Config
   <$> Toml.table databaseConfigCodec "database" .= database
   <*> Toml.table apiConfigCodec      "api"      .= api
 
+-- |
 -- Reads configuration file at given filepath
 load :: (MonadIO m, MonadFail m) => FilePath -> m Config
 load path = do
