@@ -50,7 +50,7 @@ main = do
   DB.withHandle config (\dbHandle -> do
     -- first we generate a JSON Web Key
     key <- jwtKey (jwkPath inputOptions)
-    -- we start the app dependencies
+    -- we setup the application services
     let services = appServices dbHandle key
     -- we retrieve the port from configuration
     let port = getPort . apiPort . api $ config
