@@ -10,10 +10,10 @@ You can build the client application using
 bin/frontend/build
 
 # From the project root with nix
-nix-shell --run 'cd elm; npx parcel build index.html'
+nix-shell --run 'cd elm; elm make src/Main.elm'
 
 # With npm
-npx parcel build index.html
+elm make src/Main.elm
 ```
 
 ## Serving for development
@@ -22,10 +22,10 @@ npx parcel build index.html
 bin/frontend/serve
 
 # From the project root with nix
-nix-shell --run 'cd elm; npx parcel index.html'
+nix-shell --run 'cd elm; elm-live src/Main.elm'
 
 # With npm
-npx parcel index.html
+cd elm; elm-live src/Main.elm'
 ```
 
 Then, you can directly go to `http://localhost:1234` (default port) to view the application.

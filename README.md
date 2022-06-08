@@ -167,10 +167,10 @@ You can find more details in [elm/README.md](elm/README.md), but there are conve
 bin/frontend/build
 
 # With nix
-nix-shell --run 'cd elm; npx parcel build index.html'
+nix-shell --run 'cd elm; elm make src/Main.elm'
 
 # With npm
-cd elm; npx parcel build index.html
+cd elm; npx elm make src/Main.elm
 ```
 
 ### Serve project for development
@@ -179,8 +179,8 @@ cd elm; npx parcel build index.html
 bin/frontend/serve
 
 # With nix
-nix-shell --run 'cd elm; npx parcel index.html'
+nix-shell --run 'cd elm; elm-live src/Main.elm'
 
 # With npm
-cd elm; npx parcel index.html
+cd elm; npx elm-live src/Main.elm
 ```

@@ -1,5 +1,6 @@
 #!/bin/sh
 
 # This will build the app for production
-cmd='cd elm; npx parcel build index.html'
+args=$@
+cmd="cd elm; elm make src/Main.elm $args"
 bin/util/with-nix $cmd
