@@ -6,22 +6,25 @@ import Api.Config (Port (..), apiPort)
 import qualified Api.Config as Config
 import CLIOptions (CLIOptions (configPath))
 import qualified CLIOptions
-import qualified Infrastructure.Database as DB
 import qualified Middleware
 import qualified Network.Wai.Handler.Warp as Warp
 import qualified Tagger.JSONWebKey as JWK
 import qualified Infrastructure.Database as DB
+import qualified Infrastructure.Logging.Logger as Logger
+import qualified Infrastructure.SystemTime as SystemTime
 
 main :: IO ()
 main = do
   options <- CLIOptions.parse
   appConfig <- Config.load $ configPath options
-  connection <- DB.acquire appConfig
-  DB.withHandle config (\dbHandle -> do
-    jwk <- JWK.setup options
 
-    let (Port port) = apiPort . Config.api $ appConfig
-        services = AppServices.start connection jwk
-        application = Middleware.apply (app services)
+  SystemTime.withHandle $ \systemTime ->
+    Logger.withHandle systemTime $ \loggerHandle ->
+      DB.withHandle appConfig $ \dbHandle -> do
+        jwk <- JWK.setup options
 
-    Warp.run port application
+        let (Port port) = apiPort . Config.api $ appConfig
+            services = AppServices.start dbHandle loggerHandle jwk
+            application = Middleware.apply (app services)
+
+        Warp.run port application
