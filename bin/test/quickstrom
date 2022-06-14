@@ -1,0 +1,33 @@
+#!/bin/sh
+
+cd elm/spec
+
+sudo rm -rf report
+
+docker stop webdriver
+
+docker run --rm -d \
+  --name webdriver \
+  --network=host \
+  -v /dev/shm:/dev/shm \
+  -v $PWD:/spec \
+  selenium/standalone-chrome:3.141.59-20200826
+
+sleep 1
+
+docker run --rm \
+  --network=host \
+  -v $PWD:/spec \
+  quickstrom/quickstrom \
+  quickstrom check \
+  --webdriver-host=webdriver \
+  --webdriver-path=/wd/hub \
+  --browser=chrome \
+  --reporter=html \
+  --html-report-directory=/spec/report \
+  --tests=10 \
+  --max-actions=50 \
+  --max-trailing-state-changes=1 \
+  --trailing-state-change-timeout=500 \
+  /spec/Tagger.spec.purs \
+  http://localhost:8000
