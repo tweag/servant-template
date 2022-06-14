@@ -11,7 +11,7 @@ where
 import qualified Api.Config as AppConfig
 import Data.ByteString.Char8 (ByteString, unpack)
 import Data.Maybe (fromMaybe)
-import Hasql.Connection (Connection, acquire)
+import Hasql.Connection (Connection, acquire, release)
 import Hasql.Session (QueryError, Session, run)
 import Control.Exception (bracket)
 
@@ -36,7 +36,7 @@ parseConfig =
   Config . (AppConfig.connectionString . AppConfig.database)
 
 close :: Handle -> IO ()
-close = const $ pure ()
+close = release . dbConnection
 
 withHandle :: AppConfig.Config -> (Handle -> IO a) -> IO a
 withHandle config f = do
