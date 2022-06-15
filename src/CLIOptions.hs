@@ -1,10 +1,10 @@
 module CLIOptions (CLIOptions(..), parse) where
 
-import Options.Applicative (Parser, strOption, long, metavar, help, showDefault, value, (<**>), execParser, helper, info, fullDesc)
+import Options.Applicative (Parser, strOption, long, metavar, help, showDefault, value, (<**>), execParser, helper, info, fullDesc, optional)
 
 data CLIOptions = CLIOptions
   { configPath :: FilePath
-  , jwkPath    :: FilePath
+  , jwkPath    :: Maybe FilePath
   }
 
 parse :: IO CLIOptions
@@ -19,9 +19,7 @@ inputOptionsParser = CLIOptions
     <> help "Path for the file containing the application configuration"
     <> showDefault
     <> value "./config.toml" )
-  <*> strOption
+  <*> optional (strOption
     (  long "jwk"
     <> metavar "JWK"
-    <> help "Path for the file storing the authentication key"
-    <> showDefault
-    <> value "./.jwk" )
+    <> help "Path for the file storing the authentication key"))

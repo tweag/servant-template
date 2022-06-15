@@ -1,24 +1,43 @@
 {-# LANGUAGE DerivingStrategies #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Api.Config where
 
--- bystestring
-import Data.ByteString.Char8 (ByteString, pack)
+import qualified CLIOptions as Opts
+import Control.Monad.IO.Class (MonadIO (liftIO))
+import Data.Text (Text)
+import qualified Data.Text as Text
+import Toml (Key, TomlCodec, decodeFileExact, diwrap, int, table, text, textBy, (.=))
 
--- text
-import Data.Text (Text, unpack)
+-- |
+-- The whole config needed by the application
+data Config = Config
+  { database :: DatabaseConfig,
+    api :: ApiConfig
+  }
 
--- toml
-import Toml (TomlCodec, (.=), text, table, decodeFileExact, diwrap, int)
-import Control.Monad.IO.Class (MonadIO)
+-- |
+-- The configuration parameters needed to connect to a database
+data DatabaseConfig = DatabaseConfig
+  { host :: Host,
+    port :: Port,
+    dbname :: DBName,
+    user :: User,
+    password :: Password
+  }
+
+-- |
+-- The configuration parameters needed to run the API
+data ApiConfig = ApiConfig
+  { apiPort :: Port,
+    apiJwkPath :: FilePath
+  }
 
 newtype Host = Host {getHost :: Text}
 
 newtype Port = Port {getPort :: Int}
-  deriving newtype Show
+  deriving newtype (Show)
 
 newtype DBName = DBName {getDBName :: Text}
 
@@ -27,61 +46,69 @@ newtype User = User {getUser :: Text}
 newtype Password = Password {getPassword :: Text}
 
 -- |
--- The configuration parameters needed to connect to a database
-data DatabaseConfig = DatabaseConfig
-  { host     :: Host
-  , port     :: Port
-  , dbname   :: DBName
-  , user     :: User
-  , password :: Password
-  }
+-- Reads configuration file at given filepath and keeps options passed
+-- in the command line
+load :: (MonadIO m, MonadFail m) => m Config
+load = do
+  options <- liftIO Opts.parse
+  let path = Opts.configPath options
+  config <- parseConfig path
+
+  pure $ mergeCLIOptions config options
 
 -- |
--- Compute the connection string given a 'DatabaseConfig'
-connectionString :: DatabaseConfig -> ByteString
-connectionString DatabaseConfig{host, port, dbname, user, password} = pack
-  $  "host="     <> unpack (getHost host)     <> " "
-  <> "port="     <> show port                 <> " "
-  <> "dbname="   <> unpack (getDBName dbname) <> " "
-  <> "user="     <> unpack (getUser user)     <> " "
-  <> "password=" <> unpack (getPassword password)
+-- Attempts to parse configuration at given path
+parseConfig :: (MonadIO m, MonadFail m) => FilePath -> m Config
+parseConfig path = do
+  eitherConfig <- decodeFileExact configCodec path
+  either
+    (\errors -> fail $ "unable to parse configuration: " <> show errors)
+    pure
+    eitherConfig
+
+-- |
+-- Merges parsed configuration with options, prioritizing
+-- values passed in CLI
+mergeCLIOptions :: Config -> Opts.CLIOptions -> Config
+mergeCLIOptions config options =
+  maybe
+    config
+    (\jwk -> config {api = (api config) {apiJwkPath = jwk}})
+    (Opts.jwkPath options)
+
+-- | Convenience alias for JSON Web Key path
+jwkPath :: Config -> FilePath
+jwkPath = apiJwkPath . api
 
 -- |
 -- A bidirectional codec for 'DatabaseConfig'
 databaseConfigCodec :: TomlCodec DatabaseConfig
-databaseConfigCodec = DatabaseConfig
-  <$> Toml.diwrap (Toml.text "host")     .= host
-  <*> Toml.diwrap (Toml.int  "port")     .= port
-  <*> Toml.diwrap (Toml.text "dbname")   .= dbname
-  <*> Toml.diwrap (Toml.text "user")     .= user
-  <*> Toml.diwrap (Toml.text "password") .= password
-
--- |
--- The configuration parameters needed to expose the API
-newtype ApiConfig = ApiConfig {apiPort :: Port}
+databaseConfigCodec =
+  DatabaseConfig
+    <$> Toml.diwrap (Toml.text "host") .= host
+    <*> Toml.diwrap (Toml.int "port") .= port
+    <*> Toml.diwrap (Toml.text "dbname") .= dbname
+    <*> Toml.diwrap (Toml.text "user") .= user
+    <*> Toml.diwrap (Toml.text "password") .= password
 
 -- |
 -- A bidirectional codec for 'ApiConfig'
 apiConfigCodec :: TomlCodec ApiConfig
-apiConfigCodec = Toml.diwrap $ Toml.int "port"
+apiConfigCodec =
+  ApiConfig
+    <$> Toml.diwrap (Toml.int "port") .= apiPort
+    <*> Toml.diwrap (filePathCodec "jwk_path") .= apiJwkPath
 
 -- |
--- The whole config needed by the application
-data Config = Config
-  { database :: DatabaseConfig
-  , api      :: ApiConfig
-  }
+-- A bidirectional codec for 'FilePath'
+filePathCodec :: Toml.Key -> TomlCodec FilePath
+filePathCodec =
+  textBy Text.pack (Right . Text.unpack)
 
 -- |
 -- A bidirectional codec for 'Config'
 configCodec :: TomlCodec Config
-configCodec = Config
-  <$> Toml.table databaseConfigCodec "database" .= database
-  <*> Toml.table apiConfigCodec      "api"      .= api
-
--- |
--- Reads configuration file at given filepath
-load :: (MonadIO m, MonadFail m) => FilePath -> m Config
-load path = do
-  eitherConfig <- decodeFileExact configCodec path
-  either (\errors -> fail $ "unable to parse configuration: " <> show errors) pure eitherConfig
+configCodec =
+  Config
+    <$> Toml.table databaseConfigCodec "database" .= database
+    <*> Toml.table apiConfigCodec "api" .= api

@@ -7,3 +7,4 @@
 
 [api]
   port = 8080
+  jwk_path = './.jwk'
