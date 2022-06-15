@@ -3,9 +3,10 @@
 {-# LANGUAGE DerivingVia #-}
 {-# LANGUAGE NamedFieldPuns #-}
 
-module Tagger.Content where
+module Tagger.Content (Content(message, tags), createContent, hasAllTags) where
 
 -- base
+import Data.List (nub)
 import GHC.Generics (Generic)
 
 -- aeson
@@ -24,6 +25,9 @@ data Content tag = Content
   , tags :: [tag]
   }
   deriving stock (Eq, Show, Functor, Generic)
+
+createContent :: Eq tag => Text -> [tag] -> Content tag
+createContent message tags = Content message (nub tags)
 
 instance Foldable Content where
   foldMap f = foldMap f . tags
