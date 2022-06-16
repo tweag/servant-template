@@ -136,6 +136,11 @@ The executable accepts two options:
 - `--config`, which allows to customize the path of the configuration file
 - `--jwk`, which allows to customize the path of the file where the JWK is stored
 
+### Formatting
+The Haskell files are formatted using `ormolu`. The Elm source code is formatted using `elm-format`.
+
+There is a script to format all files in the codebase (Elm and Haskell) under `bin/format`. Individual projects can be formatted separately with `bin/api/format` and `bin/frontend/format`.
+
 ## Documentation
 
 You can generate the documentation of the project using
