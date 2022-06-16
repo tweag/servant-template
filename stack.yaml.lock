@@ -39,12 +39,12 @@ packages:
       sha256: 863179602fd64c564cd6d7a5ed328fed8525329e07e5d924f629ad78c4ff461a
       size: 1469
     commit: d05da71f09be08131d29a2c17f613a4bd71faea2
-    git: git@github.com:haskell-servant/servant.git
+    git: https://github.com/haskell-servant/servant
     version: 0.4.7.0
   original:
     subdir: servant-auth/servant-auth-server
     commit: d05da71f09be08131d29a2c17f613a4bd71faea2
-    git: git@github.com:haskell-servant/servant.git
+    git: https://github.com/haskell-servant/servant
 snapshots:
 - completed:
     sha256: f1c4aca9b9b81afbb9db55571acb0690cdc01ac97a178234de281f9dc075e95e
