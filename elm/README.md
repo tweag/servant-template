@@ -25,6 +25,6 @@ In the private area, you'll see the contents for the logged-in user, and you can
 
 The `spec` folder contains some end-to-end acceptance tests written using [Quickstrom](https://quickstrom.io/).
 
-To run them, just execute `bin/test/quickstrom` from the root of the project, given your application is exposed on `localhost:8000`.
+To run them, just execute `docker-compose up` from the `elm/spec` folder, given your application is exposed on `localhost:8000`.
 
 Then in the `elm/spec/report` folder you'll find an `index.html` file containing a report of each test which was executed.
