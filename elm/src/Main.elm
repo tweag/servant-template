@@ -13,6 +13,9 @@ import Browser exposing (..)
 import Set exposing (..)
 import Tuple exposing (mapBoth)
 
+-- elm/html
+import Html.Attributes exposing (id)
+
 -- mdgriffith/elm-ui
 import Element exposing (..)
 
@@ -68,6 +71,7 @@ view model = Element.column
     [ titleFont
     , bigPadding
     , centerX
+    , htmlAttribute ( id "title" )
     ]
     ( Element.text "Tagger" )
   , case model of

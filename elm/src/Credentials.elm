@@ -3,6 +3,9 @@ module Credentials exposing (..)
 import Component exposing (..)
 import Style exposing (..)
 
+-- elm/html
+import Html.Attributes exposing (class)
+
 -- elm/http
 import Http exposing (..)
 
@@ -51,17 +54,18 @@ type SubmitMessage a
   | Failed Http.Error
   | Succeeded a
 
-updateSubmit : Decoder a -> String -> Model -> SubmitMessage a -> Submit a -> ( Submit a, Cmd (SubmitMessage a) )
-updateSubmit decoder url credentials submitMessage model =
+updateSubmit : Decoder a -> String -> Model -> SubmitMessage a -> Submit a -> ( { model : Model, submitState : Submit a }, Cmd (SubmitMessage a) )
+updateSubmit decoder url credentials submitMessage submitState =
   case submitMessage of
-    Submit          -> ( model, submit decoder url credentials )
-    Failed error    -> ( Failure error, Cmd.none )
-    Succeeded value -> ( Successful value, Cmd.none )
+    Submit          -> ( { model = emptyCredentials, submitState = submitState      }, submit decoder url credentials )
+    Failed error    -> ( { model = credentials     , submitState = Failure error    }, Cmd.none )
+    Succeeded value -> ( { model = credentials     , submitState = Successful value }, Cmd.none )
 
 -- VIEW
 
-view : String -> (CredentialsMessage -> msg) -> (SubmitMessage a -> msg) -> Model -> Element msg
-view title liftModel liftMessage credentials = Component.mainColumn
+view : String -> String -> (CredentialsMessage -> msg) -> (SubmitMessage a -> msg) -> Model -> Element msg
+view identifier title liftModel liftMessage credentials = Component.mainColumn
+  identifier
   [ Component.columnTitle title
   , column
     [ normalSpacing
@@ -70,13 +74,15 @@ view title liftModel liftMessage credentials = Component.mainColumn
     [ Element.map liftModel ( column
       [ normalSpacing
       ]
-      [ Element.Input.username []
+      [ Element.Input.username
+        [ htmlAttribute ( class "username" ) ]
         { onChange    = Username
         , text        = credentials.username
         , placeholder = Just ( Element.Input.placeholder [] ( Element.text "Username" ) )
         , label       = labelAbove [] ( Element.text "Username" )
         }
-      , Element.Input.newPassword []
+      , Element.Input.newPassword
+        [ htmlAttribute ( class "password" ) ]
         { onChange    = Password
         , text        = credentials.password
         , placeholder = Just ( Element.Input.placeholder [] ( Element.text "Password" ) )

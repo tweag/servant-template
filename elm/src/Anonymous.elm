@@ -40,11 +40,11 @@ type Msg
   | Register (SubmitMessage UserId)
   | Login (SubmitMessage Token)
 
-updateModelWithRegisterSubmit : Model -> Submit UserId -> Model
-updateModelWithRegisterSubmit model registerSubmit = { model | registerSubmit = registerSubmit }
+updateModelWithRegisterSubmit : Model -> { model : Credentials.Model, submitState : Submit UserId } -> Model
+updateModelWithRegisterSubmit model data = { model | registerSubmit = data.submitState, register = data.model }
 
-updateModelWithLoginSubmit : Model -> Submit Token -> Model
-updateModelWithLoginSubmit model loginSubmit = { model | loginSubmit = loginSubmit}
+updateModelWithLoginSubmit : Model -> { model : Credentials.Model, submitState : Submit Token } -> Model
+updateModelWithLoginSubmit model data = { model | loginSubmit = data.submitState, login = data.model }
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
@@ -64,8 +64,9 @@ update msg model =
 
 view : Model -> Element Msg
 view model = Component.mainRow
-  [ Credentials.view "Register User" RegisterData Register model.register
-  , Credentials.view "Login" LoginData Login model.login
+  "anonymous"
+  [ Credentials.view "register" "Register User" RegisterData Register model.register
+  , Credentials.view "login"    "Login"         LoginData    Login    model.login
   ]
 
 -- HTTP
