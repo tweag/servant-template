@@ -1,15 +1,18 @@
-module InputOptions where
+module CLIOptions (CLIOptions(..), parse) where
 
--- optparse-applicative
-import Options.Applicative (Parser, strOption, long, metavar, help, showDefault, value)
+import Options.Applicative (Parser, strOption, long, metavar, help, showDefault, value, (<**>), execParser, helper, info, fullDesc)
 
-data InputOptions = InputOptions
+data CLIOptions = CLIOptions
   { configPath :: FilePath
   , jwkPath    :: FilePath
   }
 
-inputOptionsParser :: Parser InputOptions
-inputOptionsParser = InputOptions
+parse :: IO CLIOptions
+parse =
+  execParser $ info (inputOptionsParser <**> helper) fullDesc
+
+inputOptionsParser :: Parser CLIOptions
+inputOptionsParser = CLIOptions
   <$> strOption
     (  long "config"
     <> metavar "CONFIG"
