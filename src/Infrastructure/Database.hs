@@ -1,5 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 module Infrastructure.Database (Config (..), Handle, withHandle, runQuery) where
 
 import qualified Api.Config as AppConfig
