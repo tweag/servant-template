@@ -11,6 +11,7 @@ module Api.Application where
 import Api.AppServices (AppServices(..))
 import Api.Authentication (AuthenticationAPI, authenticationServer)
 import Api.Docs (DocsAPI, docsServer)
+import Api.Root (RootAPI, rootServer)
 import Api.Healthcheck (HealthcheckAPI, healthcheckServer)
 import Api.Tagger (TaggerAPI, taggerServer)
 import Tagger.ContentRepository (ContentRepository)
@@ -43,7 +44,8 @@ type API = NamedRoutes ApplicationAPI
 -- |
 -- Collects all the API groups exposed by the application
 data ApplicationAPI mode = ApplicationAPI
-  { tagger         :: mode :- Auth '[JWT] (Id User) :> NamedRoutes TaggerAPI
+  { root           :: mode :- RootAPI
+  , tagger         :: mode :- Auth '[JWT] (Id User) :> NamedRoutes TaggerAPI
   , docs           :: mode :- DocsAPI
   , healthcheck    :: mode :- HealthcheckAPI
   , authentication :: mode :- NamedRoutes AuthenticationAPI
@@ -62,11 +64,13 @@ authenticatedTaggerServer contentRepository = \case
 -- Setup all the application server, providing the services needed by the various endpoints
 server :: AppServices -> ApplicationAPI AsServer
 server AppServices{passwordManager, contentRepository, userRepository, authenticateUser} = ApplicationAPI
-  { tagger         = authenticatedTaggerServer contentRepository
+  { root = rootServer
+  , tagger         = authenticatedTaggerServer contentRepository
   , docs           = docsServer
   , healthcheck    = healthcheckServer
   , authentication = authenticationServer passwordManager authenticateUser userRepository
   }
+
 
 app :: AppServices -> Application
 app appServices = serveWithContext
