@@ -3,20 +3,31 @@ version: '3'
 services:
   postgres:
     image: postgres:14-alpine
+    # build:
+    #   context: docker/postgres
+    #   args:
+    #     USER_ID: "${USER_ID}"
+    #     GROUP_ID: "${GROUP_ID}"
     container_name: postgres
     environment:
-      - POSTGRES_USER=user
-      - POSTGRES_PASSWORD=password
-      - POSTGRES_DB=tagger
+      - POSTGRES_USER=tagger-user
+      - POSTGRES_PASSWORD=tagger-pwd
+      - POSTGRES_DB=tagger-db
     volumes:
       - ./data:/var/lib/postgresql/data
     ports:
       - 5432:5432
     networks:
       - default
+    user: "${USER_ID}:${GROUP_ID}"
 
   pgadmin:
-    image: dpage/pgadmin4:6.5
+    image: dpage/pgadmin4:6.10
+    # build:
+    #   context: docker/pgadmin
+    #   args:
+    #     USER_ID: "${USER_ID}"
+    #     GROUP_ID: "${GROUP_ID}"
     container_name: pgadmin
     environment:
       - PGADMIN_DEFAULT_EMAIL=user@domain.com
@@ -31,6 +42,7 @@ services:
       - 8081:80
     networks:
       - default
+    user: "${USER_ID}:${GROUP_ID}"
 
 networks:
   default:

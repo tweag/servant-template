@@ -1,0 +1,4 @@
+#!/bin/sh
+
+pkill postgres
+rm -rf ./.postgres

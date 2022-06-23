@@ -1,0 +1,5 @@
+#!/bin/sh
+
+args=$@
+cmd="cd elm; elm-live src/Main.elm $args"
+bin/util/with-nix $cmd

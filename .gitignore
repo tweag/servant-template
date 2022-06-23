@@ -1,3 +1,5 @@
+.direnv
+.postgres
 .hie
 .stack-work
 *.cabal
