@@ -8,7 +8,7 @@ cmd=$@
 if command -v nix-shell > /dev/null; then
   if [[ -z $IN_NIX_SHELL ]]
   then
-    nix-shell --run "$cmd"
+    nix develop -c $cmd
   else
     eval $cmd
   fi
