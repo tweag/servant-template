@@ -5,67 +5,72 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE TypeOperators #-}
 
-module Api.Authentication where
+module Api.AuthenticationWeb where
 
 import Data.Aeson (FromJSON, ToJSON)
 import Data.OpenApi (ToSchema)
-import Data.Proxy (Proxy (Proxy))
+import qualified Data.Text as T
 import GHC.Generics (Generic)
 import Infrastructure.Authentication.AuthenticateUser (AuthenticateUser (runAuthenticateUser))
 import Infrastructure.Authentication.Credentials (Credentials (username))
 import Infrastructure.Authentication.PasswordManager (PasswordManager (generatePassword, generateToken))
-import Infrastructure.Authentication.Token (Token)
-import Servant (Handler, JSON, Post, ReqBody, type (:>))
+import Infrastructure.Authentication.Token (Token, toText)
+import Servant (Handler, Header, Headers, JSON, Post, ReqBody, addHeader, type (:>))
 import Servant.API.Generic (type (:-))
-import Servant.OpenApi (HasOpenApi (toOpenApi))
+import Servant.HTML.Lucid (HTML)
 import Servant.Server.Generic (AsServer)
 import Tagger.Id (Id (..))
 import Tagger.User (User)
 import Tagger.UserRepository (UserRepository (addUser))
-
-type Register =
-  "register"
-    :> ReqBody '[JSON] Credentials
-    :> Post '[JSON] RegistrationResponse
-
-type Login =
-  "login"
-    :> ReqBody '[JSON] Credentials
-    :> Post '[JSON] LoginResponse
-
-newtype RegistrationResponse = RegistrationResponse {idFromResponse :: Id User}
-  deriving stock (Show)
-  deriving newtype (ToSchema, ToJSON, FromJSON)
-
-newtype LoginResponse = LoginResponse {tokenFromResponse :: Token}
-  deriving stock (Show)
-  deriving newtype (ToSchema, ToJSON, FromJSON)
+import UI
+import qualified UI.Form.Account as AccountForms
+import UI.Layout
+import qualified UI.Dashboard
 
 -- |
 -- The endpoints required to perform authentication
-data AuthenticationAPI mode = AuthenticationAPI
-  { -- | Given some 'Login' data, registers a new 'User'
-    register :: mode :- Register,
-    -- | Given some 'Login' data, generates an authentication token
-    login :: mode :- Login
+data AuthenticationWeb mode = AuthenticationWeb
+  { register :: mode :- "register" :> ReqBody '[JSON] Credentials :> Post '[HTML] RegistrationResponse,
+    signin :: mode :- "signin" :> ReqBody '[JSON] Credentials :> Post '[HTML] SigninResponse
   }
   deriving stock (Generic)
 
-instance HasOpenApi AuthenticationAPI where
-  toOpenApi _ =
-    toOpenApi (Proxy :: Proxy Register)
-      <> toOpenApi (Proxy :: Proxy Login)
+newtype RegistrationResponse = RegistrationResponse (Id User)
+  deriving stock (Show)
+  deriving newtype (ToSchema, ToJSON, FromJSON)
 
-authenticationServer ::
+type SigninResponse =
+  Headers
+    '[ Header "HX-Trigger" T.Text,
+       Header "HX-Retarget" T.Text,
+       Header "HX-Push" T.Text
+     ]
+    SignInContent
+
+data SignInContent = SignInContent
+
+instance ToHtml RegistrationResponse where
+  toHtmlRaw = toHtml
+  toHtml _ = toHtml $ do
+    flash "User registered successfully!"
+    AccountForms.registration
+
+instance ToHtml SignInContent where
+  toHtmlRaw = toHtml
+  toHtml _ = do
+    flash "Logged in!"
+    UI.Dashboard.view
+
+authenticationServerWeb ::
   PasswordManager Handler ->
   AuthenticateUser Handler ->
   UserRepository Handler ->
-  AuthenticationAPI AsServer
-authenticationServer passwordManager authenticateUser userRepository =
+  AuthenticationWeb AsServer
+authenticationServerWeb passwordManager authenticateUser userRepository =
   let authenticator = authenticate passwordManager authenticateUser
-   in AuthenticationAPI
+   in AuthenticationWeb
         { register = registerEndpoint passwordManager userRepository,
-          login = loginEndpoint authenticator
+          signin = signinEndpoint authenticator
         }
 
 registerEndpoint :: PasswordManager Handler -> UserRepository Handler -> Credentials -> Handler RegistrationResponse
@@ -75,10 +80,16 @@ registerEndpoint passwordManager userRepository credentials = do
   -- store the new user into the database
   RegistrationResponse <$> addUser userRepository (username credentials) hashedPassword
 
-loginEndpoint :: (Credentials -> Handler Token) -> Credentials -> Handler LoginResponse
-loginEndpoint authenticator credentials = do
+signinEndpoint :: (Credentials -> Handler Token) -> Credentials -> Handler SigninResponse
+signinEndpoint authenticator credentials = do
   token <- authenticator credentials
-  pure $ LoginResponse token
+  let loggedInEvent = "{\"loggedIn\":\"" <> toText token <> "\"}"
+  let contentTarget = "#" <> UI.Layout.mainContentAnchor UI.Layout.anchors
+  return $
+    addHeader loggedInEvent
+      . addHeader contentTarget
+      . addHeader "/dashboard"
+      $ SignInContent
 
 authenticate :: PasswordManager Handler -> AuthenticateUser Handler -> Credentials -> Handler Token
 authenticate passwordManager authenticateUser credentials = do

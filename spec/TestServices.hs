@@ -11,7 +11,8 @@ import Infrastructure.SystemTime as SystemTime
 import GHC.Conc (newTVarIO)
 
 -- servant-auth-server
-import Servant.Auth.Server (generateKey, defaultJWTSettings)
+-- servant-auth-server
+import Servant.Auth.Server (generateKey, defaultJWTSettings, defaultCookieSettings)
 
 testServices :: IO AppServices
 testServices = do
@@ -24,7 +25,8 @@ testServices = do
       let userRepository'    = inMemoryUserRepository userMap
       let contentsRepository = inMemoryContentRepository contentsMap
       pure $ AppServices
-        { jwtSettings       = defaultJWTSettings key
+        { cookieSettings    = defaultCookieSettings
+        , jwtSettings       = defaultJWTSettings key
         , passwordManager   = passwordManager'
         , contentRepository = connectedContentRepository loggerHandle contentsRepository
         , userRepository    = connectedUserRepository loggerHandle userRepository'

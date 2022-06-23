@@ -1,9 +1,10 @@
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 
 module TaggerSpec where
 
 import Api.Application (API, ApplicationAPI(..), app)
-import Api.Authentication (AuthenticationAPI(..))
+import Api.Authentication (AuthenticationAPI(..), RegistrationResponse, idFromResponse, tokenFromResponse)
 import Api.Tagger (TaggerAPI(..))
 import Infrastructure.Authentication.Credentials (Credentials(Credentials), Password(Password))
 import Infrastructure.Authentication.Token (Token(Token))
@@ -58,14 +59,14 @@ toServantToken (Token token) = Servant.Token (toStrict token)
 apiClient :: Client ClientM API
 apiClient = client (Proxy :: Proxy API)
 
-registerUser :: ClientEnv -> Credentials -> IO (Either ClientError (Id User))
+registerUser :: ClientEnv -> Credentials -> IO (Either ClientError RegistrationResponse)
 registerUser env login' = runClientM ((register . authentication $ apiClient) login') env
 
 loginUser :: ClientEnv -> Credentials -> IO (Either ClientError (Id User, Token))
 loginUser env login' = do
   userId <- registerUser env login'
   token  <- runClientM ((login    . authentication $ apiClient) login') env
-  pure $ (,) <$> userId <*> token
+  pure $ (,) <$> (idFromResponse <$> userId) <*> (tokenFromResponse <$> token)
 
 successfullyLoginUser :: ClientEnv -> Credentials -> IO (Id User, Token)
 successfullyLoginUser env login' = do

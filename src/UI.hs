@@ -5,10 +5,22 @@ module UI
   )
 where
 
-import Data.Text
+import qualified Data.Text as T
 import Html
 import Prelude hiding (div)
 import UI.Layout
+import qualified UI.Layout as Layout
 
-flash :: Text -> Html ()
-flash = div [id_ "flash"] . toHtml
+data Event =
+  ContentsUpdated
+
+instance Show Event where
+  show ContentsUpdated = "contentsUpdated"
+
+flash :: Monad m => T.Text -> HtmlT m ()
+flash = div_ [id_ flashAnchor', makeAttribute "hx-swap-oob" "true"] . toHtml
+  where
+    flashAnchor' = Layout.flashAnchor Layout.anchors
+
+hxEvent :: Event -> HXTrigger
+hxEvent evt = CustomEvent (T.pack . show $ evt) []
