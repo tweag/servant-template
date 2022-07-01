@@ -16,29 +16,26 @@ login = do
 
 accountForm :: Text -> Text -> Html ()
 accountForm label routeName = do
-  h2_ $ toHtml label
+  div_ [class_ "container"] $ do
+    h2_ [class_ "text-center font-medium"] $ toHtml label
 
-  form_
-    [hxPost_ $ "/" <> routeName]
-    $ do
-      div_ [] $ do
-        let inputName = routeName <> "-username"
-        label_ [for_ inputName] "Username"
-        input_
-          [ id_ inputName,
-            name_ "username",
-            placeholder_ "Username",
-            type_ "username"
-          ]
+    form_ [hxPost_ $ "/" <> routeName] $ do
+      textInput $
+        InputProps
+          { inputName = "username",
+            inputLabel = "Username",
+            inputType = Just "username",
+            inputPlaceholder = Just "johnny_minnesota",
+            extraAttrs = []
+          }
 
-      div_ [] $ do
-        let inputName = routeName <> "-password"
-        label_ [for_ inputName] "Password"
-        input_
-          [ id_ inputName,
-            name_ "password",
-            placeholder_ "Password",
-            type_ "password"
-          ]
+      textInput $
+        InputProps
+          { inputName = "password",
+            inputLabel = "Password",
+            inputType = Just "password",
+            inputPlaceholder = Nothing,
+            extraAttrs = []
+          }
 
-      button_ [type_ "submit"] "Submit"
+      formButton "Submit"

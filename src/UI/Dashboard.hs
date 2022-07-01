@@ -4,13 +4,17 @@ import UI
 import qualified UI.ContentList
 import UI.Form.Content
 
-view :: Monad m => HtmlT m ()
+view :: Html ()
 view = do
-  UI.Form.Content.newContent
-  div_
-    [ hxTarget "contents",
-      hxSwap OuterHtml [],
-      hxTriggers [ Load [], hxEvent ContentsUpdated],
-      hxGet_ "/contents"
-    ]
-    (UI.ContentList.view [])
+  h1_ [class_ "mb-2 text-center bg-blue-300 text-xl font-semibold"] "Dashboard"
+  div_ [id_ "dashboard", class_ "columns-2 h-full"] $ do
+    div_
+      [ hxTarget "contents",
+        hxSwap OuterHtml [],
+        hxTriggers [Load [], hxEvent ContentsUpdated],
+        hxGet_ "/contents"
+      ]
+      (UI.ContentList.view [])
+    div_
+      [class_ "break-before-column"]
+      UI.Form.Content.newContent

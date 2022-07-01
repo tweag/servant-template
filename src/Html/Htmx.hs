@@ -111,10 +111,14 @@ instance Show HXTrigger where
 data BrowserEvent
   = Clicked
   | MouseEnter
+  | MouseLeave
+  | KeyUp
 
 instance Show BrowserEvent where
   show Clicked = "clicked"
   show MouseEnter = "mouseenter"
+  show MouseLeave = "mouseleave"
+  show KeyUp = "keyup"
 
 type TriggerFilter = T.Text
 

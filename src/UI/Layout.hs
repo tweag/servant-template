@@ -6,26 +6,23 @@ import Html
 data Anchors = Anchors
   { flashAnchor :: T.Text,
     mainContentAnchor :: T.Text,
-    headersAnchor :: T.Text,
-    bodyHeadingAnchor :: T.Text
+    headersAnchor :: T.Text
   }
 
-mainLayout :: Html () -> Html () -> Html ()
-mainLayout heading body' = do
+mainLayout :: Html () -> Html ()
+mainLayout body' = do
   doctypehtml_ $ do
     head_ $ do
       title_ "Home - [Tagger]"
       with (term "script" [src_ "https://unpkg.com/htmx.org@1.7.0", defer_ "true"]) [] ""
       with (term "script" [src_ "https://unpkg.com/htmx.org/dist/ext/json-enc.js", defer_ "true"]) [] ""
+      with (term "script" [src_ "https://cdn.tailwindcss.com", defer_ "true"]) [] ""
 
-    body_ [extensions] $ do
+    body_ [extensions, class_ "h-full"] $ do
       div_ [id_ $ headersAnchor anchors, headers] $ do
         section_ [id_ $ flashAnchor anchors] ""
 
-        section_ [id_ $ bodyHeadingAnchor anchors]
-          heading
-
-        section_ [id_ $ mainContentAnchor anchors] $
+        section_ [id_ $ mainContentAnchor anchors, class_ "h-full"] $
           toHtml body'
 
         sessionScript
@@ -35,8 +32,7 @@ anchors =
   Anchors
     { flashAnchor = "flash",
       mainContentAnchor = "mainContent",
-      headersAnchor = "headersAnchor",
-      bodyHeadingAnchor = "bodyHeadingAnchor"
+      headersAnchor = "headersAnchor"
     }
 
 headers :: Attribute
@@ -49,8 +45,8 @@ sessionScript :: Html ()
 sessionScript =
   script_
     "document.body.addEventListener('loggedIn', function(event) {\
-      \let token = event.detail.value;\
-      \let headers = JSON.parse(document.getElementById('headersAnchor').dataset.hxHeaders);\
-      \headers['Authorization'] = \"Bearer \" + token;\
-      \document.getElementById('headersAnchor').dataset.hxHeaders = JSON.stringify(headers);\
-      \;});"
+    \let token = event.detail.value;\
+    \let headers = JSON.parse(document.getElementById('headersAnchor').dataset.hxHeaders);\
+    \headers['Authorization'] = \"Bearer \" + token;\
+    \document.getElementById('headersAnchor').dataset.hxHeaders = JSON.stringify(headers);\
+    \;});"

@@ -57,7 +57,7 @@ instance ToHtml RegistrationResponse where
 
 instance ToHtml SignInContent where
   toHtmlRaw = toHtml
-  toHtml _ = do
+  toHtml _ = toHtml $ do
     flash "Logged in!"
     UI.Dashboard.view
 
