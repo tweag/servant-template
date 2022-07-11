@@ -10,7 +10,7 @@ newContent =
 
 messageForm :: Html ()
 messageForm =
-  form_ [hxTarget "new-content-form", hxPost_ "/contents", hxInclude_ "[name='tags']"] $ do
+  form_ [hxTarget "new-content-form", hxPost "/contents", hxInclude "[name='tags']"] $ do
     textInput $
       InputProps
         { inputName = "message",
@@ -35,7 +35,7 @@ addTagForm =
   form_
     [ id_ "add-tag-form",
       hxTarget "content-tags",
-      hxPost_ "/add-tag",
+      hxPost "/add-tag",
       hxSwap BeforeEnd []
     ]
     $ do

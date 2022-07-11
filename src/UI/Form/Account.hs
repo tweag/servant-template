@@ -19,7 +19,7 @@ accountForm label routeName = do
   div_ [class_ "container"] $ do
     h2_ [class_ "text-center font-medium"] $ toHtml label
 
-    form_ [hxPost_ $ "/" <> routeName] $ do
+    form_ [hxPost $ "/" <> routeName] $ do
       textInput $
         InputProps
           { inputName = "username",

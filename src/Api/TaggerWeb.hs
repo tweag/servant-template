@@ -52,7 +52,7 @@ instance ToHtml TagAdded where
   toHtml (TagAdded tag) = do
     div_
       [ id_ "tag-list",
-        hxSwapOob_ "beforeend"
+        hxSwapOob $ HXSwapTarget' BeforeEnd
       ]
       (div_ [class_ "border bg-blue-300 rounded-p1"] $ toHtml $ Tag.name tag <> " x")
 

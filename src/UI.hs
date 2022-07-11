@@ -24,7 +24,7 @@ flash :: Monad m => T.Text -> HtmlT m ()
 flash msg =
   div_
     [ id_ flashAnchor',
-      makeAttribute "hx-swap-oob" "true",
+      hxSwapOob Simple,
       class_ "bg-green-100 font-semibold"
     ]
     (p_ $ toHtml msg)

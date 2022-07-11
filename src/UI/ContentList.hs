@@ -39,9 +39,9 @@ searchBar =
         inputType = Just "text",
         inputPlaceholder = Just "Filter by tags",
         extraAttrs =
-          [ hxGet_ "/contents",
+          [ hxGet "/contents",
             hxTarget "contents",
-            hxParams_ "tag",
+            hxParams "tag",
             hxTrigger $ BrowserEvt KeyUp [Delay (Milliseconds 500)]
           ]
       }

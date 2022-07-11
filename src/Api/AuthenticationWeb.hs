@@ -8,6 +8,7 @@
 module Api.AuthenticationWeb where
 
 import Data.Aeson (FromJSON, ToJSON)
+import qualified Data.Aeson.Extended as Json
 import Data.OpenApi (ToSchema)
 import qualified Data.Text as T
 import GHC.Generics (Generic)
@@ -22,10 +23,11 @@ import Servant.Server.Generic (AsServer)
 import Tagger.Id (Id (..))
 import Tagger.User (User)
 import Tagger.UserRepository (UserRepository (addUser))
+import qualified Temp
 import UI
+import qualified UI.Dashboard
 import qualified UI.Form.Account as AccountForms
 import UI.Layout
-import qualified UI.Dashboard
 
 -- |
 -- The endpoints required to perform authentication
@@ -83,10 +85,10 @@ registerEndpoint passwordManager userRepository credentials = do
 signinEndpoint :: (Credentials -> Handler Token) -> Credentials -> Handler SigninResponse
 signinEndpoint authenticator credentials = do
   token <- authenticator credentials
-  let loggedInEvent = "{\"loggedIn\":\"" <> toText token <> "\"}"
+  let loggedInEvent' = Json.fromKV [(Temp.loggedInEvt, toText token)]
   let contentTarget = "#" <> UI.Layout.mainContentAnchor UI.Layout.anchors
   return $
-    addHeader loggedInEvent
+    addHeader (Json.asText loggedInEvent')
       . addHeader contentTarget
       . addHeader "/dashboard"
       $ SignInContent

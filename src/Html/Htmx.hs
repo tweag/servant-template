@@ -1,9 +1,9 @@
 module Html.Htmx
   ( module Html.Htmx,
-    module Lucid.Htmx,
   )
 where
 
+import qualified Data.Aeson.Extended as Aeson (asText, fromKV)
 import Data.String (IsString)
 import Data.Text (intercalate)
 import qualified Data.Text as T
@@ -175,3 +175,34 @@ data IntersectOptions
 instance Show IntersectOptions where
   show (Root selector) = "root:" <> show selector
   show (Threshold f) = "threshold:" <> show f
+
+data HXOobOption
+  = Simple
+  | HXSwapTarget' HXSwapTarget
+  | SwapWithSelector HXSwapTarget Selector
+
+instance Show HXOobOption where
+  show Simple = "true"
+  show (HXSwapTarget' target) = show target
+  show (SwapWithSelector target selector) = show target <> ":" <> show selector
+
+hxSwapOob :: HXOobOption -> Attribute
+hxSwapOob = hxSwapOob_ . T.pack . show
+
+hxHeaders :: [(T.Text, T.Text)] -> Attribute
+hxHeaders = hxHeaders_ . Aeson.asText . Aeson.fromKV
+
+hxExt :: T.Text -> Attribute
+hxExt = hxExt_
+
+hxPost :: T.Text -> Attribute
+hxPost = hxPost_
+
+hxGet :: T.Text -> Attribute
+hxGet = hxGet_
+
+hxInclude :: T.Text -> Attribute
+hxInclude = hxInclude_
+
+hxParams :: T.Text -> Attribute
+hxParams = hxParams_

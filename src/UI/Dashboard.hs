@@ -12,7 +12,7 @@ view = do
       [ hxTarget "contents",
         hxSwap OuterHtml [],
         hxTriggers [Load [], hxEvent ContentsUpdated],
-        hxGet_ "/contents"
+        hxGet "/contents"
       ]
       (UI.ContentList.view [])
     div_
