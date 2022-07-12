@@ -1,84 +1,29 @@
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE NamedFieldPuns #-}
 
 module Main where
 
+import qualified Api.AppServices as AppServices
 import Api.Application (app)
-import Api.AppServices (appServices)
-import Api.Config (api, apiPort, configCodec, connectionString, database, getPort)
-import InputOptions (inputOptionsParser, InputOptions (configPath, jwkPath))
+import Api.Config (Port (..), apiPort)
+import qualified Api.Config as Config
+import qualified Middleware
+import qualified Network.Wai.Handler.Warp as Warp
+import qualified Tagger.JSONWebKey as JWK
+import qualified Dependencies as Deps
+import Dependencies (Deps(..))
+import qualified Infrastructure.Logging.Logger as Logger
 
--- base
-import Control.Exception (catch)
-import Data.Function ((&))
-import Data.Maybe (fromMaybe)
-import Prelude hiding (writeFile)
-
--- bytestring
-import Data.ByteString.Char8 (writeFile, unpack)
-
--- hasql
-import Hasql.Connection (acquire)
-
--- jose
-import Crypto.JOSE.JWK (JWK)
-
--- optparse-applicative
-import Options.Applicative ((<**>), execParser, helper, info, fullDesc)
-
--- servant-auth-server
-import Servant.Auth.Server (fromSecret, generateSecret, readKey)
-
--- toml
-import Toml (decodeFileExact)
-
--- wai-cors
-import Network.Wai.Middleware.Cors (cors, simpleCorsResourcePolicy, corsRequestHeaders)
-
--- wai-extra
-import Network.Wai.Middleware.RequestLogger (logStdoutDev)
-
--- warp
-import Network.Wai.Handler.Warp (run)
-
-main:: IO ()
+main :: IO ()
 main = do
-  -- parse input options
-  inputOptions <- execParser $ info (inputOptionsParser <**> helper) fullDesc
-  -- extract application configuration from file
-  eitherConfig <- decodeFileExact configCodec (configPath inputOptions)
-  config <- either (\errors -> fail $ "unable to parse configuration: " <> show errors) pure eitherConfig
-  -- acquire the connection to the database
-  connection <- acquire $ connectionString (database config)
-  either
-    (fail . unpack . fromMaybe "unable to connect to the database")
-    -- if we were able to connect to the database we run the application
-    (\connection' -> do
-      -- first we generate a JSON Web Key
-      key <- jwtKey (jwkPath inputOptions)
-      -- we setup the application services
-      let services = appServices connection' key
-      -- we retrieve the port from configuration
-      let port = getPort . apiPort . api $ config
-      -- we create our application
-      let application
-            -- we pass in the required services
-            = app services
-            -- manage CORS for browser interaction
-            & cors (const . Just $ simpleCorsResourcePolicy {corsRequestHeaders = ["Authorization", "Content-Type"]})
-            -- we setup logging for the incoming requests
-            & logStdoutDev
-      -- eventually, we run the application on the port
-      run port application)
-      --run port . logStdoutDev . app $ services)
-    connection
+  appConfig <- Config.load
 
-jwtKey :: FilePath -> IO JWK
-jwtKey path = do
-  -- try to retrieve the JWK from file
-  catch (readKey path) $ \(_ :: IOError) -> do
-    -- if the file does not exist or does not contain a valid key, we generate one
-    key <- generateSecret
-    -- and we store it
-    writeFile path key
-    pure $ fromSecret key
+  Deps.withDeps appConfig $ \Deps {loggerHandle, dbHandle} -> do
+    jwk <- JWK.setup $ Config.jwkPath appConfig
+
+    let (Port port) = apiPort . Config.api $ appConfig
+        services = AppServices.start dbHandle loggerHandle jwk
+        application = Middleware.apply (app services)
+
+    Logger.logInfo loggerHandle $ "Listening on port " <> show port
+
+    Warp.run port application

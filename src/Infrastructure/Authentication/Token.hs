@@ -19,6 +19,9 @@ import Data.OpenApi (ToSchema(declareNamedSchema))
 import Data.Text (Text)
 import Data.Text.Encoding (decodeUtf8, encodeUtf8)
 
+toText :: Token -> Text
+toText (Token bs) = decodeUtf8 . toStrict $ bs
+
 -- |
 -- An authentication 'Token'
 newtype Token = Token ByteString
@@ -28,7 +31,7 @@ instance FromJSON Token where
   parseJSON = withText "Token" (pure . Token . fromStrict .  encodeUtf8)
 
 instance ToJSON Token where
-  toJSON (Token bs) = String . decodeUtf8 $ toStrict bs
+  toJSON = String . toText
 
 instance ToSchema Token where
   declareNamedSchema _ = declareNamedSchema (Proxy :: Proxy Text)

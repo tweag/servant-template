@@ -9,6 +9,7 @@ extra-deps:
   - postgresql-error-codes-1.0.1
   - tomland-1.3.3.1
   - validation-selective-0.1.0.1
+  - lucid-htmx-0.1.0.6@sha256:83d9eed5ff74778a2dfc3f320a66b08592a2880abca28d75747a0513a39bd871,1528
   - git: git@github.com:haskell-servant/servant.git
     commit: d05da71f09be08131d29a2c17f613a4bd71faea2
     subdirs:

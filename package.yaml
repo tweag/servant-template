@@ -15,6 +15,9 @@ ghc-options:
 library:
   source-dirs:      src
 
+default-extensions:
+  - OverloadedStrings
+
 dependencies:
   - base >= 4.14 && < 5
   - aeson
@@ -26,6 +29,8 @@ dependencies:
   - hasql-transaction
   - jose
   - lens
+  - lucid
+  - lucid-htmx
   - mtl
   - openapi3
   - optparse-applicative
@@ -33,6 +38,7 @@ dependencies:
   - servant
   - servant-auth
   - servant-auth-server
+  - servant-lucid
   - servant-openapi3
   - servant-server
   - text
