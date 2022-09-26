@@ -16,7 +16,7 @@ services:
       - default
 
   pgadmin:
-    image: dpage/pgadmin4:6.5
+    image: dpage/pgadmin4:6.13
     container_name: pgadmin
     environment:
       - PGADMIN_DEFAULT_EMAIL=user@domain.com

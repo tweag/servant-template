@@ -18,7 +18,6 @@ import GHC.Generics (Generic)
 import Prelude hiding (getContents)
 
 -- servant
--- servant
 import Servant.API (type (:>), Get, Post, JSON, ReqBody, QueryParams)
 import Servant.API.Generic ((:-))
 
