@@ -18,7 +18,11 @@
   outputs = { self, nixpkgs, flake-utils }:
     flake-utils.lib.eachDefaultSystem (system:
       let
-        pkgs = nixpkgs.legacyPackages.${system};
+        pkgs = import nixpkgs {
+          inherit system;
+
+          config.allowBroken = true;
+        };
         stack-nix = pkgs.symlinkJoin {
           name = "stack";
           paths = [ pkgs.stack ];
