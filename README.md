@@ -52,6 +52,10 @@ Eventually, you should pass your token in the `Authorization` header for the rel
 
 ## Development
 
+*Note*: If you're using `nix` you can run `nix develop` to get a shell with all
+required dependencies pre-installed. You should then build with `stack` from
+within this shell as normal.
+
 The project is using [Stack](https://docs.haskellstack.org/en/stable/README/).
 
 To build the project, run
