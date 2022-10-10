@@ -38,8 +38,7 @@
         };
       in
       {
-        devShell =
-          pkgs.mkShell {
+        devShells.default = pkgs.mkShell {
             buildInputs = with pkgs; [
               elmPackages.elm
               elmPackages.elm-live
