@@ -8,6 +8,10 @@ import Tags exposing (..)
 
 -- elm/core
 import Set exposing (..)
+import String exposing (fromInt)
+
+-- elm/html
+import Html.Attributes exposing (attribute, class, id)
 
 -- elm/http
 import Http exposing (..)
@@ -24,6 +28,9 @@ import Url.Builder exposing (..)
 import Element exposing (..)
 import Element.Border exposing (..)
 import Element.Input exposing (..)
+
+-- stoeffel/set-extra
+import Set.Extra exposing (subset)
 
 -- MODEL
 
@@ -50,6 +57,13 @@ type Msg
   | SubmitSuccessful Content
   | SubmitFailed
 
+-- add a content only if has the tags used as filters
+addFilteredContent : Content -> Model -> Model
+addFilteredContent content model =
+  if   subset model.filters.tags content.tags
+  then { model | contents = content :: model.contents }
+  else model
+
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model = case msg of
   FetchSuccessful contents -> ( { model | contents = contents }, Cmd.none )
@@ -57,8 +71,8 @@ update msg model = case msg of
   NewContent newContent    -> ( { model | newContent = newContent }, Cmd.none )
   NewFilter filterMsg      -> Tuple.mapFirst ( \filters -> { model | filters = filters } ) ( Tags.update ( retrieveContents model.token ) filterMsg model.filters )
   NewTag tagMsg            -> Tuple.mapFirst ( \newTags -> { model | newTags = newTags } ) ( Tags.update ( always ( Cmd.none ) ) tagMsg model.newTags )
-  SubmitContent            -> ( model, addContent model.token ( Content model.newContent model.newTags.tags ) )
-  SubmitSuccessful content -> ( { model | contents = content :: model.contents }, Cmd.none )
+  SubmitContent            -> ( { model | newContent = "", newTags = Tags.init } , addContent model.token ( Content model.newContent model.newTags.tags ) )
+  SubmitSuccessful content -> ( addFilteredContent content model, Cmd.none )
   SubmitFailed             -> ( model, Cmd.none )
 
 -- VIEW
@@ -67,42 +81,48 @@ viewTag : Tag -> Element msg
 viewTag tag = Element.el
   [ normalPadding
   , normalSpacing
+  , htmlAttribute ( class "tag" )
   ]
   ( Element.text tag )
 
 view : Model -> Element Msg
 view model = Component.mainRow
+  "logged"
   [ Component.mainColumn
+    "contents"
     [ Component.columnTitle "Contents"
-    , Element.map NewFilter ( Tags.view viewTag "Filter by tag" "Add filter" model.filters )
-    , Element.table
+    , Element.map NewFilter ( Tags.view viewTag "Filter by tag" "Add filter" "filter-by-tag" model.filters )
+    , Element.indexedTable
       [ normalPadding
+      , htmlAttribute (id "contents-table")
       ]
       { data = model.contents
       , columns =
         [ { header = tableHeader "Content"
           , width = fill
-          , view = \content -> Element.el
-            ( normalPadding :: tableRowStyle )
+          , view = \i content -> Element.el
+            ( normalPadding :: htmlAttribute ( attribute "content-row" ( fromInt i ) ) :: tableRowStyle )
             ( Element.text content.message )
           }
         , { header = tableHeader "Tags"
           , width = fill
-          , view = \content -> Element.el
-            tableRowStyle
+          , view = \i content -> Element.el
+            ( htmlAttribute ( attribute "tag-row" ( fromInt i ) ) :: tableRowStyle )
             ( row [] ( List.map viewTag ( toList content.tags ) ) ) }
         ]
       }
     ]
   , Component.mainColumn
+    "add-content"
     [ Component.columnTitle "Add content"
-    , Element.Input.text []
+    , Element.Input.text
+      [ htmlAttribute (id "new-content") ]
       { onChange = NewContent
       , text = model.newContent
       , placeholder = Just ( Element.Input.placeholder [] ( Element.text "New content" ) )
       , label = labelAbove [] ( Element.text "New content" )
       }
-    , Element.map NewTag ( Tags.view viewTag "New tag" "Add tag" model.newTags )
+    , Element.map NewTag ( Tags.view viewTag "New tag" "Add tag" "new-tag" model.newTags )
     , Component.button SubmitContent "Add content"
     ]
   ]

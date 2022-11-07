@@ -1,0 +1,27 @@
+version: '3'
+
+services:
+  webdriver:
+    image: selenium/standalone-chrome:3.141.59-20200826
+    container_name: webdriver
+    volumes:
+      - /dev/shm:/dev/shm
+      - .:/spec
+    healthcheck:
+      test: curl -f http://localhost:4444 || exit 1
+      interval: 1s
+      timeout: 1s
+      retries: 5
+      start_period: 10s
+    network_mode: "host"
+
+  quickstrom:
+    image: quickstrom/quickstrom
+    container_name: quickstrom
+    volumes:
+      - .:/spec
+    command: quickstrom check --webdriver-host=webdriver --webdriver-path=/wd/hub --browser=chrome --reporter=html --html-report-directory=/spec/report --tests=10 --max-actions=50 --max-trailing-state-changes=1 --trailing-state-change-timeout=500 /spec/Tagger.spec.purs http://localhost:8000
+    depends_on:
+      webdriver:
+        condition: service_healthy
+    network_mode: "host"
