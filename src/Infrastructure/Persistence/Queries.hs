@@ -3,42 +3,36 @@
 
 module Infrastructure.Persistence.Queries where
 
-import Infrastructure.Persistence.Schema (Content(..), contentSchema, Tag(..), tagSchema, ContentsTags(..), contentsTagsSchema, litTag, litContent, User (userName), userSchema, userId)
-import Tagger.Id (Id)
-import qualified Tagger.User as Domain (User)
-import Tagger.UserRepository (SelectUserError(..))
-
--- base
 import qualified Data.List as List (filter)
-import Prelude hiding (filter)
-
--- hasql
+import Data.Text (Text)
 import Hasql.Session (Session, statement)
 import Hasql.Statement (Statement)
-
--- hasql-transaction
 import qualified Hasql.Transaction as Transaction (statement)
-import Hasql.Transaction.Sessions (transaction, IsolationLevel (Serializable), Mode (Write))
-
--- rel8
-import Rel8 (Expr, Insert(..), OnConflict(..), Query, Result, each, filter, insert, many, select, values, where_, (==.), TableSchema, Name, Rel8able, in_, lit)
-
--- text
-import Data.Text (Text)
+import Hasql.Transaction.Sessions (IsolationLevel (Serializable), Mode (Write), transaction)
+import Infrastructure.Persistence.Schema (Content (..), ContentsTags (..), Tag (..), User (userName), contentSchema, contentsTagsSchema, litContent, litTag, tagSchema, userId, userSchema)
+import Rel8 (Expr, Insert (..), Name, OnConflict (..), Query, Rel8able, Result, TableSchema, each, filter, in_, insert, lit, many, select, values, where_, (==.))
+import Tagger.Id (Id)
+import qualified Tagger.User as Domain (User)
+import Tagger.UserRepository (SelectUserError (..))
+import Prelude hiding (filter)
 
 -- SELECT CONTENTS
 
 -- |
 -- Selects the 'ContentsTags' for a given 'Content'
 contentsTagsForContent :: Content Expr -> Query (ContentsTags Expr)
-contentsTagsForContent content = each contentsTagsSchema >>= filter (\contentTag' ->
-  ctContentId contentTag' ==. contentId content)
+contentsTagsForContent content =
+  each contentsTagsSchema
+    >>= filter
+      ( \contentTag' ->
+          ctContentId contentTag' ==. contentId content
+      )
 
 -- |
 -- Selects the 'Tags' associated with a given 'Content'
 tagsForContent :: Content Expr -> Query (Tag Expr)
 tagsForContent content = do
-  tag         <- each tagSchema
+  tag <- each tagSchema
   contentTag' <- contentsTagsForContent content
   where_ $ tagId tag ==. ctTagId contentTag'
   return tag
@@ -46,20 +40,28 @@ tagsForContent content = do
 -- |
 -- Selects the 'User' who ownes a 'Content'
 userForContent :: Content Expr -> Query (User Expr)
-userForContent content = each userSchema >>= filter (\user ->
-  userId user ==. contentUserId content)
+userForContent content =
+  each userSchema
+    >>= filter
+      ( \user ->
+          userId user ==. contentUserId content
+      )
 
 -- |
 -- Given a 'Domain.User' 'Id', retrieves all the contents for that specific user
 selectUserContents :: Id Domain.User -> Session [(Content Result, [Tag Result], User Result)]
 selectUserContents userId' = statement () . select $ do
   -- Select all content for the given user
-  content <- each contentSchema >>= filter (\content ->
-    contentUserId content ==. lit userId')
+  content <-
+    each contentSchema
+      >>= filter
+        ( \content ->
+            contentUserId content ==. lit userId'
+        )
   -- Select tags for each content
-  tags    <- many $ tagsForContent content
+  tags <- many $ tagsForContent content
   -- Select user for each content
-  user    <- userForContent content
+  user <- userForContent content
   return (content, tags, user)
 
 -- SELECT TAGS
@@ -74,20 +76,23 @@ selectTags tagNames = select $ each tagSchema >>= filter ((`in_` (tagName . litT
 -- |
 -- Adds a number of rows to the specified 'TableSchema'
 add :: Rel8able f => TableSchema (f Name) -> [f Expr] -> Statement () ()
-add schema rows' = insert $ Insert
-  { into = schema
-  , rows = values rows'
-  , onConflict = Abort
-  , returning = pure ()
-  }
+add schema rows' =
+  insert $
+    Insert
+      { into = schema,
+        rows = values rows',
+        onConflict = Abort,
+        returning = pure ()
+      }
 
 -- |
 -- Creates a 'ContentTag' given a 'Content' and a 'Tag'
 contentTag :: Content f -> Tag f -> ContentsTags f
-contentTag content tag = ContentsTags
-  { ctContentId = contentId content
-  , ctTagId     = tagId     tag
-  }
+contentTag content tag =
+  ContentsTags
+    { ctContentId = contentId content,
+      ctTagId = tagId tag
+    }
 
 -- |
 -- Removes the 'alreadyPresentTags' from 'allTags'
@@ -117,16 +122,19 @@ addContentWithTags content tags = transaction Serializable Write $ do
 -- Given a list of 'User's, succeed if there is only one in the list, otherwise fail with the appropriate error message
 singleUser :: [User Result] -> Either SelectUserError (User Result)
 singleUser = \case
-  []     -> Left NoUser
+  [] -> Left NoUser
   [user] -> Right user
-  _      -> Left MoreThanOneUser
+  _ -> Left MoreThanOneUser
 
 -- |
 -- Retrieve from the database a user with the provided name.
 -- If in the database we find none or more the one, it returns the appropriate error message
 selectUserByName :: Text -> Session (Either SelectUserError (User Result))
-selectUserByName name = singleUser <$> (statement () . select $
-  each userSchema >>= filter (\user -> userName user ==. lit name))
+selectUserByName name =
+  singleUser
+    <$> ( statement () . select $
+            each userSchema >>= filter (\user -> userName user ==. lit name)
+        )
 
 -- ADD USER
 

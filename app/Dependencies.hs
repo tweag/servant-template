@@ -15,7 +15,7 @@ data Deps = Deps
 
 -- |
 -- Starts dependencies and calls a given effectful function with them
-withDeps :: Config.Config -> (Deps  -> IO a) -> IO a
+withDeps :: Config.Config -> (Deps -> IO a) -> IO a
 withDeps appConfig f = do
   SystemTime.withHandle $ \systemTime ->
     Logger.withHandle systemTime $ \logger ->

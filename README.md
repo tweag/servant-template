@@ -53,10 +53,10 @@ Eventually, you should pass your token in the `Authorization` header for the rel
 ## Development
 
 The project is setup to be built with [Stack](https://docs.haskellstack.org/en/stable/README/),
-though it is also possible to build via [Nix](https://nixos.org/). Convenience 
-scripts are provided (under the `bin/` directory) to manage the lifecycle of the 
-application. These scripts try to use Nix if it is available, and fall back to 
-using Stack directly otherwise. The scripts are completely optional, and direct 
+though it is also possible to build via [Nix](https://nixos.org/). Convenience
+scripts are provided (under the `bin/` directory) to manage the lifecycle of the
+application. These scripts try to use Nix if it is available, and fall back to
+using Stack directly otherwise. The scripts are completely optional, and direct
 invocations of stack commands (e.g. `stack build`, `stack test`, etc.) is also
 valid.
 
@@ -141,6 +141,11 @@ The executable accepts two options:
 
 - `--config`, which allows to customize the path of the configuration file
 - `--jwk`, which allows to customize the path of the file where the JWK is stored
+
+### Formatting
+The Haskell files are formatted using `ormolu`. The Elm source code is formatted using `elm-format`.
+
+There is a script to format all files in the codebase (Elm and Haskell) under `bin/format`. Individual projects can be formatted separately with `bin/api/format` and `bin/frontend/format`.
 
 ## Documentation
 

@@ -3,26 +3,19 @@
 {-# LANGUAGE DerivingVia #-}
 {-# LANGUAGE NamedFieldPuns #-}
 
-module Tagger.Content (Content(message, tags), createContent, hasAllTags) where
+module Tagger.Content (Content (message, tags), createContent, hasAllTags) where
 
--- base
-import Data.List (nub)
-import GHC.Generics (Generic)
-
--- aeson
 import Data.Aeson (FromJSON, ToJSON)
-
--- openapi3
+import Data.List (nub)
 import Data.OpenApi (ToSchema)
-
--- text
 import Data.Text (Text)
+import GHC.Generics (Generic)
 
 -- |
 -- A 'Content' is just a text indexed by a list of 'tag's
 data Content tag = Content
-  { message :: Text
-  , tags :: [tag]
+  { message :: Text,
+    tags :: [tag]
   }
   deriving stock (Eq, Show, Functor, Generic)
 
@@ -33,7 +26,7 @@ instance Foldable Content where
   foldMap f = foldMap f . tags
 
 instance Traversable Content where
-  traverse f Content{message, tags} = Content message <$> traverse f tags
+  traverse f Content {message, tags} = Content message <$> traverse f tags
 
 instance ToSchema tag => ToSchema (Content tag)
 

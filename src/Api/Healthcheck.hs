@@ -3,11 +3,8 @@
 
 module Api.Healthcheck where
 
--- servant
-import Servant.API (type (:>), Get, JSON)
-
--- servant-server
-import Servant (Server, NoContent (NoContent))
+import Servant (NoContent (NoContent), Server)
+import Servant.API (Get, JSON, type (:>))
 
 -- |
 -- A single endpoint to check the liveness of the application

@@ -4,34 +4,21 @@
 
 module Tagger.EncryptedPassword (EncryptedPassword, asBytestring, encryptPassword, validatePassword) where
 
--- base
-import Data.Data (Proxy(Proxy))
-import GHC.Generics (Generic)
-
--- aeson
-import Data.Aeson (ToJSON(toJSON), FromJSON(parseJSON))
-
--- bcrypt
-import Crypto.BCrypt (hashPasswordUsingPolicy, fastBcryptHashingPolicy)
+import Crypto.BCrypt (fastBcryptHashingPolicy, hashPasswordUsingPolicy)
 import qualified Crypto.BCrypt as BCrypt (validatePassword)
-
--- bytestring
+import Data.Aeson (FromJSON (parseJSON), ToJSON (toJSON))
 import Data.ByteString (ByteString)
-
--- openapi3
-import Data.OpenApi (ToSchema(declareNamedSchema))
-
--- rel8
-import Rel8 (DBEq, DBType)
-
--- text
+import Data.Data (Proxy (Proxy))
+import Data.OpenApi (ToSchema (declareNamedSchema))
 import Data.Text (Text)
-import Data.Text.Encoding (encodeUtf8, decodeUtf8)
+import Data.Text.Encoding (decodeUtf8, encodeUtf8)
+import GHC.Generics (Generic)
+import Rel8 (DBEq, DBType)
 
 -- |
 -- An 'EncryptedPassword' is a newtype wrapping a 'Bytestring'.
 -- We do not export the constructor to enforce that an 'EncryptedPassword' is built using 'encryptPassword'
-newtype EncryptedPassword = EncryptedPassword { asBytestring :: ByteString }
+newtype EncryptedPassword = EncryptedPassword {asBytestring :: ByteString}
   deriving stock (Eq, Show, Read, Generic)
   deriving newtype (DBEq, DBType)
 
