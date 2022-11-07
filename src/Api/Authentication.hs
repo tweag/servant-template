@@ -5,46 +5,41 @@
 
 module Api.Authentication where
 
-import Infrastructure.Authentication.AuthenticateUser (AuthenticateUser(runAuthenticateUser))
-import Infrastructure.Authentication.Credentials (Credentials(username))
-import Infrastructure.Authentication.PasswordManager (PasswordManager(generatePassword, generateToken))
-import Infrastructure.Authentication.Token (Token)
-import Tagger.Id (Id)
-import Tagger.User (User)
-import Tagger.UserRepository (UserRepository(addUser))
-
--- base
 import Data.Proxy (Proxy (Proxy))
 import GHC.Generics (Generic)
-
--- servant
-import Servant (ReqBody, JSON, type (:>), Handler, Post)
+import Infrastructure.Authentication.AuthenticateUser (AuthenticateUser (runAuthenticateUser))
+import Infrastructure.Authentication.Credentials (Credentials (username))
+import Infrastructure.Authentication.PasswordManager (PasswordManager (generatePassword, generateToken))
+import Infrastructure.Authentication.Token (Token)
+import Servant (Handler, JSON, Post, ReqBody, type (:>))
 import Servant.API.Generic (type (:-))
-
--- servant-openapi3
-import Servant.OpenApi (HasOpenApi(toOpenApi))
-
--- servant-server
+import Servant.OpenApi (HasOpenApi (toOpenApi))
 import Servant.Server.Generic (AsServer)
+import Tagger.Id (Id)
+import Tagger.User (User)
+import Tagger.UserRepository (UserRepository (addUser))
 
 -- |
 -- The endpoints required to perform authentication
 data AuthenticationAPI mode = AuthenticationAPI
-  { register :: mode :- "register" :> ReqBody '[JSON] Credentials :> Post '[JSON] (Id User) -- ^ Given some 'Login' data, registers a new 'User'
-  , login    :: mode :- "login"    :> ReqBody '[JSON] Credentials :> Post '[JSON] Token     -- ^ Given some 'Login' data, generates an authentication token
+  { -- | Given some 'Login' data, registers a new 'User'
+    register :: mode :- "register" :> ReqBody '[JSON] Credentials :> Post '[JSON] (Id User),
+    -- | Given some 'Login' data, generates an authentication token
+    login :: mode :- "login" :> ReqBody '[JSON] Credentials :> Post '[JSON] Token
   }
-  deriving stock Generic
+  deriving stock (Generic)
 
 instance HasOpenApi AuthenticationAPI where
-  toOpenApi _
-    =  toOpenApi (Proxy :: Proxy ("register" :> ReqBody '[JSON] Credentials :> Post '[JSON] (Id User)))
-    <> toOpenApi (Proxy :: Proxy ("login"    :> ReqBody '[JSON] Credentials :> Post '[JSON] Token))
+  toOpenApi _ =
+    toOpenApi (Proxy :: Proxy ("register" :> ReqBody '[JSON] Credentials :> Post '[JSON] (Id User)))
+      <> toOpenApi (Proxy :: Proxy ("login" :> ReqBody '[JSON] Credentials :> Post '[JSON] Token))
 
 authenticationServer :: PasswordManager Handler -> AuthenticateUser Handler -> UserRepository Handler -> AuthenticationAPI AsServer
-authenticationServer passwordManager authenticateUser userRepository = AuthenticationAPI
-  { register = registerEndpoint passwordManager userRepository
-  , login    = loginEndpoint passwordManager authenticateUser
-  }
+authenticationServer passwordManager authenticateUser userRepository =
+  AuthenticationAPI
+    { register = registerEndpoint passwordManager userRepository,
+      login = loginEndpoint passwordManager authenticateUser
+    }
 
 registerEndpoint :: PasswordManager Handler -> UserRepository Handler -> Credentials -> Handler (Id User)
 registerEndpoint passwordManager userRepository login' = do

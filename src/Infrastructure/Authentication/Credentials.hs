@@ -4,22 +4,16 @@
 
 module Infrastructure.Authentication.Credentials where
 
--- base
-import Data.Proxy (Proxy(Proxy))
-import GHC.Generics (Generic)
-
--- aeson
-import Data.Aeson (FromJSON (parseJSON), ToJSON(toJSON))
-
+import Data.Aeson (FromJSON (parseJSON), ToJSON (toJSON))
 -- bytestring
 import Data.ByteString (ByteString)
-
 -- openapi3
-import Data.OpenApi (ToSchema(declareNamedSchema))
-
+import Data.OpenApi (ToSchema (declareNamedSchema))
+import Data.Proxy (Proxy (Proxy))
 -- text
 import Data.Text (Text)
-import Data.Text.Encoding (encodeUtf8, decodeUtf8)
+import Data.Text.Encoding (decodeUtf8, encodeUtf8)
+import GHC.Generics (Generic)
 
 -- |
 -- A newtype wrapper over 'ByteString' to represent a non encrypted password
@@ -35,8 +29,8 @@ instance ToSchema Password where
   declareNamedSchema _ = declareNamedSchema (Proxy :: Proxy Text)
 
 data Credentials = Credentials
-  { username :: Text
-  , password :: Password
+  { username :: Text,
+    password :: Password
   }
-  deriving stock Generic
+  deriving stock (Generic)
   deriving anyclass (FromJSON, ToJSON, ToSchema)

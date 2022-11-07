@@ -4,70 +4,68 @@
 
 module Infrastructure.Authentication.PasswordManager where
 
-import qualified Infrastructure.Authentication.Credentials as Credentials (password)
-import Infrastructure.Authentication.Credentials (Credentials, Password(asBytestring))
-import Infrastructure.Authentication.Token (Token(Token))
-import qualified Tagger.EncryptedPassword as Encrypted (validatePassword)
-import Tagger.EncryptedPassword (EncryptedPassword, encryptPassword)
-import Tagger.User (User(password))
-import Tagger.Id (Id)
-
--- base
 import Control.Category ((>>>))
-import Data.Bifunctor (bimap)
-
--- jose
+import Control.Monad.Trans.Except (ExceptT (ExceptT))
 import Crypto.JWT (Error)
-
--- servant-auth-server
+import Data.Bifunctor (bimap)
+import Infrastructure.Authentication.Credentials (Credentials, Password (asBytestring))
+import qualified Infrastructure.Authentication.Credentials as Credentials (password)
+import Infrastructure.Authentication.Token (Token (Token))
 import Servant.Auth.Server (JWTSettings, makeJWT)
-
--- transformers
-import Control.Monad.Trans.Except (ExceptT(ExceptT))
+import Tagger.EncryptedPassword (EncryptedPassword, encryptPassword)
+import qualified Tagger.EncryptedPassword as Encrypted (validatePassword)
+import Tagger.Id (Id)
+import Tagger.User (User (password))
 
 -- |
 -- A 'PasswordManager' is the service dedicated at dealing with password and authentication tokens
 -- It is indexed by a context 'm' which wraps the results.
 data PasswordManager m = PasswordManager
-  { generatePassword :: Credentials -> m EncryptedPassword -- ^ given some 'Credentials', tries to encrypt the password
-  , generateToken    :: Id User -> m Token                 -- ^ given a 'User' 'Id', tries to generate an authentication 'Token'
-  , validatePassword :: User -> Password -> Bool           -- ^ given a 'User' and a non excrypted 'Password', checks whether the password corresponds to the user's one
+  { -- | given some 'Credentials', tries to encrypt the password
+    generatePassword :: Credentials -> m EncryptedPassword,
+    -- | given a 'User' 'Id', tries to generate an authentication 'Token'
+    generateToken :: Id User -> m Token,
+    -- | given a 'User' and a non excrypted 'Password', checks whether the password corresponds to the user's one
+    validatePassword :: User -> Password -> Bool
   }
 
 -- |
 -- Given a natural transformation between a context 'm' and a context 'n', it allows to change the context where 'PasswordManager' is operating
 hoist :: (forall a. m a -> n a) -> PasswordManager m -> PasswordManager n
-hoist f PasswordManager{generatePassword, generateToken, validatePassword} =
+hoist f PasswordManager {generatePassword, generateToken, validatePassword} =
   PasswordManager (f . generatePassword) (f . generateToken) validatePassword
 
 -- |
 -- How the 'PasswordManager' operations can fail
 data PasswordManagerError
-  = FailedHashing           -- ^ there was an error while hashing the password
-  | FailedJWTCreation Error -- ^ there was an error while generating the authentication token
-  deriving stock Show
+  = -- | there was an error while hashing the password
+    FailedHashing
+  | -- | there was an error while generating the authentication token
+    FailedJWTCreation Error
+  deriving stock (Show)
 
 -- |
 -- A 'PasswordManager' implementation based on the 'bcrypt' algorithm
 bcryptPasswordManager :: JWTSettings -> PasswordManager (ExceptT PasswordManagerError IO)
-bcryptPasswordManager jwtSettings = PasswordManager
-  { generatePassword = bcryptGeneratePassword
-  , generateToken    = bcryptGenerateToken jwtSettings
-  , validatePassword = bcryptValidatePassword
-  }
+bcryptPasswordManager jwtSettings =
+  PasswordManager
+    { generatePassword = bcryptGeneratePassword,
+      generateToken = bcryptGenerateToken jwtSettings,
+      validatePassword = bcryptValidatePassword
+    }
 
 bcryptGeneratePassword :: Credentials -> ExceptT PasswordManagerError IO EncryptedPassword
-bcryptGeneratePassword
+bcryptGeneratePassword =
   -- extract the password from the Credentials
-  =   Credentials.password
-  -- convert it to bytestring
-  >>> asBytestring
-  -- try to encrypt it
-  >>> encryptPassword
-  -- wrap the error message to get a PasswordManagerError
-  >>> fmap (maybe (Left FailedHashing) Right)
-  -- wrap everything in ExceptT
-  >>> ExceptT
+  Credentials.password
+    -- convert it to bytestring
+    >>> asBytestring
+    -- try to encrypt it
+    >>> encryptPassword
+    -- wrap the error message to get a PasswordManagerError
+    >>> fmap (maybe (Left FailedHashing) Right)
+    -- wrap everything in ExceptT
+    >>> ExceptT
 
 bcryptGenerateToken :: JWTSettings -> Id User -> ExceptT PasswordManagerError IO Token
 bcryptGenerateToken jwtSettings userId = ExceptT $ do

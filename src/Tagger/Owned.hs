@@ -3,23 +3,17 @@
 
 module Tagger.Owned where
 
+import Data.Aeson (FromJSON, ToJSON)
+import Data.OpenApi (ToSchema)
+import GHC.Generics (Generic)
 import Tagger.Id (Id)
 import Tagger.User (User)
-
--- base
-import GHC.Generics (Generic)
-
--- aeson
-import Data.Aeson (FromJSON, ToJSON)
-
--- openapi3
-import Data.OpenApi (ToSchema)
 
 -- |
 -- 'Owned' is a data type used to associate a 'User' to a content via its 'Id'
 data Owned a = Owned
-  { userId  :: Id User
-  , content :: a
+  { userId :: Id User,
+    content :: a
   }
   deriving stock (Eq, Show, Generic)
 
