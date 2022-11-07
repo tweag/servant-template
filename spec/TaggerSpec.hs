@@ -8,7 +8,7 @@ import Api.Authentication (AuthenticationAPI(..))
 import Api.Tagger (TaggerAPI(..))
 import Infrastructure.Authentication.Credentials (Credentials(Credentials), Password(Password))
 import Infrastructure.Authentication.Token (Token(Token))
-import Tagger.Content (Content(Content))
+import Tagger.Content (Content, createContent)
 import Tagger.Id (Id)
 import Tagger.Owned (Owned(Owned))
 import Tagger.Tag (Tag(Tag))
@@ -115,7 +115,7 @@ spec = around withTaggerApp $ do
       it "allows a user to add a new content" $ \port -> do
         let loginData = Credentials "marcosh" (Password "password")
         token <- snd <$> successfullyLoginUser (clientEnv port) loginData
-        let content = Content "some content" [Tag "first tag", Tag "second tag"]
+        let content = createContent "some content" [Tag "first tag", Tag "second tag"]
         response <- addUserContent (clientEnv port) token content
         response `shouldSatisfy` isRight
 
@@ -123,8 +123,8 @@ spec = around withTaggerApp $ do
       it "retrieves all contents added by a user" $ \port -> do
         let loginData = Credentials "marcosh" (Password "password")
         (userId, token) <- successfullyLoginUser (clientEnv port) loginData
-        let content1 = Content "some content"  [Tag "first tag", Tag "second tag"]
-        let content2 = Content "other content" [Tag "first tag", Tag "third tag"]
+        let content1 = createContent "some content"  [Tag "first tag", Tag "second tag"]
+        let content2 = createContent "other content" [Tag "first tag", Tag "third tag"]
         _        <- addUserContent (clientEnv port) token content1
         _        <- addUserContent (clientEnv port) token content2
         contents <- getUserContents (clientEnv port) token []
@@ -135,8 +135,8 @@ spec = around withTaggerApp $ do
       it "retrieves all contents with a shared tag" $ \port -> do
         let loginData = Credentials "marcosh" (Password "password")
         (userId, token) <- successfullyLoginUser (clientEnv port) loginData
-        let content1 = Content "some content"  [Tag "first tag", Tag "second tag"]
-        let content2 = Content "other content" [Tag "first tag", Tag "third tag"]
+        let content1 = createContent "some content"  [Tag "first tag", Tag "second tag"]
+        let content2 = createContent "other content" [Tag "first tag", Tag "third tag"]
         _        <- addUserContent (clientEnv port) token content1
         _        <- addUserContent (clientEnv port) token content2
         contents <- getUserContents (clientEnv port) token [Tag "first tag"]
@@ -147,8 +147,8 @@ spec = around withTaggerApp $ do
       it "retrieves only contents with a given tag" $ \port -> do
         let loginData = Credentials "marcosh" (Password "password")
         (userId, token) <- successfullyLoginUser (clientEnv port) loginData
-        let content1 = Content "some content"  [Tag "first tag", Tag "second tag"]
-        let content2 = Content "other content" [Tag "first tag", Tag "third tag"]
+        let content1 = createContent "some content"  [Tag "first tag", Tag "second tag"]
+        let content2 = createContent "other content" [Tag "first tag", Tag "third tag"]
         _        <- addUserContent (clientEnv port) token content1
         _        <- addUserContent (clientEnv port) token content2
         contents <- getUserContents (clientEnv port) token [Tag "second tag"]
@@ -159,8 +159,8 @@ spec = around withTaggerApp $ do
       it "does not retrieve contents with non existing mix of tags" $ \port -> do
         let loginData = Credentials "marcosh" (Password "password")
         (_, token) <- successfullyLoginUser (clientEnv port) loginData
-        let content1 = Content "some content"  [Tag "first tag", Tag "second tag"]
-        let content2 = Content "other content" [Tag "first tag", Tag "third tag"]
+        let content1 = createContent "some content"  [Tag "first tag", Tag "second tag"]
+        let content2 = createContent "other content" [Tag "first tag", Tag "third tag"]
         _        <- addUserContent (clientEnv port) token content1
         _        <- addUserContent (clientEnv port) token content2
         contents <- getUserContents (clientEnv port) token [Tag "second tag", Tag "third tag"]
@@ -171,8 +171,8 @@ spec = around withTaggerApp $ do
       it "retrieves contents with all the required tags" $ \port -> do
         let loginData = Credentials "marcosh" (Password "password")
         (userId, token) <- successfullyLoginUser (clientEnv port) loginData
-        let content1 = Content "some content"  [Tag "first tag", Tag "second tag"]
-        let content2 = Content "other content" [Tag "first tag", Tag "third tag"]
+        let content1 = createContent "some content"  [Tag "first tag", Tag "second tag"]
+        let content2 = createContent "other content" [Tag "first tag", Tag "third tag"]
         _        <- addUserContent (clientEnv port) token content1
         _        <- addUserContent (clientEnv port) token content2
         contents <- getUserContents (clientEnv port) token [Tag "first tag", Tag "second tag"]
@@ -183,14 +183,14 @@ spec = around withTaggerApp $ do
       it "retrieves only contents from the requesting user" $ \port -> do
         let loginData1 = Credentials "marcosh" (Password "password")
         (userId1, token1) <- successfullyLoginUser (clientEnv port) loginData1
-        let content1 = Content "first content"  [Tag "first tag", Tag "second tag"]
-        let content2 = Content "second content" [Tag "first tag", Tag "third tag"]
+        let content1 = createContent "first content"  [Tag "first tag", Tag "second tag"]
+        let content2 = createContent "second content" [Tag "first tag", Tag "third tag"]
         _ <- addUserContent (clientEnv port) token1 content1
         _ <- addUserContent (clientEnv port) token1 content2
         let loginData2 = Credentials "perons" (Password "password")
         (_, token2) <- successfullyLoginUser (clientEnv port) loginData2
-        let content3 = Content "third content"  [Tag "first tag", Tag "second tag"]
-        let content4 = Content "fourth content" [Tag "first tag", Tag "third tag"]
+        let content3 = createContent "third content"  [Tag "first tag", Tag "second tag"]
+        let content4 = createContent "fourth content" [Tag "first tag", Tag "third tag"]
         _        <- addUserContent (clientEnv port) token2 content3
         _        <- addUserContent (clientEnv port) token2 content4
         contents <- getUserContents (clientEnv port) token1 [Tag "first tag"]
