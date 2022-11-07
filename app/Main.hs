@@ -15,11 +15,10 @@ main :: IO ()
 main = do
   options <- CLIOptions.parse
   appConfig <- Config.load $ configPath options
-  connection <- DB.acquire appConfig
-  jwk <- JWK.setup options
+  key <- JWK.setup options
+  DB.withHandle appConfig (\dbHandle -> do
+    let (Port port) = apiPort . Config.api $ appConfig
+        services = AppServices.start dbHandle key
+        application = Middleware.apply (app services)
 
-  let (Port port) = apiPort . Config.api $ appConfig
-      services = AppServices.start connection jwk
-      application = Middleware.apply (app services)
-
-  Warp.run port application
+    Warp.run port application)
