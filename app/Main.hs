@@ -12,6 +12,7 @@ import CLIOptions (CLIOptions (configPath))
 import qualified CLIOptions
 import Dependencies (Deps (..))
 import qualified Dependencies as Deps
+import qualified Infrastructure.Logging.Logger as Logger
 import qualified Middleware
 import qualified Network.Wai.Handler.Warp as Warp
 import qualified Tagger.JSONWebKey as JWK
@@ -28,5 +29,6 @@ main = do
             services = AppServices.start dbHandle loggerHandle key
             application = Middleware.apply (app services)
 
+        Logger.logInfo loggerHandle $ "Starting app on port " <> show port <> "."
         Warp.run port application
     )

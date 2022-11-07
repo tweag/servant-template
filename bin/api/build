@@ -1,0 +1,6 @@
+#!/bin/sh
+
+args=$@
+cmd="stack build $args"
+
+bin/util/with-nix $cmd

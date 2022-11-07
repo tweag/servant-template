@@ -1,0 +1,34 @@
+#!/bin/sh
+
+dbuser=$(toml2json $PWD/config.toml | jq .database.user -r)
+dbport=$(toml2json $PWD/config.toml | jq .database.port -r)
+dbname=$(toml2json $PWD/config.toml | jq .database.dbname -r)
+
+export PGHOST=$PWD/.postgres
+export PGDATA=$PGHOST/data
+export PGDATABASE=postgres
+export PGLOG=$PGHOST/postgres.log
+export PGPORT=$dbport
+
+mkdir -p $PGHOST
+
+if [ ! -d $PGDATA ]; then
+  initdb --auth=trust --no-locale --encoding=UTF8 > /dev/null
+fi
+
+if ! pg_ctl status > /dev/null
+then
+  pg_ctl start -l $PGLOG -o "--unix_socket_directories='$PGHOST'"
+
+  echo "[DB] Creating database \"$dbname\"..."
+  psql --command "create database \"$dbname\""
+
+  echo "[DB] Creating user \"$dbuser\"..."
+  psql --command "create user \"$dbuser\""
+
+  echo "[DB] Granting privileges to \"$dbuser\"..."
+  psql --command "grant all privileges on database \"$dbname\" to \"$dbuser\";"
+
+  echo "[DB] Applying schema..."
+  psql -U "$dbuser" -d "$dbname" -f ./schema.sql;
+fi

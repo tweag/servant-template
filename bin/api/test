@@ -1,0 +1,5 @@
+#!/bin/sh
+
+args=$@
+cmd="stack test $args"
+bin/util/with-nix $cmd

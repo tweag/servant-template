@@ -6,7 +6,14 @@ This folder contains a client application built with [Elm](https://elm-lang.org/
 
 You can build the client application using
 
-```
+```sh
+# From the project root with convenience script
+bin/frontend/build
+
+# From the project root with nix
+nix-shell --run 'cd elm; elm make src/Main.elm'
+
+# With npm
 elm make src/Main.elm
 ```
 
@@ -14,8 +21,15 @@ elm make src/Main.elm
 
 You can start the application with live reload using:
 
-```
-elm-live src/Main.elm --open -- --debug'
+```sh
+# From the project root with convenience script
+bin/frontend/serve
+
+# From the project root with nix
+nix-shell --run 'cd elm; elm-live src/Main.elm'
+
+# With npm
+cd elm; elm-live src/Main.elm'
 ```
 
 It will open a new tab in your browser with the time-traveler available.
