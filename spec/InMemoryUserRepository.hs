@@ -1,5 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 module InMemoryUserRepository where
 
 import Control.Monad.Except (throwError)

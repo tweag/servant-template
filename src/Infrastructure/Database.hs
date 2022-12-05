@@ -1,5 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 module Infrastructure.Database
   ( Config (..),
     Handle,

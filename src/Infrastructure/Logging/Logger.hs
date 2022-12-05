@@ -1,5 +1,3 @@
-{-# OPTIONS_GHC -Wno-unused-top-binds #-}
-
 module Infrastructure.Logging.Logger
   ( Handle,
     withHandle,
@@ -7,6 +5,7 @@ module Infrastructure.Logging.Logger
     logError,
     logInfo,
     logWarning,
+    logDebug,
   )
 where
 
