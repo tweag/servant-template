@@ -5,7 +5,6 @@
 
 module Api.Authentication where
 
-import Data.Proxy (Proxy (Proxy))
 import GHC.Generics (Generic)
 import Infrastructure.Authentication.AuthenticateUser (AuthenticateUser (runAuthenticateUser))
 import Infrastructure.Authentication.Credentials (Credentials (username))
@@ -13,7 +12,6 @@ import Infrastructure.Authentication.PasswordManager (PasswordManager (generateP
 import Infrastructure.Authentication.Token (Token)
 import Servant (Handler, JSON, Post, ReqBody, type (:>))
 import Servant.API.Generic (type (:-))
-import Servant.OpenApi (HasOpenApi (toOpenApi))
 import Servant.Server.Generic (AsServer)
 import Tagger.Id (Id)
 import Tagger.User (User)
@@ -28,11 +26,6 @@ data AuthenticationAPI mode = AuthenticationAPI
     login :: mode :- "login" :> ReqBody '[JSON] Credentials :> Post '[JSON] Token
   }
   deriving stock (Generic)
-
-instance HasOpenApi AuthenticationAPI where
-  toOpenApi _ =
-    toOpenApi (Proxy :: Proxy ("register" :> ReqBody '[JSON] Credentials :> Post '[JSON] (Id User)))
-      <> toOpenApi (Proxy :: Proxy ("login" :> ReqBody '[JSON] Credentials :> Post '[JSON] Token))
 
 authenticationServer :: PasswordManager Handler -> AuthenticateUser Handler -> UserRepository Handler -> AuthenticationAPI AsServer
 authenticationServer passwordManager authenticateUser userRepository =
