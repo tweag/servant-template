@@ -1,3 +1,4 @@
+{-# LANGUAGE RecordWildCards #-}
 module Dependencies (withDeps, Deps (..)) where
 
 import qualified Api.Config as Config
@@ -16,8 +17,8 @@ data Deps = Deps
 -- |
 -- Starts dependencies and calls a given effectful function with them
 withDeps :: Config.Config -> (Deps -> IO a) -> IO a
-withDeps appConfig f = do
-  SystemTime.withHandle $ \systemTime ->
-    Logger.withHandle systemTime $ \logger ->
-      DB.withHandle appConfig $ \db -> do
-        f $ Deps systemTime logger db
+withDeps appConfig f =
+  SystemTime.withHandle $ \systemTimeHandler ->
+    Logger.withHandle systemTimeHandler $ \loggerHandle ->
+      DB.withHandle appConfig $ \dbHandle ->
+        f Deps {..}

@@ -1,7 +1,6 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DerivingStrategies #-}
 {-# LANGUAGE NamedFieldPuns #-}
-{-# LANGUAGE OverloadedStrings #-}
 
 module Tagger.User where
 

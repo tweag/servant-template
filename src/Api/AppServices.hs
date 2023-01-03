@@ -1,4 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RankNTypes #-}
 
 module Api.AppServices where

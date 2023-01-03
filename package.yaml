@@ -12,6 +12,9 @@ ghc-options:
   -fwrite-ide-info
   -hiedir=.hie
 
+default-extensions:
+  - OverloadedStrings
+
 library:
   source-dirs:      src
 
