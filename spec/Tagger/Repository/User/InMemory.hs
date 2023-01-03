@@ -1,4 +1,4 @@
-module InMemoryUserRepository where
+module Tagger.Repository.User.InMemory (inMemoryUserRepository) where
 
 import Control.Monad.Except (throwError)
 import Control.Monad.IO.Class (liftIO)
@@ -7,15 +7,15 @@ import Data.Map.Lazy (Map, assocs, filter, insert, size)
 import Data.Text (Text)
 import Data.Text.Encoding (encodeUtf8)
 import Data.UUID.V4 (nextRandom)
-import GHC.Conc (TVar, atomically, readTVar, readTVarIO, writeTVar)
+import GHC.Conc (TVar, atomically, readTVarIO, writeTVar)
 import Hasql.Session (CommandError (ResultError), QueryError (QueryError), ResultError (ServerError))
 import Infrastructure.Persistence.PostgresUserRepository (UserRepositoryError (..))
 import Infrastructure.Persistence.Queries (WrongNumberOfResults (..))
 import PostgreSQL.ErrorCodes (unique_violation)
 import Tagger.EncryptedPassword (EncryptedPassword)
 import Tagger.Id (Id (Id))
+import Tagger.Repository.User (UserRepository (..))
 import Tagger.User (User (..))
-import Tagger.UserRepository (UserRepository (..))
 import Prelude hiding (filter)
 
 inMemoryUserRepository :: TVar (Map (Id User) User) -> UserRepository (ExceptT UserRepositoryError IO)
@@ -27,7 +27,7 @@ inMemoryUserRepository userMap =
 
 inMemoryGetUserByName :: TVar (Map (Id User) User) -> Text -> ExceptT UserRepositoryError IO (Id User, User)
 inMemoryGetUserByName userMap name' = do
-  users <- liftIO $ readTVarIO userMap
+  users <- liftIO (readTVarIO userMap)
   let usersWithName = filter ((== name') . name) users
   case size usersWithName of
     0 -> throwError $ UnexpectedNumberOfRows NoResults
@@ -51,9 +51,9 @@ duplicateNameError name' =
 inMemoryAddUser :: TVar (Map (Id User) User) -> Text -> EncryptedPassword -> ExceptT UserRepositoryError IO (Id User)
 inMemoryAddUser userMap name' password' = do
   userId <- Id <$> liftIO nextRandom
+  users <- liftIO $ readTVarIO userMap
+  let usersWithName = filter ((== name') . name) users
   queryError <- liftIO . atomically $ do
-    users <- readTVar userMap
-    let usersWithName = filter ((== name') . name) users
     if null usersWithName
       then writeTVar userMap (insert userId (User name' password') users) >> pure Nothing
       else pure . Just $ duplicateNameError name'

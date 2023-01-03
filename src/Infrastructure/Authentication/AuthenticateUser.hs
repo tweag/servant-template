@@ -10,7 +10,7 @@ import Infrastructure.Persistence.PostgresUserRepository (UserRepositoryError)
 import Infrastructure.Persistence.Queries (WrongNumberOfResults)
 import Tagger.Id (Id)
 import Tagger.User (User)
-import Tagger.UserRepository (UserRepository (getUserByName))
+import Tagger.Repository.User (UserRepository (getUserByName))
 
 -- |
 -- 'AuthenticateUser' is a service which exposes the ability to authenticate a 'User' providing her 'Credentials'.

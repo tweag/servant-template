@@ -1,6 +1,6 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 
-module Tagger.JSONWebKey (setup, JWK) where
+module Infrastructure.JSONWebKey (setup, JWK) where
 
 import CLIOptions (CLIOptions (jwkPath))
 import Control.Exception (catch)

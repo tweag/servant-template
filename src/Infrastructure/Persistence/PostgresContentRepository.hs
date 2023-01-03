@@ -12,7 +12,7 @@ import qualified Infrastructure.Database as DB
 import qualified Infrastructure.Persistence.Queries as DB (addContentWithTags, selectUserContents)
 import Infrastructure.Persistence.Serializer (serializeContent, unserializeContent)
 import Tagger.Content (Content, hasAllTags)
-import Tagger.ContentRepository (ContentRepository (..))
+import Tagger.Repository.Content (ContentRepository (..))
 import Tagger.Id (Id (Id))
 import Tagger.Owned (Owned (content))
 import Tagger.Tag (Tag)

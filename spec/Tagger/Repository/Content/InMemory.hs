@@ -1,4 +1,4 @@
-module InMemoryContentRepository where
+module Tagger.Repository.Content.InMemory (inMemoryContentRepository) where
 
 import Control.Monad.IO.Class (liftIO)
 import Control.Monad.Trans.Except (ExceptT)
@@ -7,7 +7,7 @@ import Data.UUID.V4 (nextRandom)
 import GHC.Conc (TVar, atomically, readTVar, writeTVar)
 import Hasql.Session (QueryError)
 import Tagger.Content (Content, hasAllTags)
-import Tagger.ContentRepository (ContentRepository (..))
+import Tagger.Repository.Content (ContentRepository (..))
 import Tagger.Id (Id (Id))
 import Tagger.Owned (Owned (..))
 import Tagger.Tag (Tag)

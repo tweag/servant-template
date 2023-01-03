@@ -15,7 +15,7 @@ import Servant.API.Generic (type (:-))
 import Servant.Server.Generic (AsServer)
 import Tagger.Id (Id)
 import Tagger.User (User)
-import Tagger.UserRepository (UserRepository (addUser))
+import Tagger.Repository.User (UserRepository (addUser))
 
 -- |
 -- The endpoints required to perform authentication

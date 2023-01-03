@@ -22,7 +22,7 @@ import Servant.API.Generic ((:-))
 import Servant.Auth (Auth, JWT)
 import Servant.Auth.Server (AuthResult (Authenticated), ThrowAll (throwAll), defaultCookieSettings)
 import Servant.Server.Generic (AsServer)
-import Tagger.ContentRepository (ContentRepository)
+import Tagger.Repository.Content (ContentRepository)
 import Tagger.Id (Id)
 import Tagger.User (User)
 

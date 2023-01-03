@@ -14,7 +14,7 @@ import qualified Dependencies as Deps
 import qualified Infrastructure.Logging.Logger as Logger
 import qualified Middleware
 import qualified Network.Wai.Handler.Warp as Warp
-import qualified Tagger.JSONWebKey as JWK
+import qualified Infrastructure.JSONWebKey as JWK
 
 main :: IO ()
 main = do

@@ -1,7 +1,7 @@
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE RankNTypes #-}
 
-module Tagger.UserRepository where
+module Tagger.Repository.User (UserRepository (..), hoist) where
 
 import Data.Text (Text)
 import Tagger.EncryptedPassword (EncryptedPassword)

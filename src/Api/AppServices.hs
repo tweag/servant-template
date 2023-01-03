@@ -9,7 +9,7 @@ import Control.Monad.Trans.Except (ExceptT, runExceptT)
 import Crypto.JOSE.JWK (JWK)
 import Hasql.Session (QueryError)
 import Infrastructure.Authentication.AuthenticateUser (AuthenticationError (AuthenticationQueryError))
-import qualified Infrastructure.Authentication.AuthenticateUser as Auth
+import qualified Infrastructure.Authentication.AuthenticateUser as Auth (AuthenticateUser (AuthenticateUser), authenticateUser, hoist)
 import Infrastructure.Authentication.PasswordManager (PasswordManager, PasswordManagerError (..), bcryptPasswordManager)
 import qualified Infrastructure.Authentication.PasswordManager as PasswordManager
 import qualified Infrastructure.Database as DB
@@ -20,10 +20,10 @@ import Infrastructure.Persistence.PostgresUserRepository (UserRepositoryError (D
 import Infrastructure.Persistence.Queries (WrongNumberOfResults (..))
 import Servant (Handler, err401, err403, err500)
 import Servant.Auth.Server (JWTSettings, defaultJWTSettings)
-import Tagger.ContentRepository (ContentRepository)
-import qualified Tagger.ContentRepository as ContentRepository
-import Tagger.UserRepository (UserRepository)
-import qualified Tagger.UserRepository as UserRepository
+import Tagger.Repository.Content (ContentRepository)
+import qualified Tagger.Repository.Content as ContentRepository
+import Tagger.Repository.User (UserRepository)
+import qualified Tagger.Repository.User as UserRepository
 import Prelude hiding (log)
 
 -- |
@@ -69,7 +69,7 @@ connectedAuthenticateUser logHandle userRepository' passwordManager' =
     . Auth.AuthenticateUser
     $ Auth.authenticateUser userRepository' passwordManager'
   where
-    handleAuthenticationError :: Auth.AuthenticationError -> Handler a
+    handleAuthenticationError :: AuthenticationError -> Handler a
     -- If the user was not found, we return a 401 response
     handleAuthenticationError (AuthenticationQueryError (UnexpectedNumberOfRows NoResults)) = do
       throwError err401
