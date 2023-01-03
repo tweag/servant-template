@@ -1,3 +1,5 @@
+![CI](https://github.com/tweag/servant-template/actions/workflows/ci.yaml/badge.svg)
+
 # servant-template
 
 A modern template for a [Servant](https://haskell-servant.github.io/) application.

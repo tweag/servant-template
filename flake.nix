@@ -1,15 +1,6 @@
 {
   description = "A servant template";
 
-  nixConfig = {
-    extra-substituters = [
-      "https://tweag-servant-template.cachix.org"
-    ];
-    extra-trusted-public-keys = [
-      "tweag-servant-template.cachix.org-1:FXFYXlGuectsxqO48eP+uSqPHw2lJDeSPY63JWU713U="
-    ];
-  };
-
   inputs = {
     nixpkgs.url = "nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";

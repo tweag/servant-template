@@ -1,19 +1,14 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 cmd=$@
 
 # If nix-shell is available, attempts to run given command in one,
 # being careful to check if already inside a nix shell,
 # otherwise falls back to using the user's environment.
-if command -v nix-shell > /dev/null; then
-  if [[ -z $IN_NIX_SHELL ]]
-  then
-    nix-shell --run "$cmd"
-  else
-    eval $cmd
-  fi
+if command -v nix develop > /dev/null; then
+    nix develop -c $cmd
 else
-  echo "Warning: nix-shell command not found..."
+  echo "Warning: nix develop command not found..."
   echo "Warning: Attempting to run command directly..."
   echo "$cmd"
   eval $cmd

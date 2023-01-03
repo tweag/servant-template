@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 dbuser=$(toml2json $PWD/config.toml | jq .database.user -r)
 dbport=$(toml2json $PWD/config.toml | jq .database.port -r)
