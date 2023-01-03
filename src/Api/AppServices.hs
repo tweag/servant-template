@@ -8,14 +8,16 @@ import Control.Monad.IO.Class (liftIO)
 import Control.Monad.Trans.Except (ExceptT, runExceptT)
 import Crypto.JOSE.JWK (JWK)
 import Hasql.Session (QueryError)
-import qualified Infrastructure.Authentication.AuthenticateUser as Auth (AuthenticateUser (AuthenticateUser), AuthenticationError (AuthenticationQueryError), authenticateUser, hoist)
+import Infrastructure.Authentication.AuthenticateUser (AuthenticationError (AuthenticationQueryError))
+import qualified Infrastructure.Authentication.AuthenticateUser as Auth
 import Infrastructure.Authentication.PasswordManager (PasswordManager, PasswordManagerError (..), bcryptPasswordManager)
 import qualified Infrastructure.Authentication.PasswordManager as PasswordManager
 import qualified Infrastructure.Database as DB
 import Infrastructure.Logging.Logger (logError, logWarning, withContext)
 import qualified Infrastructure.Logging.Logger as Logger
 import Infrastructure.Persistence.PostgresContentRepository (postgresContentRepository)
-import Infrastructure.Persistence.PostgresUserRepository (UserRepositoryError (DuplicateUserName), postgresUserRepository)
+import Infrastructure.Persistence.PostgresUserRepository (UserRepositoryError (DuplicateUserName, IncorrectNumberOfRows), postgresUserRepository)
+import Infrastructure.Persistence.Queries (WrongNumberOfRows (..))
 import Servant (Handler, err401, err403, err500)
 import Servant.Auth.Server (JWTSettings, defaultJWTSettings)
 import Tagger.ContentRepository (ContentRepository)
@@ -63,17 +65,20 @@ connectedUserRepository logHandle = UserRepository.hoist $ eitherTToHandler hand
 -- Creates an 'AuthenticateUser' service injecting its dependencies and handling errors
 connectedAuthenticateUser :: Logger.Handle -> UserRepository (ExceptT UserRepositoryError IO) -> PasswordManager Handler -> Auth.AuthenticateUser Handler
 connectedAuthenticateUser logHandle userRepository' passwordManager' =
-  Auth.hoist (eitherTToHandler handleAuthenticationError)
+  Auth.hoist (eitherTToHandler handleError)
     . Auth.AuthenticateUser
     $ Auth.authenticateUser userRepository' passwordManager'
   where
-    handleAuthenticationError :: Auth.AuthenticationError -> Handler a
+    handleError :: Auth.AuthenticationError -> Handler a
+    -- If the user was not found, we return a 401 response
+    handleError (AuthenticationQueryError (IncorrectNumberOfRows NoResults)) = do
+      throwError err401
     -- If there was an error at the database level, we return a 500 response
-    handleAuthenticationError (Auth.AuthenticationQueryError e) = do
-      logError logHandle $ show (Auth.AuthenticationQueryError e)
+    handleError (AuthenticationQueryError e) = do
+      logError logHandle $ show (AuthenticationQueryError e)
       throwError err500
     -- In other cases, there was an authentication error and we return a 401 response
-    handleAuthenticationError e = do
+    handleError e = do
       logWarning logHandle (show e)
       throwError err401
 

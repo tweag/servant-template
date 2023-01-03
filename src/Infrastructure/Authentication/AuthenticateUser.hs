@@ -3,14 +3,14 @@
 
 module Infrastructure.Authentication.AuthenticateUser where
 
-import Control.Monad.Trans.Except (ExceptT, except, throwE, withExceptT)
-import Data.Bifunctor (Bifunctor (first))
+import Control.Monad.Trans.Except (ExceptT, throwE, withExceptT)
 import Infrastructure.Authentication.Credentials (Credentials (..))
 import Infrastructure.Authentication.PasswordManager (PasswordManager (validatePassword))
 import Infrastructure.Persistence.PostgresUserRepository (UserRepositoryError)
+import Infrastructure.Persistence.Queries (WrongNumberOfRows)
 import Tagger.Id (Id)
 import Tagger.User (User)
-import Tagger.UserRepository (SelectUserError, UserRepository (getUserByName))
+import Tagger.UserRepository (UserRepository (getUserByName))
 
 -- |
 -- 'AuthenticateUser' is a service which exposes the ability to authenticate a 'User' providing her 'Credentials'.
@@ -26,7 +26,7 @@ hoist f (AuthenticateUser auth) = AuthenticateUser $ f . auth
 -- How 'authenticateUser' can actually fail
 data AuthenticationError
   = -- | the provided 'Credentials' data do not correspond to a unique user
-    AuthenticationSelectUserError SelectUserError
+    AuthenticationSelectUserError WrongNumberOfRows
   | -- | the interaction with the database somehow failed
     AuthenticationQueryError UserRepositoryError
   | -- | the password provided in the 'Credentials' data is not correct
@@ -38,9 +38,8 @@ data AuthenticationError
 -- Depends on a 'UserRepository' and a 'PasswordManager'
 authenticateUser :: UserRepository (ExceptT UserRepositoryError IO) -> PasswordManager n -> Credentials -> ExceptT AuthenticationError IO (Id User)
 authenticateUser userRepository passwordManager Credentials {username, password} = do
-  eitherIdAndUser <- withExceptT AuthenticationQueryError $ getUserByName userRepository username
-  idAndUser <- except $ first AuthenticationSelectUserError eitherIdAndUser
+  (userId, user) <- withExceptT AuthenticationQueryError $ getUserByName userRepository username
   -- check whether the provided password is the correct one
-  if validatePassword passwordManager (snd idAndUser) password
-    then pure $ fst idAndUser
+  if validatePassword passwordManager user password
+    then pure userId
     else throwE AuthenticationPasswordVerificationFailed

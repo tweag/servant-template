@@ -13,7 +13,6 @@ import Infrastructure.Persistence.Schema (Content (..), ContentsTags (..), Tag (
 import Rel8 (Expr, Insert (..), Name, OnConflict (..), Query, Rel8able, Result, TableSchema, each, filter, in_, insert, lit, many, select, values, where_, (==.))
 import Tagger.Id (Id)
 import qualified Tagger.User as Domain (User)
-import Tagger.UserRepository (SelectUserError (..))
 import Prelude hiding (filter)
 
 -- SELECT CONTENTS
@@ -116,25 +115,32 @@ addContentWithTags content tags = transaction Serializable Write $ do
   Transaction.statement () $ add contentSchema [litContent content]
   Transaction.statement () $ add contentsTagsSchema (contentTag (litContent content) <$> (litTag <$> alreadyPresentTags) <> newTags)
 
--- SELECT USER BY USERNAME
+-- |
+-- Describes the possible error cases for queries that expect exactly one row as a result.
+data WrongNumberOfRows
+  = NoResults
+  | MoreThanOneResult
+  deriving (Show)
 
 -- |
--- Given a list of 'User's, succeed if there is only one in the list, otherwise fail with the appropriate error message
-singleUser :: [User Result] -> Either SelectUserError (User Result)
-singleUser = \case
-  [] -> Left NoUser
-  [user] -> Right user
-  _ -> Left MoreThanOneUser
+-- Given a list of results, succeed if there is only one in the list, otherwise fail with the appropriate error message
+justOne :: [a Result] -> Either WrongNumberOfRows (a Result)
+justOne = \case
+  [] -> Left NoResults
+  [a] -> Right a
+  _ -> Left MoreThanOneResult
+
+-- SELECT USER BY USERNAME
 
 -- |
 -- Retrieve from the database a user with the provided name.
 -- If in the database we find none or more the one, it returns the appropriate error message
-selectUserByName :: Text -> Session (Either SelectUserError (User Result))
-selectUserByName name =
-  singleUser
-    <$> ( statement () . select $
-            each userSchema >>= filter (\user -> userName user ==. lit name)
-        )
+selectUserByName :: Text -> Session (Either WrongNumberOfRows (User Result))
+selectUserByName name = statement () query
+  where
+    query = fmap justOne . select $ do
+      users <- each userSchema
+      filter (\user -> userName user ==. lit name) users
 
 -- ADD USER
 
