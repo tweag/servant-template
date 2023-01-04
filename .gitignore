@@ -4,3 +4,4 @@
 .stack-work
 *.cabal
 .jwk
+.pre-commit-config.yaml

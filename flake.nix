@@ -2,11 +2,12 @@
   description = "A servant template";
 
   inputs = {
+    pre-commit-hooks.url = "github:cachix/pre-commit-hooks.nix";
     nixpkgs.url = "nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
   };
 
-  outputs = { self, nixpkgs, flake-utils }:
+  outputs = { self, nixpkgs, flake-utils, pre-commit-hooks }:
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = import nixpkgs {
@@ -29,7 +30,20 @@
         };
       in
       {
+        checks = {
+          pre-commit-check = pre-commit-hooks.lib.${system}.run {
+            src = ./.;
+            hooks = {
+              hlint.enable = true;
+              hpack.enable = true;
+              ormolu.enable = true;
+              nixpkgs-fmt.enable = true;
+            };
+          };
+        };
         devShells.default = pkgs.mkShell {
+          inherit (self.checks.${system}.pre-commit-check) shellHook;
+
           buildInputs = with pkgs; [
             elmPackages.elm
             elmPackages.elm-format
