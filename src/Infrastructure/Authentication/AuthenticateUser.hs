@@ -7,7 +7,7 @@ import Control.Monad.Trans.Except (ExceptT, throwE, withExceptT)
 import Infrastructure.Authentication.Credentials (Credentials (..))
 import Infrastructure.Authentication.PasswordManager (PasswordManager (validatePassword))
 import Infrastructure.Persistence.PostgresUserRepository (UserRepositoryError)
-import Infrastructure.Persistence.Queries (WrongNumberOfRows)
+import Infrastructure.Persistence.Queries (WrongNumberOfResults)
 import Tagger.Id (Id)
 import Tagger.User (User)
 import Tagger.UserRepository (UserRepository (getUserByName))
@@ -26,7 +26,7 @@ hoist f (AuthenticateUser auth) = AuthenticateUser $ f . auth
 -- How 'authenticateUser' can actually fail
 data AuthenticationError
   = -- | the provided 'Credentials' data do not correspond to a unique user
-    AuthenticationSelectUserError WrongNumberOfRows
+    AuthenticationSelectUserError WrongNumberOfResults
   | -- | the interaction with the database somehow failed
     AuthenticationQueryError UserRepositoryError
   | -- | the password provided in the 'Credentials' data is not correct

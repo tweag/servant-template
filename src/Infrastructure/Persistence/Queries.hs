@@ -115,27 +115,27 @@ addContentWithTags content tags = transaction Serializable Write $ do
   Transaction.statement () $ add contentSchema [litContent content]
   Transaction.statement () $ add contentsTagsSchema (contentTag (litContent content) <$> (litTag <$> alreadyPresentTags) <> newTags)
 
+-- SELECT USER BY USERNAME
+
 -- |
 -- Describes the possible error cases for queries that expect exactly one row as a result.
-data WrongNumberOfRows
+data WrongNumberOfResults
   = NoResults
   | MoreThanOneResult
   deriving (Show)
 
 -- |
 -- Given a list of results, succeed if there is only one in the list, otherwise fail with the appropriate error message
-justOne :: [a Result] -> Either WrongNumberOfRows (a Result)
+justOne :: [a Result] -> Either WrongNumberOfResults (a Result)
 justOne = \case
   [] -> Left NoResults
   [a] -> Right a
   _ -> Left MoreThanOneResult
 
--- SELECT USER BY USERNAME
-
 -- |
 -- Retrieve from the database a user with the provided name.
 -- If in the database we find none or more the one, it returns the appropriate error message
-selectUserByName :: Text -> Session (Either WrongNumberOfRows (User Result))
+selectUserByName :: Text -> Session (Either WrongNumberOfResults (User Result))
 selectUserByName name = statement () query
   where
     query = fmap justOne . select $ do

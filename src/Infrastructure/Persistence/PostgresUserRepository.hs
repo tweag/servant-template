@@ -10,7 +10,7 @@ import Data.Text (Text)
 import Data.UUID.V4 (nextRandom)
 import Hasql.Session (CommandError (ResultError), QueryError (QueryError), ResultError (ServerError), Session)
 import qualified Infrastructure.Database as DB
-import Infrastructure.Persistence.Queries (WrongNumberOfRows)
+import Infrastructure.Persistence.Queries (WrongNumberOfResults)
 import qualified Infrastructure.Persistence.Queries as Query
 import Infrastructure.Persistence.Schema (litUser, userId)
 import Infrastructure.Persistence.Serializer (serializeUser, unserializeUser)
@@ -22,42 +22,42 @@ import Tagger.UserRepository (UserRepository (..))
 -- We want to distinguish the `QueryError` coming from the violation of the "users_name_key" unique constraints
 data UserRepositoryError
   = DuplicateUserName QueryError
-  | IncorrectNumberOfRows WrongNumberOfRows
+  | UnexpectedNumberOfRows WrongNumberOfResults
   | OtherError QueryError
   deriving (Show)
 
 -- |
 -- A 'UserRepository' based on PostgreSQL
-postgresUserRepository :: DB.Handle -> UserRepository Ctx
+postgresUserRepository :: DB.Handle -> UserRepository (ExceptT UserRepositoryError IO)
 postgresUserRepository handle =
   UserRepository
     { getUserByName = postgresGetUserByName handle,
       addUser = postgresAddUser handle
     }
 
-type Ctx = ExceptT UserRepositoryError IO
-
-postgresGetUserByName :: DB.Handle -> Text -> Ctx (Id User, User)
+postgresGetUserByName :: DB.Handle -> Text -> ExceptT UserRepositoryError IO (Id User, User)
 postgresGetUserByName handle name = do
-  eitherUser <- runQuery' handle (Query.selectUserByName name)
+  eitherUser <- runRepositoryQuery handle (Query.selectUserByName name)
   case eitherUser of
     Right usr -> pure (userId usr, unserializeUser usr)
-    Left e -> throwE $ IncorrectNumberOfRows e
+    Left e -> throwE $ UnexpectedNumberOfRows e
 
-postgresAddUser :: DB.Handle -> Text -> EncryptedPassword -> Ctx (Id User)
+postgresAddUser :: DB.Handle -> Text -> EncryptedPassword -> ExceptT UserRepositoryError IO (Id User)
 postgresAddUser handle name password = do
   -- Generate the UUID for the user
   userId' <- liftIO nextRandom
   let query = Query.addUser . litUser $ serializeUser (Id userId') (User name password)
 
   -- Actually add the user to the database, differentiating the `UserRepositoryError` cases
-  runQuery' handle query
+  runRepositoryQuery handle query
   pure $ Id userId'
 
-runQuery' :: DB.Handle -> Session a -> Ctx a
-runQuery' handle query = withExceptT liftAddUserError . ExceptT $ DB.runQuery handle query
+-- | Run a query transforming a Hasql.QueryError into a UserRepositoryError as appropriate to the
+-- domain.
+runRepositoryQuery :: DB.Handle -> Session a -> ExceptT UserRepositoryError IO a
+runRepositoryQuery handle = withExceptT liftRepositoryError . ExceptT . DB.runQuery handle
 
-liftAddUserError :: QueryError -> UserRepositoryError
-liftAddUserError queryError@(QueryError _ _ (ResultError (ServerError "23505" message _ _)))
+liftRepositoryError :: QueryError -> UserRepositoryError
+liftRepositoryError queryError@(QueryError _ _ (ResultError (ServerError "23505" message _ _)))
   | "users_name_key" `isInfixOf` message = DuplicateUserName queryError
-liftAddUserError queryError = OtherError queryError
+liftRepositoryError queryError = OtherError queryError
