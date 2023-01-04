@@ -16,10 +16,8 @@ import Infrastructure.Persistence.Schema (litUser, userId)
 import Infrastructure.Persistence.Serializer (serializeUser, unserializeUser)
 import Tagger.EncryptedPassword (EncryptedPassword)
 import Tagger.Id (Id (Id))
-import Tagger.User (User (User))
 import Tagger.Repository.User (UserRepository (..))
-
-type Ctx = ExceptT UserRepositoryError IO
+import Tagger.User (User (User))
 
 -- We want to distinguish the `QueryError` coming from the violation of the "users_name_key" unique constraints
 data UserRepositoryError
