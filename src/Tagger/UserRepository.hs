@@ -9,21 +9,11 @@ import Tagger.Id (Id)
 import Tagger.User (User)
 
 -- |
--- When we 'getUserByName' we expect only one 'User' in return.
--- 'SelectUserError' describes how this can fail
-data SelectUserError
-  = -- | we are expecting one user, but actually no user is found
-    NoUser
-  | -- | we are expecting one user, but actually more than one user is found
-    MoreThanOneUser
-  deriving (Show)
-
--- |
 -- A 'UserRespository' represents a collection of 'User's.
 -- It is indexed by a context 'm' which wraps the results.
 data UserRepository m = UserRepository
   { -- | searches the repository for 'User's with the provided name
-    getUserByName :: Text -> m (Either SelectUserError (Id User, User)),
+    getUserByName :: Text -> m (Id User, User),
     -- | tries to add a user with the provided name and password
     addUser :: Text -> EncryptedPassword -> m (Id User)
   }

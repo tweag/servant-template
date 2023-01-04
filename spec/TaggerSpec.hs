@@ -88,7 +88,10 @@ spec = around withTaggerApp $ do
         response `shouldSatisfy` isRight
 
       it "does not generate a token for a non registered user" $ \port -> do
-        response <- runClientM ((login . authentication $ apiClient) (Credentials "marcosh" (Password "password"))) (clientEnv port)
+        let loginOperation = login . authentication $ apiClient
+            credentials = Credentials "marcosh" (Password "password")
+
+        response <- runClientM (loginOperation credentials) (clientEnv port)
         response `shouldSatisfy` hasStatus unauthorized401
 
     describe "addContent" $ do
