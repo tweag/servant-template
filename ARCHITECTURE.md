@@ -5,7 +5,7 @@
 The project is structured in three layers:
 - the `Tagger` folder contains the business domain of the application;
 - the `Infrastructure` folder contains the implementation of the services needed by the application;
-- the `Api` folder contains the application layer which connects the external world and the previous two layers.
+- the `API` folder contains the application layer which connects the external world and the previous two layers.
 
 There is a dependency between the layers which works as follows
 

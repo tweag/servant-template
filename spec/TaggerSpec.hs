@@ -2,9 +2,9 @@
 
 module TaggerSpec where
 
-import Api.Application (API, ApplicationAPI (..), app)
-import Api.Authentication (AuthenticationAPI (..))
-import Api.Tagger (TaggerAPI (..))
+import API.Application (API, ApplicationAPI (..), app)
+import API.Authentication (AuthenticationAPI (..))
+import API.Tagger (TaggerAPI (..))
 import Data.ByteString.Lazy (toStrict)
 import Data.Either (isRight)
 import Data.Proxy (Proxy (Proxy))

@@ -1,10 +1,10 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE TypeOperators #-}
 
-module Api.Docs where
+module API.Docs where
 
-import Api.Authentication (AuthenticationAPI)
-import Api.Tagger (TaggerAPI)
+import API.Authentication (AuthenticationAPI)
+import API.Tagger (TaggerAPI)
 import Control.Lens ((&), (.~), (?~))
 import Data.OpenApi (OpenApi, description, info, title, version)
 import Data.Proxy (Proxy (Proxy))
@@ -21,4 +21,4 @@ docsServer =
     toOpenApi (Proxy :: Proxy (NamedRoutes TaggerAPI)) <> toOpenApi (Proxy :: Proxy (NamedRoutes AuthenticationAPI))
       & info . title .~ "Tagger api"
       & info . version .~ "1.0.0"
-      & info . description ?~ "Api endpoints for the tagger API"
+      & info . description ?~ "API endpoints for the tagger API"

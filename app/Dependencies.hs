@@ -1,7 +1,7 @@
 {-# LANGUAGE RecordWildCards #-}
 module Dependencies (withDeps, Deps (..)) where
 
-import qualified Api.Config as Config
+import qualified API.Config as Config
 import qualified Infrastructure.Database as DB
 import qualified Infrastructure.Logging.Logger as Logger
 import qualified Infrastructure.SystemTime as SystemTime

@@ -1,7 +1,7 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE TypeOperators #-}
 
-module Api.Healthcheck where
+module API.Healthcheck where
 
 import Servant (NoContent (NoContent), Server)
 import Servant.API (Get, JSON, type (:>))

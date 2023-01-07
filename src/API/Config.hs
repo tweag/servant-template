@@ -2,7 +2,7 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE NamedFieldPuns #-}
 
-module Api.Config where
+module API.Config where
 
 import Control.Monad.IO.Class (MonadIO)
 import Data.ByteString.Char8 (ByteString, pack)
