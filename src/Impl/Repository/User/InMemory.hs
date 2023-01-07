@@ -1,4 +1,4 @@
-module InMemoryUserRepository where
+module Impl.Repository.User.InMemory (Table, repository) where
 
 import Control.Monad.Except (throwError)
 import Control.Monad.IO.Class (liftIO)
@@ -9,23 +9,25 @@ import Data.Text.Encoding (encodeUtf8)
 import Data.UUID.V4 (nextRandom)
 import GHC.Conc (TVar, atomically, readTVar, readTVarIO, writeTVar)
 import Hasql.Session (CommandError (ResultError), QueryError (QueryError), ResultError (ServerError))
-import Infrastructure.Persistence.PostgresUserRepository (UserRepositoryError (..))
+import Impl.Repository.User.Error (UserRepositoryError (..))
 import Infrastructure.Persistence.Queries (WrongNumberOfResults (..))
 import PostgreSQL.ErrorCodes (unique_violation)
 import Tagger.EncryptedPassword (EncryptedPassword)
 import Tagger.Id (Id (Id))
+import Tagger.Repository.User (UserRepository (..))
 import Tagger.User (User (..))
-import Tagger.UserRepository (UserRepository (..))
 import Prelude hiding (filter)
 
-inMemoryUserRepository :: TVar (Map (Id User) User) -> UserRepository (ExceptT UserRepositoryError IO)
-inMemoryUserRepository userMap =
+type Table = TVar (Map (Id User) User)
+
+repository :: Table -> UserRepository (ExceptT UserRepositoryError IO)
+repository userMap =
   UserRepository
-    { getUserByName = inMemoryGetUserByName userMap,
-      addUser = inMemoryAddUser userMap
+    { findByName = inMemoryGetUserByName userMap,
+      add = inMemoryAddUser userMap
     }
 
-inMemoryGetUserByName :: TVar (Map (Id User) User) -> Text -> ExceptT UserRepositoryError IO (Id User, User)
+inMemoryGetUserByName :: Table -> Text -> ExceptT UserRepositoryError IO (Id User, User)
 inMemoryGetUserByName userMap name' = do
   users <- liftIO $ readTVarIO userMap
   let usersWithName = filter ((== name') . name) users
@@ -48,7 +50,7 @@ duplicateNameError name' =
             Nothing
       )
 
-inMemoryAddUser :: TVar (Map (Id User) User) -> Text -> EncryptedPassword -> ExceptT UserRepositoryError IO (Id User)
+inMemoryAddUser :: Table -> Text -> EncryptedPassword -> ExceptT UserRepositoryError IO (Id User)
 inMemoryAddUser userMap name' password' = do
   userId <- Id <$> liftIO nextRandom
   queryError <- liftIO . atomically $ do

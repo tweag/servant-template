@@ -24,6 +24,7 @@ dependencies:
   - bcrypt
   - bytestring
   - co-log-core
+  - containers
   - extra
   - hasql
   - hasql-transaction
@@ -32,6 +33,7 @@ dependencies:
   - mtl
   - openapi3
   - optparse-applicative
+  - postgresql-error-codes
   - rel8
   - servant
   - servant-auth
@@ -69,7 +71,6 @@ tests:
       - hspec
       - http-client
       - http-types
-      - postgresql-error-codes
       - servant-auth-client
       - servant-client
       - servant-client-core

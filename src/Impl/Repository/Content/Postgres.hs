@@ -1,6 +1,6 @@
 {-# LANGUAGE TupleSections #-}
 
-module Infrastructure.Persistence.PostgresContentRepository where
+module Impl.Repository.Content.Postgres (repository) where
 
 import Control.Monad (forM)
 import Control.Monad.IO.Class (liftIO)
@@ -12,16 +12,16 @@ import qualified Infrastructure.Database as DB
 import qualified Infrastructure.Persistence.Queries as DB (addContentWithTags, selectUserContents)
 import Infrastructure.Persistence.Serializer (serializeContent, unserializeContent)
 import Tagger.Content (Content, hasAllTags)
-import Tagger.ContentRepository (ContentRepository (..))
 import Tagger.Id (Id (Id))
 import Tagger.Owned (Owned (content))
+import Tagger.Repository.Content (ContentRepository (..))
 import Tagger.Tag (Tag)
 import Tagger.User (User)
 
 -- |
 -- A 'ContentRepository' based on PostgreSQL
-postgresContentRepository :: DB.Handle -> ContentRepository (ExceptT QueryError IO)
-postgresContentRepository handle =
+repository :: DB.Handle -> ContentRepository (ExceptT QueryError IO)
+repository handle =
   ContentRepository
     { selectUserContentsByTags = postgresSelectUserContentsByTags handle,
       addContentWithTags = postgresAddContentWithTags handle

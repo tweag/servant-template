@@ -1,16 +1,16 @@
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE RankNTypes #-}
 
-module Infrastructure.Authentication.AuthenticateUser where
+module Impl.Authentication.AuthenticateUser where
 
 import Control.Monad.Trans.Except (ExceptT, throwE, withExceptT)
+import Impl.Repository.User.Error (UserRepositoryError)
 import Infrastructure.Authentication.Credentials (Credentials (..))
 import Infrastructure.Authentication.PasswordManager (PasswordManager (validatePassword))
-import Infrastructure.Persistence.PostgresUserRepository (UserRepositoryError)
 import Infrastructure.Persistence.Queries (WrongNumberOfResults)
 import Tagger.Id (Id)
+import Tagger.Repository.User as UserRepo
 import Tagger.User (User)
-import Tagger.UserRepository (UserRepository (getUserByName))
 
 -- |
 -- 'AuthenticateUser' is a service which exposes the ability to authenticate a 'User' providing her 'Credentials'.
@@ -38,7 +38,7 @@ data AuthenticationError
 -- Depends on a 'UserRepository' and a 'PasswordManager'
 authenticateUser :: UserRepository (ExceptT UserRepositoryError IO) -> PasswordManager n -> Credentials -> ExceptT AuthenticationError IO (Id User)
 authenticateUser userRepository passwordManager Credentials {username, password} = do
-  (userId, user) <- withExceptT AuthenticationQueryError $ getUserByName userRepository username
+  (userId, user) <- withExceptT AuthenticationQueryError $ UserRepo.findByName userRepository username
   -- check whether the provided password is the correct one
   if validatePassword passwordManager user password
     then pure userId
