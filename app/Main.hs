@@ -9,8 +9,8 @@ import Api.Config (Port (..), apiPort)
 import qualified Api.Config as Config
 import CLIOptions (CLIOptions (configPath))
 import qualified CLIOptions
-import Dependencies (Deps (..))
-import qualified Dependencies as Deps
+import Infrastructure.Dependencies (Deps (..))
+import qualified Infrastructure.Dependencies as Deps
 import qualified Infrastructure.Logging.Logger as Logger
 import qualified Middleware
 import qualified Network.Wai.Handler.Warp as Warp

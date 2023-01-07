@@ -1,5 +1,6 @@
 {-# LANGUAGE RecordWildCards #-}
-module Dependencies (withDeps, Deps (..)) where
+
+module Infrastructure.Dependencies (withDeps, Deps (..)) where
 
 import qualified Api.Config as Config
 import qualified Infrastructure.Database as DB
