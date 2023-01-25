@@ -3,7 +3,7 @@
 {-# LANGUAGE DerivingStrategies #-}
 {-# LANGUAGE TypeOperators #-}
 
-module Api.Authentication where
+module API.Authentication where
 
 import GHC.Generics (Generic)
 import Infrastructure.Authentication.AuthenticateUser (AuthenticateUser (runAuthenticateUser))

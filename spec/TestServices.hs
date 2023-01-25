@@ -1,6 +1,6 @@
 module TestServices where
 
-import Api.AppServices (AppServices (..), connectedAuthenticateUser, connectedContentRepository, connectedUserRepository, encryptedPasswordManager)
+import API.AppServices (AppServices (..), connectedAuthenticateUser, connectedContentRepository, connectedUserRepository, encryptedPasswordManager)
 import GHC.Conc (newTVarIO)
 import InMemoryContentRepository (inMemoryContentRepository)
 import InMemoryUserRepository (inMemoryUserRepository)

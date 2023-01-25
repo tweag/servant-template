@@ -3,7 +3,7 @@
 {-# LANGUAGE DerivingStrategies #-}
 {-# LANGUAGE TypeOperators #-}
 
-module Api.Tagger where
+module API.Tagger where
 
 import GHC.Generics (Generic)
 import Servant (Handler)

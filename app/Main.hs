@@ -3,10 +3,10 @@
 
 module Main where
 
-import Api.AppServices as AppServices
-import Api.Application (app)
-import Api.Config (Port (..), apiPort)
-import qualified Api.Config as Config
+import API.AppServices as AppServices
+import API.Application (app)
+import API.Config (Port (..), apiPort)
+import qualified API.Config as Config
 import CLIOptions (CLIOptions (configPath))
 import qualified CLIOptions
 import Dependencies (Deps (..))

@@ -1,6 +1,6 @@
 {-# LANGUAGE RankNTypes #-}
 
-module Api.AppServices where
+module API.AppServices where
 
 import Control.Monad ((<=<))
 import Control.Monad.Except (throwError)

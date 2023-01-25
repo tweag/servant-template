@@ -6,13 +6,13 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeOperators #-}
 
-module Api.Application where
+module API.Application where
 
-import Api.AppServices (AppServices (..))
-import Api.Authentication (AuthenticationAPI, authenticationServer)
-import Api.Docs (DocsAPI, docsServer)
-import Api.Healthcheck (HealthcheckAPI, healthcheckServer)
-import Api.Tagger (TaggerAPI, taggerServer)
+import API.AppServices (AppServices (..))
+import API.Authentication (AuthenticationAPI, authenticationServer)
+import API.Docs (DocsAPI, docsServer)
+import API.Healthcheck (HealthcheckAPI, healthcheckServer)
+import API.Tagger (TaggerAPI, taggerServer)
 import Data.Proxy (Proxy (..))
 import GHC.Generics (Generic)
 import Network.Wai (Application)
