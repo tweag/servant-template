@@ -1,7 +1,7 @@
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE RankNTypes #-}
 
-module Tagger.ContentRepository where
+module Tagger.Repository.Content where
 
 import Tagger.Content (Content)
 import Tagger.Id (Id)

@@ -1,7 +1,7 @@
 {-# LANGUAGE DuplicateRecordFields #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module Infrastructure.Persistence.PostgresUserRepository where
+module Impl.Repository.User.Postgres (repository) where
 
 import Control.Monad.IO.Class (liftIO)
 import Control.Monad.Trans.Except (ExceptT (ExceptT), throwE, withExceptT)
@@ -9,30 +9,23 @@ import Data.ByteString (isInfixOf)
 import Data.Text (Text)
 import Data.UUID.V4 (nextRandom)
 import Hasql.Session (CommandError (ResultError), QueryError (QueryError), ResultError (ServerError), Session)
+import Impl.Repository.User.Error (UserRepositoryError (..))
 import qualified Infrastructure.Database as DB
-import Infrastructure.Persistence.Queries (WrongNumberOfResults)
 import qualified Infrastructure.Persistence.Queries as Query
 import Infrastructure.Persistence.Schema (litUser, userId)
 import Infrastructure.Persistence.Serializer (serializeUser, unserializeUser)
 import Tagger.EncryptedPassword (EncryptedPassword)
 import Tagger.Id (Id (Id))
+import Tagger.Repository.User (UserRepository (..))
 import Tagger.User (User (User))
-import Tagger.UserRepository (UserRepository (..))
-
--- We want to distinguish the `QueryError` coming from the violation of the "users_name_key" unique constraints
-data UserRepositoryError
-  = DuplicateUserName QueryError
-  | UnexpectedNumberOfRows WrongNumberOfResults
-  | OtherError QueryError
-  deriving (Show)
 
 -- |
 -- A 'UserRepository' based on PostgreSQL
-postgresUserRepository :: DB.Handle -> UserRepository (ExceptT UserRepositoryError IO)
-postgresUserRepository handle =
+repository :: DB.Handle -> UserRepository (ExceptT UserRepositoryError IO)
+repository handle =
   UserRepository
-    { getUserByName = postgresGetUserByName handle,
-      addUser = postgresAddUser handle
+    { findByName = postgresGetUserByName handle,
+      add = postgresAddUser handle
     }
 
 postgresGetUserByName :: DB.Handle -> Text -> ExceptT UserRepositoryError IO (Id User, User)

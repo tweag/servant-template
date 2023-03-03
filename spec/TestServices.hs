@@ -2,8 +2,8 @@ module TestServices where
 
 import API.AppServices (AppServices (..), connectedAuthenticateUser, connectedContentRepository, connectedUserRepository, encryptedPasswordManager)
 import GHC.Conc (newTVarIO)
-import InMemoryContentRepository (inMemoryContentRepository)
-import InMemoryUserRepository (inMemoryUserRepository)
+import qualified Impl.Repository.Content as Repo.Content
+import qualified Impl.Repository.User as Repo.User
 import Infrastructure.Logging.Logger as Logger
 import Infrastructure.SystemTime as SystemTime
 import Servant.Auth.Server (defaultJWTSettings, generateKey)
@@ -16,8 +16,8 @@ testServices = do
   SystemTime.withHandle $ \timeHandle ->
     Logger.withHandle timeHandle $ \loggerHandle -> do
       let passwordManager' = encryptedPasswordManager loggerHandle $ defaultJWTSettings key
-      let userRepository' = inMemoryUserRepository userMap
-      let contentsRepository = inMemoryContentRepository contentsMap
+      let userRepository' = Repo.User.inMemory userMap
+      let contentsRepository = Repo.Content.inMemory contentsMap
       pure $
         AppServices
           { jwtSettings = defaultJWTSettings key,

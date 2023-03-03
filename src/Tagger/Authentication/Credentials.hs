@@ -2,7 +2,7 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DerivingStrategies #-}
 
-module Infrastructure.Authentication.Credentials where
+module Tagger.Authentication.Credentials where
 
 import Data.Aeson (FromJSON (parseJSON), ToJSON (toJSON))
 -- bytestring
