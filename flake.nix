@@ -50,6 +50,7 @@
             elmPackages.elm-live
             elmPackages.elm-language-server
             haskellPackages.haskell-language-server
+            haskellPackages.hspec-discover
             haskellPackages.ormolu
             jq
             nodejs
