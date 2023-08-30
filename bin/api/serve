@@ -1,6 +1,0 @@
-#!/usr/bin/env bash
-
-args=$@
-cmd="watchexec -r -e nix,hs,cabal,yaml,toml -i 'elm/**' -- stack build --exec servant-template-exe -- $args"
-
-bin/util/with-nix $cmd

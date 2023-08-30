@@ -1,0 +1,75 @@
+version: '3'
+
+env:
+  API_EXECUTABLE: servant-template-exe
+
+tasks:
+  setup:
+    desc: Setup the necessary services for the application
+    deps: [db:setup]
+
+  api:build:
+    desc: Build the API
+    sources:
+      - 'app/**/*.hs'
+      - 'src/**/*.hs'
+      - 'spec/**/*.hs'
+      - '**/*.nix'
+      - 'package.yaml'
+      - 'Taskfile.yml'
+      - 'config.toml'
+    cmds:
+      - cabal build {{.CLI_ARGS}}
+
+  api:serve:
+    desc: Serve the API
+    deps: [db:setup, api:build]
+    interval: '500ms'
+    cmds:
+      - cmd: pkill -f $API_EXECUTABLE || true
+        silent: true
+      - cmd: cabal run $API_EXECUTABLE {{.CLI_ARGS}}
+        ignore_error: true
+
+  api:dev:
+    desc: Typecheck the API in a loop
+    cmds:
+      - ghcid --command "cabal repl"
+
+  api:repl:
+    desc: Start a cabal REPL
+    cmds:
+      - cabal repl
+
+  api:test:
+    desc: Run API tests
+    deps: [api:build]
+    cmds:
+      - cabal test
+
+  api:docs:
+    desc: Build Haddock docs
+    cmds:
+      - cabal haddock
+
+  db:setup:
+    desc: Setup a postgres database using the config file
+    cmds:
+      - ./scripts/db/setup
+
+  db:destroy:
+    desc: Destroy the database
+    cmds:
+      - ./scripts/db/destroy
+
+  fe:build:
+    desc: Build the frontend app
+    dir: elm
+    cmds:
+      - elm make src/Main.elm {{.CLI_ARGS}}
+
+  fe:serve:
+    desc: Serve the frontend app
+    dir: elm
+    cmds:
+      - elm-live src/Main.elm {{.CLI_ARGS}}

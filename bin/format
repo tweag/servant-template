@@ -1,4 +1,0 @@
-#!/bin/sh
-
-./bin/api/format
-./bin/frontend/format

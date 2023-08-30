@@ -1,7 +1,7 @@
 name:               servant-template
 version:            0.1.0.0
 author:             Marco Perone
-maintainer:         marco.perone@tweag.io
+maintainer:         christian.georgii@tweag.io
 extra-source-files:
   - README.md
 

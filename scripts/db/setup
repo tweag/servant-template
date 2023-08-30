@@ -32,3 +32,5 @@ then
   echo "[DB] Applying schema..."
   psql -U "$dbuser" -d "$dbname" -f ./schema.sql;
 fi
+
+echo "DB setup complete."

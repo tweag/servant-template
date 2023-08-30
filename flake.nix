@@ -63,16 +63,17 @@
           buildInputs = with pkgs; [
             elmPackages.elm
             elmPackages.elm-format
-            elmPackages.elm-live
             elmPackages.elm-language-server
-            haskellPackages.haskell-language-server
-            haskellPackages.ormolu
+            elmPackages.elm-live
             haskellPackages.cabal-install
             haskellPackages.ghcid
+            haskellPackages.haskell-language-server
+            haskellPackages.ormolu
             hpack
             jq
             nodejs
             postgresql
+            go-task
             toml2json
             watchexec
             zlib
