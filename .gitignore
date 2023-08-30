@@ -1,8 +1,7 @@
-*.cabal
 .direnv
 .hie
 .jwk
 .postgres
 .pre-commit-config.yaml
-.stack-work
 .task
+result

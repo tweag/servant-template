@@ -54,12 +54,11 @@
           };
         };
 
-        devShells.default = pkgs.mkShell rec {
+        devShells.default = pkgs.haskellPackages.shellFor rec {
           inherit (self.checks.${system}.pre-commit-check) shellHook;
 
-          inputsFrom = builtins.attrValues self.packages.${system};
-          nativeBuildInputs = with pkgs; [
-          ];
+          packages = p: [ self.packages.${system}.${packageName} ];
+
           buildInputs = with pkgs; [
             elmPackages.elm
             elmPackages.elm-format
