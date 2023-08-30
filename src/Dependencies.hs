@@ -1,4 +1,5 @@
 {-# LANGUAGE RecordWildCards #-}
+
 module Dependencies (withDeps, Deps (..)) where
 
 import qualified API.Config as Config

@@ -23,7 +23,9 @@ library
       API.Docs
       API.Healthcheck
       API.Tagger
+      App
       CLIOptions
+      Dependencies
       Impl.Authentication.Authenticator
       Impl.Repository.Content
       Impl.Repository.Content.InMemory
@@ -40,6 +42,7 @@ library
       Infrastructure.Persistence.Schema
       Infrastructure.Persistence.Serializer
       Infrastructure.SystemTime
+      Middleware
       Tagger.Authentication.Authenticator
       Tagger.Authentication.Credentials
       Tagger.Content
@@ -86,13 +89,14 @@ library
     , transformers
     , uuid
     , wai
+    , wai-cors
+    , wai-extra
+    , warp
   default-language: Haskell2010
 
 executable servant-template-exe
   main-is: Main.hs
   other-modules:
-      Dependencies
-      Middleware
       Paths_servant_template
   hs-source-dirs:
       app
@@ -180,5 +184,7 @@ test-suite servant-template-spec
     , transformers
     , uuid
     , wai
+    , wai-cors
+    , wai-extra
     , warp
   default-language: Haskell2010

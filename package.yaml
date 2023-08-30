@@ -46,6 +46,9 @@ dependencies:
   - transformers
   - uuid
   - wai
+  - wai-cors
+  - wai-extra
+  - warp
 
 executables:
   servant-template-exe:
@@ -53,13 +56,6 @@ executables:
     main:           Main.hs
     dependencies:
       - servant-template
-      - bytestring
-      - hasql
-      - jose
-      - transformers
-      - wai-cors
-      - wai-extra
-      - warp
 
 tests:
   servant-template-spec:
