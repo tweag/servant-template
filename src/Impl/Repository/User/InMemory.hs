@@ -48,6 +48,7 @@ duplicateNameError name' =
             "duplicate key value violates unique constraint"
             (Just $ "Key (name)=(" <> encodeUtf8 name' <> ") already exists")
             Nothing
+            Nothing
       )
 
 inMemoryAddUser :: Table -> Text -> EncryptedPassword -> ExceptT UserRepositoryError IO (Id User)

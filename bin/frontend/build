@@ -1,6 +1,0 @@
-#!/usr/bin/env bash
-
-# This will build the app for production
-args=$@
-cmd="cd elm; elm make src/Main.elm $args"
-bin/util/with-nix $cmd

@@ -51,6 +51,6 @@ runRepositoryQuery :: DB.Handle -> Session a -> ExceptT UserRepositoryError IO a
 runRepositoryQuery handle = withExceptT liftRepositoryError . ExceptT . DB.runQuery handle
 
 liftRepositoryError :: QueryError -> UserRepositoryError
-liftRepositoryError queryError@(QueryError _ _ (ResultError (ServerError "23505" message _ _)))
+liftRepositoryError queryError@(QueryError _ _ (ResultError (ServerError "23505" message _ _ _)))
   | "users_name_key" `isInfixOf` message = DuplicateUserName queryError
 liftRepositoryError queryError = OtherError queryError

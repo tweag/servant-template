@@ -8,6 +8,7 @@ A modern template for a [Servant](https://haskell-servant.github.io/) applicatio
 
 The project aims to provide a template for a Servant project featuring:
 
+- `nix` support via flakes.
 - database interaction with [rel8](https://hackage.haskell.org/package/rel8);
 - JWT authentication with [servant-auth](https://hackage.haskell.org/package/servant-auth);
 - logging with [co-log-core](https://hackage.haskell.org/package/co-log-core);
@@ -54,34 +55,37 @@ Eventually, you should pass your token in the `Authorization` header for the rel
 
 ## Development
 
-The project is setup to be built with [Stack](https://docs.haskellstack.org/en/stable/README/),
-though it is also possible to build via [Nix](https://nixos.org/). Convenience
-scripts are provided (under the `bin/` directory) to manage the lifecycle of the
-application. These scripts try to use Nix if it is available, and fall back to
-using Stack directly otherwise. The scripts are completely optional, and direct
-invocations of stack commands (e.g. `stack build`, `stack test`, etc.) is also
-valid.
+The project is setup to be built with [Cabal](https://cabal.readthedocs.io/en/latest/cabal-commands.html), though with dependencies provided via [Nix](https://nixos.org/).
+Tasks are provided using a GNU Make-like tool called [Task](https://taskfile.dev/) and are supposed to be run inside a Nix shell.
 
-In summary, there are three equally valid ways of interacting with the project depending on your setup:
-- Using the higher-level convenience scripts (`bin/api/serve`, `bin/frontend/build`)
-- Through the nix-shell (using `nix-shell --run 'stack'` and `nix-shell --run 'elm make ...'` and letting `nix` take care of making the dependencies available)
-- Directly (using your environment's `stack` and `elm` commands)
+Available tasks can be seen with `task --list`:
+
+```sh
+❯ task --list
+task: Available tasks for this project:
+* api:build:        Build the API
+* api:dev:          Typecheck the API in a loop
+* api:docs:         Build Haddock docs
+* api:repl:         Start a cabal REPL
+* api:serve:        Serve the API
+* api:test:         Run API tests
+* db:destroy:       Destroy the database
+* db:setup:         Setup a postgres database using the config file
+* fe:build:         Build the frontend app
+* fe:serve:         Serve the frontend app
+```
+
+The usage of tasks is completely optional, and direct invocations of `cabal` (e.g. `cabal build`, `cabal test`, etc.) and `elm` commands are also valid.
 
 > :information_source: If `direnv` is installed, it is also possible to use it with `nix`. The provided `.envrc` file is already configured to use `nix` and only needs to be enabled by issuing `direnv allow` in the project root once.
 
 ### Setup
 
-There are a few ways to setup the project and its dependencies, outlined below.
+Setting up the runtime dependencies for development, such as the database, is taken care of by `task setup`. This calls individual components' setup scripts such as `task db:setup` under the hood, if you prefer to call it directly.
 
-#### With nix
+This task (and others in general) assumes the existence of a few packages (`toml2json`, `jq`, `postgres`, etc.) provided by the nix shell.
 
-Setting up the runtime dependencies for development, such as the database, is taken care of by the `bin/setup` script. This calls individual components' setup scripts such as `bin/db/setup` under the hood, if you prefer to call it directly without using `nix`.
-
-#### Without nix
-
-Alternatively, there is a setup script in `bin/db/setup` that will create a database, user and load the schema required for a working development environment. This script assumes the existence of few packages (`toml2json`, `jq`, `postgres`, etc.).
-
-#### With docker
+#### Alternative: docker
 
 In the root of the project you can find a `docker-compose.yml` file which provides a Postgresql database and a web interface to it, exposed on port `8081`.
 You can initialise the schema of the database by running the `schema.sql` which is also provided.
@@ -91,48 +95,33 @@ You can initialise the schema of the database by running the `schema.sql` which 
 To build the API, run
 
 ```sh
-# With convenience script
-bin/api/build
+# With task
+task api:build
 
-# With nix
-nix-shell --run 'stack build'
-
-# With stack
-stack build
+# With cabal
+cabal build
 ```
 
-> :information_source: The convenience script forwards options/flags to `stack build`, so it could be run as `bin/api/build --file-watch`
-
-> :warning: Note for non-nix users: the build requires the presence of the `pg_config` executable which is made available by installing Postgresql. Nix would take care of this automatically.
+> :warning: Note for non-nix users: the build requires the presence of the `pg_config` executable which is made available by installing Postgresql. Nix takes care of this automatically.
 
 ### Serving the API for development
 
 You can launch the web server using
 
 ```sh
-# With convenience script (with hot-reloading enabled)
-bin/api/serve
-
-# With nix
-nix-shell --run 'stack exec servant-template-exe'
-
-# With stack (without hot-reloading)
-stack exec servant-template-exe
-```
+# With task
+task api:serve
 
 ### Running the API tests
 
 To run the tests, run
 
 ```sh
-# With convenience script
-bin/api/test
+# With task
+task api:test
 
-# With nix
-nix-shell --run 'stack test'
-
-# With Stack
-stack test
+# With Cabal
+cabal test
 ```
 
 which will expose the service on port defined in configuration.
@@ -145,23 +134,23 @@ The executable accepts two options:
 - `--jwk`, which allows to customize the path of the file where the JWK is stored
 
 ### Formatting
-The Haskell files are formatted using `ormolu`. The Elm source code is formatted using `elm-format`.
+The Haskell files are formatted using `ormolu`. The Elm source code is formatted using `elm-format`. The executables are provided in the nix shell.
 
-There is a script to format all files in the codebase (Elm and Haskell) under `bin/format`. Individual projects can be formatted separately with `bin/api/format` and `bin/frontend/format`.
+### Pre-commit hooks
+Git commit hooks are installed by the nix shell and run checks before a commit. These include linting, formatting, etc.
+
+These checks can also be run manually with `pre-commit run`.
 
 ## Documentation
 
 You can generate the documentation of the project using
 
 ```sh
-# With convenience script
-bin/api/docs
+# With task
+task api:docs
 
-# With nix
-nix-shell --run 'stack haddock'
-
-# With Stack
-stack haddock
+# With Cabal
+cabal haddock
 ```
 
 ### OpenApi documentation
@@ -176,8 +165,8 @@ You can find more details in [elm/README.md](elm/README.md), but there are conve
 
 ### Building the project
 ```sh
-# With convenience script
-bin/frontend/build
+# With task
+task fe:build
 
 # With nix
 nix-shell --run 'cd elm; elm make src/Main.elm'
@@ -188,8 +177,8 @@ cd elm; npx elm make src/Main.elm
 
 ### Serve project for development
 ```sh
-# With convenience script
-bin/frontend/serve
+# With task
+task fe:serve
 
 # With nix
 nix-shell --run 'cd elm; elm-live src/Main.elm'

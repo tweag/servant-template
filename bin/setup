@@ -1,4 +1,0 @@
-#!/usr/bin/env bash
-
-# Setting up runtime dependencies such as the DB, message queues, etc. can happen here.
-bin/util/with-nix './bin/db/setup'
