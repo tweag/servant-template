@@ -1,18 +1,15 @@
-{-# LANGUAGE LambdaCase #-}
-{-# LANGUAGE RankNTypes #-}
-
 module Infrastructure.Persistence.Queries where
 
-import qualified Data.List as List (filter)
+import Data.List qualified as List (filter)
 import Data.Text (Text)
 import Hasql.Session (Session, statement)
 import Hasql.Statement (Statement)
-import qualified Hasql.Transaction as Transaction (statement)
+import Hasql.Transaction qualified as Transaction (statement)
 import Hasql.Transaction.Sessions (IsolationLevel (Serializable), Mode (Write), transaction)
 import Infrastructure.Persistence.Schema (Content (..), ContentsTags (..), Tag (..), User (userName), contentSchema, contentsTagsSchema, litContent, litTag, tagSchema, userId, userSchema)
 import Rel8 (Expr, Insert (..), Name, OnConflict (..), Query, Rel8able, Result, TableSchema, each, filter, in_, insert, lit, many, select, values, where_, (==.))
 import Tagger.Id (Id)
-import qualified Tagger.User as Domain (User)
+import Tagger.User qualified as Domain (User)
 import Prelude hiding (filter)
 
 -- SELECT CONTENTS
@@ -74,7 +71,7 @@ selectTags tagNames = select $ each tagSchema >>= filter ((`in_` (tagName . litT
 
 -- |
 -- Adds a number of rows to the specified 'TableSchema'
-add :: Rel8able f => TableSchema (f Name) -> [f Expr] -> Statement () ()
+add :: (Rel8able f) => TableSchema (f Name) -> [f Expr] -> Statement () ()
 add schema rows' =
   insert $
     Insert

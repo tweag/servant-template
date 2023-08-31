@@ -6,7 +6,7 @@ module Infrastructure.Database
   )
 where
 
-import qualified API.Config as AppConfig
+import API.Config qualified as AppConfig
 import Control.Exception (bracket)
 import Data.ByteString.Char8 (ByteString, unpack)
 import Data.Maybe (fromMaybe)

@@ -19,15 +19,15 @@ withHandle = bracket new close
 
 -- |
 -- Returns current time
-currentTime :: MonadIO m => Handle -> m UTCTime
+currentTime :: (MonadIO m) => Handle -> m UTCTime
 currentTime = const $ liftIO getCurrentTime
 
 -- |
 -- Creates new handle
-new :: MonadIO m => m Handle
+new :: (MonadIO m) => m Handle
 new = pure Handle
 
 -- |
 -- Cleanup function
-close :: MonadIO m => Handle -> m ()
+close :: (MonadIO m) => Handle -> m ()
 close = const $ pure ()

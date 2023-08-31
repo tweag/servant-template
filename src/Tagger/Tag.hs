@@ -1,11 +1,7 @@
-{-# LANGUAGE DerivingStrategies #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
-
 module Tagger.Tag where
 
 import Data.Aeson (FromJSON, ToJSON)
 import Data.OpenApi (ToParamSchema, ToSchema)
-
 -- text
 import Data.Text (Text)
 import Servant (FromHttpApiData, ToHttpApiData)

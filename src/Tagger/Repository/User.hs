@@ -1,6 +1,3 @@
-{-# LANGUAGE NamedFieldPuns #-}
-{-# LANGUAGE RankNTypes #-}
-
 module Tagger.Repository.User (UserRepository (..), hoist) where
 
 import Data.Text (Text)

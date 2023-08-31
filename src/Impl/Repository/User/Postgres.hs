@@ -1,6 +1,3 @@
-{-# LANGUAGE DuplicateRecordFields #-}
-{-# LANGUAGE OverloadedStrings #-}
-
 module Impl.Repository.User.Postgres (repository) where
 
 import Control.Monad.IO.Class (liftIO)
@@ -10,8 +7,8 @@ import Data.Text (Text)
 import Data.UUID.V4 (nextRandom)
 import Hasql.Session (CommandError (ResultError), QueryError (QueryError), ResultError (ServerError), Session)
 import Impl.Repository.User.Error (UserRepositoryError (..))
-import qualified Infrastructure.Database as DB
-import qualified Infrastructure.Persistence.Queries as Query
+import Infrastructure.Database qualified as DB
+import Infrastructure.Persistence.Queries qualified as Query
 import Infrastructure.Persistence.Schema (litUser, userId)
 import Infrastructure.Persistence.Serializer (serializeUser, unserializeUser)
 import Tagger.EncryptedPassword (EncryptedPassword)

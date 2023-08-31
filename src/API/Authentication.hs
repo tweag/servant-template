@@ -1,8 +1,3 @@
-{-# LANGUAGE DataKinds #-}
-{-# LANGUAGE DeriveGeneric #-}
-{-# LANGUAGE DerivingStrategies #-}
-{-# LANGUAGE TypeOperators #-}
-
 module API.Authentication where
 
 import GHC.Generics (Generic)
@@ -12,7 +7,7 @@ import Servant (Handler, JSON, Post, ReqBody, type (:>))
 import Servant.API.Generic (type (:-))
 import Servant.Server.Generic (AsServer)
 import Tagger.Authentication.Authenticator (Authenticator)
-import qualified Tagger.Authentication.Authenticator as Authenticator
+import Tagger.Authentication.Authenticator qualified as Authenticator
 import Tagger.Authentication.Credentials (Credentials (username))
 import Tagger.Id (Id)
 import Tagger.Repository.User as UserRepository

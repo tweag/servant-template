@@ -1,7 +1,3 @@
-{-# LANGUAGE DeriveAnyClass #-}
-{-# LANGUAGE DeriveGeneric #-}
-{-# LANGUAGE DerivingStrategies #-}
-
 module Tagger.Authentication.Credentials where
 
 import Data.Aeson (FromJSON (parseJSON), ToJSON (toJSON))

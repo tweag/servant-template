@@ -1,6 +1,3 @@
-{-# LANGUAGE NamedFieldPuns #-}
-{-# LANGUAGE RankNTypes #-}
-
 module Tagger.Repository.Content where
 
 import Tagger.Content (Content)

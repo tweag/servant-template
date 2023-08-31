@@ -1,20 +1,17 @@
-{-# LANGUAGE NamedFieldPuns #-}
-{-# LANGUAGE ScopedTypeVariables #-}
-
 module App where
 
 import API.AppServices as AppServices
 import API.Application (app)
 import API.Config (Port (..), apiPort)
-import qualified API.Config as Config
+import API.Config qualified as Config
 import CLIOptions (CLIOptions (configPath))
-import qualified CLIOptions
+import CLIOptions qualified
 import Dependencies (Deps (..))
-import qualified Dependencies as Deps
-import qualified Infrastructure.Logging.Logger as Logger
-import qualified Middleware
-import qualified Network.Wai.Handler.Warp as Warp
-import qualified Tagger.JSONWebKey as JWK
+import Dependencies qualified as Deps
+import Infrastructure.Logging.Logger qualified as Logger
+import Middleware qualified
+import Network.Wai.Handler.Warp qualified as Warp
+import Tagger.JSONWebKey qualified as JWK
 
 run :: IO ()
 run = do
@@ -23,7 +20,7 @@ run = do
   key <- JWK.setup options
 
   Deps.withDeps appConfig $ \Deps {dbHandle, loggerHandle} -> do
-    let (Port port) = apiPort . Config.api $ appConfig
+    let (Port port) = appConfig.api.apiPort
         services = AppServices.start dbHandle loggerHandle key
         application = Middleware.apply (app services)
 

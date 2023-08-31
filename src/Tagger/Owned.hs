@@ -1,6 +1,3 @@
-{-# LANGUAGE DeriveGeneric #-}
-{-# LANGUAGE DerivingStrategies #-}
-
 module Tagger.Owned where
 
 import Data.Aeson (FromJSON, ToJSON)
@@ -17,8 +14,8 @@ data Owned a = Owned
   }
   deriving stock (Eq, Show, Generic)
 
-instance FromJSON a => FromJSON (Owned a)
+instance (FromJSON a) => FromJSON (Owned a)
 
-instance ToJSON a => ToJSON (Owned a)
+instance (ToJSON a) => ToJSON (Owned a)
 
-instance ToSchema a => ToSchema (Owned a)
+instance (ToSchema a) => ToSchema (Owned a)
