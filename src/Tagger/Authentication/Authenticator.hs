@@ -1,5 +1,3 @@
-{-# LANGUAGE RankNTypes #-}
-
 module Tagger.Authentication.Authenticator where
 
 import Tagger.Authentication.Credentials (Credentials (..))

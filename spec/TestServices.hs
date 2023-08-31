@@ -2,8 +2,8 @@ module TestServices where
 
 import API.AppServices (AppServices (..), connectedAuthenticateUser, connectedContentRepository, connectedUserRepository, encryptedPasswordManager)
 import GHC.Conc (newTVarIO)
-import qualified Impl.Repository.Content as Repo.Content
-import qualified Impl.Repository.User as Repo.User
+import Impl.Repository.Content qualified as Repo.Content
+import Impl.Repository.User qualified as Repo.User
 import Infrastructure.Logging.Logger as Logger
 import Infrastructure.SystemTime as SystemTime
 import Servant.Auth.Server (defaultJWTSettings, generateKey)

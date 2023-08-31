@@ -15,7 +15,7 @@ import Control.Monad (when)
 import Control.Monad.IO.Class (MonadIO)
 import Data.Text (Text)
 import Infrastructure.SystemTime (UTCTime)
-import qualified Infrastructure.SystemTime as SystemTime
+import Infrastructure.SystemTime qualified as SystemTime
 import Prelude hiding (log)
 
 newtype Config = Config
@@ -46,22 +46,22 @@ withContext context handle = handle {localContext = Just context}
 
 -- |
 -- Logs message with severity set to Error
-logError :: MonadIO m => Handle -> String -> m ()
+logError :: (MonadIO m) => Handle -> String -> m ()
 logError = log Error
 
 -- |
 -- Logs message with severity set to Info
-logInfo :: MonadIO m => Handle -> String -> m ()
+logInfo :: (MonadIO m) => Handle -> String -> m ()
 logInfo = log Info
 
 -- |
 -- Logs message with severity set to Warning
-logWarning :: MonadIO m => Handle -> String -> m ()
+logWarning :: (MonadIO m) => Handle -> String -> m ()
 logWarning = log Warning
 
 -- |
 -- Logs message with severity set to Debug
-logDebug :: MonadIO m => Handle -> String -> m ()
+logDebug :: (MonadIO m) => Handle -> String -> m ()
 logDebug = log Debug
 
 -- |

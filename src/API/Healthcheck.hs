@@ -1,6 +1,3 @@
-{-# LANGUAGE DataKinds #-}
-{-# LANGUAGE TypeOperators #-}
-
 module API.Healthcheck where
 
 import Servant (NoContent (NoContent), Server)

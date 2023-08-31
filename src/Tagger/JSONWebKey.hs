@@ -1,5 +1,3 @@
-{-# LANGUAGE ScopedTypeVariables #-}
-
 module Tagger.JSONWebKey (setup, JWK) where
 
 import CLIOptions (CLIOptions (jwkPath))

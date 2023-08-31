@@ -1,6 +1,3 @@
-{-# LANGUAGE DataKinds #-}
-{-# LANGUAGE TypeOperators #-}
-
 module API.Docs where
 
 import API.Authentication (AuthenticationAPI)

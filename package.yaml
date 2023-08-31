@@ -5,15 +5,29 @@ maintainer:         christian.georgii@tweag.io
 extra-source-files:
   - README.md
 
+language: GHC2021
+
 ghc-options:
   -W
   -Wall
   -Werror
+  -Wincomplete-uni-patterns
+  -Wincomplete-record-updates
   -fwrite-ide-info
   -hiedir=.hie
 
 default-extensions:
+  - DataKinds
+  - DeriveAnyClass
+  - DerivingStrategies
+  - DerivingVia
+  - DuplicateRecordFields
+  - GADTs
+  - LambdaCase
+  - OverloadedRecordDot
   - OverloadedStrings
+  - RecordWildCards
+  - TypeFamilies
 
 library:
   source-dirs:      src
@@ -46,6 +60,9 @@ dependencies:
   - transformers
   - uuid
   - wai
+  - wai-cors
+  - wai-extra
+  - warp
 
 executables:
   servant-template-exe:
@@ -53,13 +70,6 @@ executables:
     main:           Main.hs
     dependencies:
       - servant-template
-      - bytestring
-      - hasql
-      - jose
-      - transformers
-      - wai-cors
-      - wai-extra
-      - warp
 
 tests:
   servant-template-spec:

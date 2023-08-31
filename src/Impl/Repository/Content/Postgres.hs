@@ -1,5 +1,3 @@
-{-# LANGUAGE TupleSections #-}
-
 module Impl.Repository.Content.Postgres (repository) where
 
 import Control.Monad (forM)
@@ -8,8 +6,8 @@ import Control.Monad.Trans.Except (ExceptT (ExceptT))
 import Data.Tuple.Extra (uncurry3)
 import Data.UUID.V4 (nextRandom)
 import Hasql.Session (QueryError)
-import qualified Infrastructure.Database as DB
-import qualified Infrastructure.Persistence.Queries as DB (addContentWithTags, selectUserContents)
+import Infrastructure.Database qualified as DB
+import Infrastructure.Persistence.Queries qualified as DB (addContentWithTags, selectUserContents)
 import Infrastructure.Persistence.Serializer (serializeContent, unserializeContent)
 import Tagger.Content (Content, hasAllTags)
 import Tagger.Id (Id (Id))

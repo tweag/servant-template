@@ -1,5 +1,3 @@
-{-# LANGUAGE LambdaCase #-}
-
 module TaggerSpec where
 
 import API.Application (API, ApplicationAPI (..), app)
@@ -12,7 +10,7 @@ import Infrastructure.Authentication.Token (Token (Token))
 import Network.HTTP.Client (defaultManagerSettings, newManager)
 import Network.HTTP.Types.Status (Status, forbidden403, unauthorized401)
 import Network.Wai.Handler.Warp (Port, testWithApplication)
-import qualified Servant.Auth.Client.Internal as Servant (Token (Token))
+import Servant.Auth.Client.Internal qualified as Servant (Token (Token))
 import Servant.Client (ClientEnv, ClientM, HasClient (Client), baseUrlPort, client, mkClientEnv, parseBaseUrl, runClientM)
 import Servant.Client.Core (ClientError (..), responseStatusCode)
 import Tagger.Authentication.Credentials (Credentials (Credentials), Password (Password))

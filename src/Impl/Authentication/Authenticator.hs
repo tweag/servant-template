@@ -1,6 +1,3 @@
-{-# LANGUAGE NamedFieldPuns #-}
-{-# LANGUAGE RankNTypes #-}
-
 module Impl.Authentication.Authenticator (Error (..), authenticator) where
 
 import Control.Monad.Trans.Except (ExceptT, throwE, withExceptT)

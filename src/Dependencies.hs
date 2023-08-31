@@ -1,10 +1,9 @@
-{-# LANGUAGE RecordWildCards #-}
 module Dependencies (withDeps, Deps (..)) where
 
-import qualified API.Config as Config
-import qualified Infrastructure.Database as DB
-import qualified Infrastructure.Logging.Logger as Logger
-import qualified Infrastructure.SystemTime as SystemTime
+import API.Config qualified as Config
+import Infrastructure.Database qualified as DB
+import Infrastructure.Logging.Logger qualified as Logger
+import Infrastructure.SystemTime qualified as SystemTime
 
 -- |
 -- Aggregates all effects needed by the app

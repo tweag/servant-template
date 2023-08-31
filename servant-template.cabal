@@ -23,7 +23,9 @@ library
       API.Docs
       API.Healthcheck
       API.Tagger
+      App
       CLIOptions
+      Dependencies
       Impl.Authentication.Authenticator
       Impl.Repository.Content
       Impl.Repository.Content.InMemory
@@ -40,6 +42,7 @@ library
       Infrastructure.Persistence.Schema
       Infrastructure.Persistence.Serializer
       Infrastructure.SystemTime
+      Middleware
       Tagger.Authentication.Authenticator
       Tagger.Authentication.Credentials
       Tagger.Content
@@ -56,8 +59,18 @@ library
   hs-source-dirs:
       src
   default-extensions:
+      DataKinds
+      DeriveAnyClass
+      DerivingStrategies
+      DerivingVia
+      DuplicateRecordFields
+      GADTs
+      LambdaCase
+      OverloadedRecordDot
       OverloadedStrings
-  ghc-options: -W -Wall -Werror -fwrite-ide-info -hiedir=.hie
+      RecordWildCards
+      TypeFamilies
+  ghc-options: -W -Wall -Werror -Wincomplete-uni-patterns -Wincomplete-record-updates -fwrite-ide-info -hiedir=.hie
   build-depends:
       aeson
     , base >=4.14 && <5
@@ -86,19 +99,30 @@ library
     , transformers
     , uuid
     , wai
-  default-language: Haskell2010
+    , wai-cors
+    , wai-extra
+    , warp
+  default-language: GHC2021
 
 executable servant-template-exe
   main-is: Main.hs
   other-modules:
-      Dependencies
-      Middleware
       Paths_servant_template
   hs-source-dirs:
       app
   default-extensions:
+      DataKinds
+      DeriveAnyClass
+      DerivingStrategies
+      DerivingVia
+      DuplicateRecordFields
+      GADTs
+      LambdaCase
+      OverloadedRecordDot
       OverloadedStrings
-  ghc-options: -W -Wall -Werror -fwrite-ide-info -hiedir=.hie
+      RecordWildCards
+      TypeFamilies
+  ghc-options: -W -Wall -Werror -Wincomplete-uni-patterns -Wincomplete-record-updates -fwrite-ide-info -hiedir=.hie
   build-depends:
       aeson
     , base >=4.14 && <5
@@ -131,7 +155,7 @@ executable servant-template-exe
     , wai-cors
     , wai-extra
     , warp
-  default-language: Haskell2010
+  default-language: GHC2021
 
 test-suite servant-template-spec
   type: exitcode-stdio-1.0
@@ -143,8 +167,18 @@ test-suite servant-template-spec
   hs-source-dirs:
       spec
   default-extensions:
+      DataKinds
+      DeriveAnyClass
+      DerivingStrategies
+      DerivingVia
+      DuplicateRecordFields
+      GADTs
+      LambdaCase
+      OverloadedRecordDot
       OverloadedStrings
-  ghc-options: -W -Wall -Werror -fwrite-ide-info -hiedir=.hie
+      RecordWildCards
+      TypeFamilies
+  ghc-options: -W -Wall -Werror -Wincomplete-uni-patterns -Wincomplete-record-updates -fwrite-ide-info -hiedir=.hie
   build-depends:
       aeson
     , base >=4.14 && <5
@@ -180,5 +214,7 @@ test-suite servant-template-spec
     , transformers
     , uuid
     , wai
+    , wai-cors
+    , wai-extra
     , warp
-  default-language: Haskell2010
+  default-language: GHC2021

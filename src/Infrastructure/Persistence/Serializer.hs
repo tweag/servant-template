@@ -1,16 +1,16 @@
 module Infrastructure.Persistence.Serializer where
 
 import Infrastructure.Persistence.Schema (contentContent, contentId, contentUserId, tagId, tagName, userId, userName, userPassword)
-import qualified Infrastructure.Persistence.Schema as DB (Content (Content), Tag (Tag), User (User))
+import Infrastructure.Persistence.Schema qualified as DB (Content (Content), Tag (Tag), User (User))
 import Rel8 (Result)
 import Tagger.Content (Content (..), createContent)
 import Tagger.Id (Id)
 import Tagger.Owned (Owned (Owned))
-import qualified Tagger.Owned as Owned (content, userId)
+import Tagger.Owned qualified as Owned (content, userId)
 import Tagger.Tag (Tag (Tag))
-import qualified Tagger.Tag as Tag (name)
+import Tagger.Tag qualified as Tag (name)
 import Tagger.User (User (User))
-import qualified Tagger.User as User (name, password)
+import Tagger.User qualified as User (name, password)
 
 -- CONTENT
 

@@ -1,7 +1,3 @@
-{-# LANGUAGE DerivingStrategies #-}
-{-# LANGUAGE NamedFieldPuns #-}
-{-# LANGUAGE RankNTypes #-}
-
 module Infrastructure.Authentication.PasswordManager where
 
 import Control.Category ((>>>))
@@ -11,9 +7,9 @@ import Data.Bifunctor (bimap)
 import Infrastructure.Authentication.Token (Token (Token))
 import Servant.Auth.Server (JWTSettings, makeJWT)
 import Tagger.Authentication.Credentials (Credentials, Password (asBytestring))
-import qualified Tagger.Authentication.Credentials as Credentials (password)
+import Tagger.Authentication.Credentials qualified as Credentials (password)
 import Tagger.EncryptedPassword (EncryptedPassword, encryptPassword)
-import qualified Tagger.EncryptedPassword as Encrypted (validatePassword)
+import Tagger.EncryptedPassword qualified as Encrypted (validatePassword)
 import Tagger.Id (Id)
 import Tagger.User (User (password))
 

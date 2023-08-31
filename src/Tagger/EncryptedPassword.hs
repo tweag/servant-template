@@ -1,11 +1,7 @@
-{-# LANGUAGE DeriveGeneric #-}
-{-# LANGUAGE DerivingStrategies #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
-
 module Tagger.EncryptedPassword (EncryptedPassword, asBytestring, encryptPassword, validatePassword) where
 
 import Crypto.BCrypt (fastBcryptHashingPolicy, hashPasswordUsingPolicy)
-import qualified Crypto.BCrypt as BCrypt (validatePassword)
+import Crypto.BCrypt qualified as BCrypt (validatePassword)
 import Data.Aeson (FromJSON (parseJSON), ToJSON (toJSON))
 import Data.ByteString (ByteString)
 import Data.Data (Proxy (Proxy))

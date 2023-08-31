@@ -1,7 +1,3 @@
-{-# LANGUAGE DeriveGeneric #-}
-{-# LANGUAGE DerivingStrategies #-}
-{-# LANGUAGE NamedFieldPuns #-}
-
 module Tagger.User where
 
 import Data.Aeson (ToJSON (toJSON), object, (.=))

@@ -1,17 +1,13 @@
-{-# LANGUAGE DeriveAnyClass #-}
-{-# LANGUAGE DeriveGeneric #-}
-{-# LANGUAGE DerivingStrategies #-}
-
 module Infrastructure.Persistence.Schema where
 
 import Data.Text (Text)
 import GHC.Generics (Generic)
 import Rel8 (Column, Expr, Name, Rel8able, Result, TableSchema (..), lit)
-import qualified Tagger.Content as Domain (Content)
+import Tagger.Content qualified as Domain (Content)
 import Tagger.EncryptedPassword (EncryptedPassword)
 import Tagger.Id (Id)
-import qualified Tagger.Tag as Domain (Tag)
-import qualified Tagger.User as Domain (User)
+import Tagger.Tag qualified as Domain (Tag)
+import Tagger.User qualified as Domain (User)
 
 -- TAG
 

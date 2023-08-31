@@ -1,5 +1,3 @@
-{-# LANGUAGE RankNTypes #-}
-
 module API.AppServices where
 
 import Control.Monad ((<=<))
@@ -8,23 +6,23 @@ import Control.Monad.IO.Class (liftIO)
 import Control.Monad.Trans.Except (ExceptT, runExceptT)
 import Crypto.JOSE.JWK (JWK)
 import Hasql.Session (QueryError)
-import qualified Impl.Authentication.Authenticator as Auth
+import Impl.Authentication.Authenticator qualified as Auth
 import Impl.Repository.Content as Repo.Content
-import qualified Impl.Repository.User as Repo.User
+import Impl.Repository.User qualified as Repo.User
 import Impl.Repository.User.Error (UserRepositoryError (..))
 import Infrastructure.Authentication.PasswordManager (PasswordManager, PasswordManagerError (..), bcryptPasswordManager)
-import qualified Infrastructure.Authentication.PasswordManager as PasswordManager
-import qualified Infrastructure.Database as DB
+import Infrastructure.Authentication.PasswordManager qualified as PasswordManager
+import Infrastructure.Database qualified as DB
 import Infrastructure.Logging.Logger (logError, logWarning, withContext)
-import qualified Infrastructure.Logging.Logger as Logger
+import Infrastructure.Logging.Logger qualified as Logger
 import Infrastructure.Persistence.Queries (WrongNumberOfResults (..))
 import Servant (Handler, err401, err403, err500)
 import Servant.Auth.Server (JWTSettings, defaultJWTSettings)
-import qualified Tagger.Authentication.Authenticator as Auth
+import Tagger.Authentication.Authenticator qualified as Auth
 import Tagger.Repository.Content (ContentRepository)
-import qualified Tagger.Repository.Content as ContentRepository
+import Tagger.Repository.Content qualified as ContentRepository
 import Tagger.Repository.User (UserRepository)
-import qualified Tagger.Repository.User as UserRepository
+import Tagger.Repository.User qualified as UserRepository
 import Prelude hiding (log)
 
 -- |

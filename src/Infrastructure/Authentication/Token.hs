@@ -1,6 +1,3 @@
-{-# LANGUAGE DerivingStrategies #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
-
 module Infrastructure.Authentication.Token where
 
 import Data.Aeson (FromJSON (parseJSON), ToJSON (toJSON), Value (String), withText)
