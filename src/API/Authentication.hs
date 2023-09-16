@@ -1,4 +1,4 @@
-module API.Authentication where
+module API.Authentication (API (..), api) where
 
 import GHC.Generics (Generic)
 import Infrastructure.Authentication.PasswordManager (PasswordManager (generatePassword, generateToken))
@@ -15,7 +15,7 @@ import Tagger.User (User)
 
 -- |
 -- The endpoints required to perform authentication
-data AuthenticationAPI mode = AuthenticationAPI
+data API mode = API
   { -- | Given some 'Login' data, registers a new 'User'
     register :: mode :- "register" :> ReqBody '[JSON] Credentials :> Post '[JSON] (Id User),
     -- | Given some 'Login' data, generates an authentication token
@@ -23,9 +23,9 @@ data AuthenticationAPI mode = AuthenticationAPI
   }
   deriving stock (Generic)
 
-authenticationServer :: PasswordManager Handler -> Authenticator Handler -> UserRepository Handler -> AuthenticationAPI AsServer
-authenticationServer passwordManager authHandler userRepository =
-  AuthenticationAPI
+api :: PasswordManager Handler -> Authenticator Handler -> UserRepository Handler -> API AsServer
+api passwordManager authHandler userRepository =
+  API
     { register = registerEndpoint passwordManager userRepository,
       login = loginEndpoint passwordManager authHandler
     }

@@ -9,7 +9,7 @@ import Prelude hiding (writeFile)
 
 setup :: CLIOptions -> IO JWK
 setup config = do
-  let path = jwkPath config
+  let path = config.jwkPath
   -- try to retrieve the JWK from file
   catch (readKey path) $ \(_ :: IOError) -> do
     -- if the file does not exist or does not contain a valid key, we generate one

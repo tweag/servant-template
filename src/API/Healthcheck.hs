@@ -1,11 +1,11 @@
-module API.Healthcheck where
+module API.Healthcheck (API, api) where
 
 import Servant (NoContent (NoContent), Server)
 import Servant.API (Get, JSON, type (:>))
 
 -- |
 -- A single endpoint to check the liveness of the application
-type HealthcheckAPI = "healthcheck" :> Get '[JSON] NoContent
+type API = "healthcheck" :> Get '[JSON] NoContent
 
-healthcheckServer :: Server HealthcheckAPI
-healthcheckServer = pure NoContent
+api :: Server API
+api = pure NoContent

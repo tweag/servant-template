@@ -1,8 +1,9 @@
 module Impl.Repository.User.InMemory (Table, repository) where
 
+import App.Error (AppError (..))
+import AppM (AppM, AppM')
 import Control.Monad.Except (throwError)
 import Control.Monad.IO.Class (liftIO)
-import Control.Monad.Trans.Except (ExceptT)
 import Data.Map.Lazy (Map, assocs, filter, insert, size)
 import Data.Text (Text)
 import Data.Text.Encoding (encodeUtf8)
@@ -20,38 +21,39 @@ import Prelude hiding (filter)
 
 type Table = TVar (Map (Id User) User)
 
-repository :: Table -> UserRepository (ExceptT UserRepositoryError IO)
+repository :: Table -> UserRepository AppM'
 repository userMap =
   UserRepository
     { findByName = inMemoryGetUserByName userMap,
       add = inMemoryAddUser userMap
     }
 
-inMemoryGetUserByName :: Table -> Text -> ExceptT UserRepositoryError IO (Id User, User)
+inMemoryGetUserByName :: Table -> Text -> AppM (Id User, User)
 inMemoryGetUserByName userMap name' = do
   users <- liftIO $ readTVarIO userMap
-  let usersWithName = filter ((== name') . name) users
+  let usersWithName = filter (\u -> u.name == name') users
   case size usersWithName of
-    0 -> throwError $ UnexpectedNumberOfRows NoResults
+    0 -> throwError $ UserRepositoryErr (UnexpectedNumberOfRows NoResults)
     1 -> pure . head . assocs $ usersWithName
-    _ -> throwError $ UnexpectedNumberOfRows MoreThanOneResult
+    _ -> throwError $ UserRepositoryErr (UnexpectedNumberOfRows MoreThanOneResult)
 
-duplicateNameError :: Text -> UserRepositoryError
+duplicateNameError :: Text -> AppError
 duplicateNameError name' =
-  DuplicateUserName $
-    QueryError
-      "insert user"
-      []
-      ( ResultError $
-          ServerError
-            unique_violation
-            "duplicate key value violates unique constraint"
-            (Just $ "Key (name)=(" <> encodeUtf8 name' <> ") already exists")
-            Nothing
-            Nothing
-      )
+  UserRepositoryErr $
+    DuplicateUserName $
+      QueryError
+        "insert user"
+        []
+        ( ResultError $
+            ServerError
+              unique_violation
+              "duplicate key value violates unique constraint"
+              (Just $ "Key (name)=(" <> encodeUtf8 name' <> ") already exists")
+              Nothing
+              Nothing
+        )
 
-inMemoryAddUser :: Table -> Text -> EncryptedPassword -> ExceptT UserRepositoryError IO (Id User)
+inMemoryAddUser :: Table -> Text -> EncryptedPassword -> AppM (Id User)
 inMemoryAddUser userMap name' password' = do
   userId <- Id <$> liftIO nextRandom
   queryError <- liftIO . atomically $ do

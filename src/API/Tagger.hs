@@ -1,4 +1,4 @@
-module API.Tagger where
+module API.Tagger (API (..), api) where
 
 import GHC.Generics (Generic)
 import Servant (Handler)
@@ -11,11 +11,10 @@ import Tagger.Owned (Owned)
 import Tagger.Repository.Content (ContentRepository (addContentWithTags, selectUserContentsByTags))
 import Tagger.Tag (Tag)
 import Tagger.User (User)
-import Prelude hiding (getContents)
 
 -- |
 -- The main endpoints of the application API
-data TaggerAPI mode = TaggerAPI
+data API mode = API
   { -- | Add a new 'Content'
     addContent :: mode :- "add-content" :> ReqBody '[JSON] (Content Tag) :> Post '[JSON] (Id (Content Tag)),
     -- | Retrieve all the 'User' 'Content's indexed by the provided 'Tag's
@@ -23,9 +22,15 @@ data TaggerAPI mode = TaggerAPI
   }
   deriving stock (Generic)
 
-taggerServer :: Id User -> ContentRepository Handler -> TaggerAPI AsServer
-taggerServer userId contentRepository =
-  TaggerAPI
-    { addContent = addContentWithTags contentRepository userId,
-      getContents = selectUserContentsByTags contentRepository userId
+api :: Id User -> ContentRepository Handler -> API AsServer
+api userId contentRepository =
+  API
+    { addContent = addContentImpl userId contentRepository,
+      getContents = getContentsImpl userId contentRepository
     }
+
+addContentImpl :: Id User -> ContentRepository Handler -> Content Tag -> Handler (Id (Content Tag))
+addContentImpl userId contentRepository = contentRepository.addContentWithTags userId
+
+getContentsImpl :: Id User -> ContentRepository Handler -> [Tag] -> Handler [Owned (Content Tag)]
+getContentsImpl userId contentRepository = contentRepository.selectUserContentsByTags userId

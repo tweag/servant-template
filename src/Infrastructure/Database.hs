@@ -7,11 +7,13 @@ module Infrastructure.Database
 where
 
 import API.Config qualified as AppConfig
+import App.Error (AppError (..))
+import Control.Arrow (left)
 import Control.Exception (bracket)
 import Data.ByteString.Char8 (ByteString, unpack)
 import Data.Maybe (fromMaybe)
 import Hasql.Connection (Connection, acquire, release)
-import Hasql.Session (QueryError, Session, run)
+import Hasql.Session (Session, run)
 
 newtype Config = Config
   { connectionString :: ByteString
@@ -43,6 +45,6 @@ withHandle config f = do
     close
     f
 
-runQuery :: Handle -> Session a -> IO (Either QueryError a)
+runQuery :: Handle -> Session a -> IO (Either AppError a)
 runQuery handle query =
-  run query (dbConnection handle)
+  left QueryErr <$> run query (dbConnection handle)

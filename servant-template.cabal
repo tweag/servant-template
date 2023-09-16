@@ -16,7 +16,7 @@ extra-source-files:
 
 library
   exposed-modules:
-      API.Application
+      API
       API.AppServices
       API.Authentication
       API.Config
@@ -24,9 +24,14 @@ library
       API.Healthcheck
       API.Tagger
       App
+      App.Env
+      App.Error
+      Application
+      AppM
+      Boot
       CLIOptions
-      Dependencies
       Impl.Authentication.Authenticator
+      Impl.Authentication.Authenticator.Error
       Impl.Repository.Content
       Impl.Repository.Content.InMemory
       Impl.Repository.Content.Postgres
@@ -35,6 +40,7 @@ library
       Impl.Repository.User.InMemory
       Impl.Repository.User.Postgres
       Infrastructure.Authentication.PasswordManager
+      Infrastructure.Authentication.PasswordManager.Error
       Infrastructure.Authentication.Token
       Infrastructure.Database
       Infrastructure.Logging.Logger
@@ -46,6 +52,7 @@ library
       Tagger.Authentication.Authenticator
       Tagger.Authentication.Credentials
       Tagger.Content
+      Tagger.Database
       Tagger.EncryptedPassword
       Tagger.Id
       Tagger.JSONWebKey
@@ -66,11 +73,12 @@ library
       DuplicateRecordFields
       GADTs
       LambdaCase
+      OverloadedLabels
       OverloadedRecordDot
       OverloadedStrings
       RecordWildCards
       TypeFamilies
-  ghc-options: -W -Wall -Werror -Wincomplete-uni-patterns -Wincomplete-record-updates -fwrite-ide-info -hiedir=.hie
+  ghc-options: -W -Wall -Wincomplete-uni-patterns -Wincomplete-record-updates -fwrite-ide-info -hiedir=.hie
   build-depends:
       aeson
     , base >=4.14 && <5
@@ -82,9 +90,9 @@ library
     , hasql
     , hasql-transaction
     , jose
-    , lens
     , mtl
     , openapi3
+    , optics
     , optparse-applicative
     , postgresql-error-codes
     , rel8
@@ -109,7 +117,7 @@ executable servant-template-exe
   other-modules:
       Paths_servant_template
   hs-source-dirs:
-      app
+      server
   default-extensions:
       DataKinds
       DeriveAnyClass
@@ -118,11 +126,12 @@ executable servant-template-exe
       DuplicateRecordFields
       GADTs
       LambdaCase
+      OverloadedLabels
       OverloadedRecordDot
       OverloadedStrings
       RecordWildCards
       TypeFamilies
-  ghc-options: -W -Wall -Werror -Wincomplete-uni-patterns -Wincomplete-record-updates -fwrite-ide-info -hiedir=.hie
+  ghc-options: -W -Wall -Wincomplete-uni-patterns -Wincomplete-record-updates -fwrite-ide-info -hiedir=.hie
   build-depends:
       aeson
     , base >=4.14 && <5
@@ -134,9 +143,9 @@ executable servant-template-exe
     , hasql
     , hasql-transaction
     , jose
-    , lens
     , mtl
     , openapi3
+    , optics
     , optparse-applicative
     , postgresql-error-codes
     , rel8
@@ -174,11 +183,12 @@ test-suite servant-template-spec
       DuplicateRecordFields
       GADTs
       LambdaCase
+      OverloadedLabels
       OverloadedRecordDot
       OverloadedStrings
       RecordWildCards
       TypeFamilies
-  ghc-options: -W -Wall -Werror -Wincomplete-uni-patterns -Wincomplete-record-updates -fwrite-ide-info -hiedir=.hie
+  ghc-options: -W -Wall -Wincomplete-uni-patterns -Wincomplete-record-updates -fwrite-ide-info -hiedir=.hie
   build-depends:
       aeson
     , base >=4.14 && <5
@@ -193,9 +203,9 @@ test-suite servant-template-spec
     , http-client
     , http-types
     , jose
-    , lens
     , mtl
     , openapi3
+    , optics
     , optparse-applicative
     , postgresql-error-codes
     , rel8

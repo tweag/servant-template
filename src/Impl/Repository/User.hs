@@ -1,14 +1,12 @@
 module Impl.Repository.User (inMemory, postgres) where
 
-import Control.Monad.Trans.Except (ExceptT)
-import Impl.Repository.User.Error (UserRepositoryError)
+import AppM (AppM')
 import Impl.Repository.User.InMemory qualified as IM
 import Impl.Repository.User.Postgres qualified as PG
-import Infrastructure.Database qualified as DB
 import Tagger.Repository.User (UserRepository (..))
 
-postgres :: DB.Handle -> UserRepository (ExceptT UserRepositoryError IO)
+postgres :: UserRepository AppM'
 postgres = PG.repository
 
-inMemory :: IM.Table -> UserRepository (ExceptT UserRepositoryError IO)
+inMemory :: IM.Table -> UserRepository AppM'
 inMemory = IM.repository

@@ -1,8 +1,9 @@
 module TaggerSpec where
 
-import API.Application (API, ApplicationAPI (..), app)
-import API.Authentication (AuthenticationAPI (..))
-import API.Tagger (TaggerAPI (..))
+import API (API, ApplicationAPI (..))
+import API.Authentication qualified
+import API.Tagger qualified
+import Application (mkApp)
 import Data.ByteString.Lazy (toStrict)
 import Data.Either (isRight)
 import Data.Proxy (Proxy (Proxy))
@@ -24,7 +25,7 @@ import TestServices (testServices)
 import Prelude hiding (getContents)
 
 withTaggerApp :: (Port -> IO ()) -> IO ()
-withTaggerApp = testWithApplication $ app <$> testServices
+withTaggerApp = testWithApplication $ mkApp <$> testServices
 
 hasStatus :: Status -> Either ClientError a -> Bool
 hasStatus status = \case
@@ -38,12 +39,12 @@ apiClient :: Client ClientM API
 apiClient = client (Proxy :: Proxy API)
 
 registerUser :: ClientEnv -> Credentials -> IO (Either ClientError (Id User))
-registerUser env login' = runClientM ((register . authentication $ apiClient) login') env
+registerUser env login' = runClientM (apiClient.authentication.register login') env
 
 loginUser :: ClientEnv -> Credentials -> IO (Either ClientError (Id User, Token))
 loginUser env login' = do
   userId <- registerUser env login'
-  token <- runClientM ((login . authentication $ apiClient) login') env
+  token <- runClientM (apiClient.authentication.login login') env
   pure $ (,) <$> userId <*> token
 
 successfullyLoginUser :: ClientEnv -> Credentials -> IO (Id User, Token)
@@ -52,10 +53,13 @@ successfullyLoginUser env login' = do
   either (const $ fail "no userId or token") pure eitherUserIdToken
 
 addUserContent :: ClientEnv -> Token -> Content Tag -> IO (Either ClientError (Id (Content Tag)))
-addUserContent env token content = runClientM ((addContent . tagger apiClient) (toServantToken token) content) env
+addUserContent env token' content = do
+  let token = toServantToken token'
+  runClientM ((API.Tagger.addContent . apiClient.tagger) token content) env
 
 getUserContents :: ClientEnv -> Token -> [Tag] -> IO (Either ClientError [Owned (Content Tag)])
-getUserContents env token tags = runClientM ((getContents . tagger apiClient) (toServantToken token) tags) env
+getUserContents env token tags =
+  runClientM ((API.Tagger.getContents . apiClient.tagger) (toServantToken token) tags) env
 
 spec :: Spec
 spec = around withTaggerApp $ do
@@ -86,7 +90,7 @@ spec = around withTaggerApp $ do
         response `shouldSatisfy` isRight
 
       it "does not generate a token for a non registered user" $ \port -> do
-        let loginOperation = login . authentication $ apiClient
+        let loginOperation = apiClient.authentication.login
             credentials = Credentials "marcosh" (Password "password")
 
         response <- runClientM (loginOperation credentials) (clientEnv port)
