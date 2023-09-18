@@ -1,17 +1,16 @@
 module App.Error where
 
+import Authentication.Error (Error (..))
+import Authentication.Error qualified as Auth
 import Control.Monad.Except (throwError)
 import Control.Monad.IO.Class
-import Hasql.Session (QueryError)
-import Impl.Authentication.Authenticator.Error (Error (..))
-import Impl.Authentication.Authenticator.Error qualified as Auth
+import DB.Queries (WrongNumberOfResults (..))
 import DB.Repository.User.Error (UserRepositoryError (..))
+import Hasql.Session (QueryError)
 import Infrastructure.Authentication.PasswordManager.Error (PasswordManagerError (..))
 import Infrastructure.Logger (logError, logWarning)
 import Infrastructure.Logger qualified as Logger
-import DB.Queries (WrongNumberOfResults (..))
 import Servant (Handler, err401, err403, err500)
-import Prelude hiding (log)
 
 data AppError
   = QueryErr QueryError

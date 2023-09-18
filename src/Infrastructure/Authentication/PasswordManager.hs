@@ -3,8 +3,7 @@ module Infrastructure.Authentication.PasswordManager where
 import App.Error (AppError (..))
 import AppM
 import Control.Monad.IO.Class (liftIO)
-import Control.Monad.Trans.Except (ExceptT (ExceptT), throwE)
-import Data.Bifunctor (bimap)
+import Control.Monad.Trans.Except (throwE)
 import Infrastructure.Authentication.PasswordManager.Error (PasswordManagerError (..))
 import Infrastructure.Authentication.Token (Token (Token))
 import Servant.Auth.Server (JWTSettings, makeJWT)
@@ -55,18 +54,14 @@ bcryptGeneratePassword credentials = do
     Nothing -> throwE (PasswordManagerErr FailedHashing)
     Just pwd -> pure pwd
 
--- -- wrap the error message to get a PasswordManagerError
--- >>> fmap (maybe (Left (PasswordManagerErr FailedHashing)) Right)
--- -- wrap everything in ExceptT
--- >>> ExceptT
-
 bcryptGenerateToken :: JWTSettings -> Id User -> AppM Token
-bcryptGenerateToken jwtSettings userId = ExceptT $ do
+bcryptGenerateToken jwtSettings userId = do
   -- try to generate the token containing the userId
   -- the Nothing means that the token does not expire
-  token <- liftIO $ makeJWT userId jwtSettings Nothing
-  -- wrap the error to get a PasswordErrorManager and the token to get a Token
-  pure $ bimap (PasswordManagerErr . FailedJWTCreation) Token token
+  liftIO (makeJWT userId jwtSettings Nothing) >>= \case
+    -- wrap the error to get a PasswordErrorManager and the token to get a Token
+    Left err -> throwE (PasswordManagerErr (FailedJWTCreation err))
+    Right token -> pure (Token token)
 
 bcryptValidatePassword :: User -> Password -> Bool
 bcryptValidatePassword user password' = Encrypted.validatePassword (password user) (asBytestring password')

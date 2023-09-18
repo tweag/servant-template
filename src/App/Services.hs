@@ -10,7 +10,7 @@ where
 
 import App.Env
 import AppM
-import Impl.Authentication.Authenticator qualified as Auth
+import Authentication qualified as Auth
 import DB.Repository.Content as Repo.Content
 import DB.Repository.User qualified as Repo.User
 import Infrastructure.Authentication.PasswordManager (PasswordManager, bcryptPasswordManager)
@@ -25,7 +25,6 @@ import Tagger.Repository.Content (ContentRepository)
 import Tagger.Repository.Content qualified as ContentRepository
 import Tagger.Repository.User (UserRepository)
 import Tagger.Repository.User qualified as UserRepository
-import Prelude hiding (log)
 
 -- |
 -- Collection of services needed by the application to work

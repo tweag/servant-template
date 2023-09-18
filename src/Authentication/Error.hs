@@ -1,7 +1,7 @@
-module Impl.Authentication.Authenticator.Error (Error (..)) where
+module Authentication.Error (Error (..)) where
 
-import DB.Repository.User.Error (UserRepositoryError)
 import DB.Queries (WrongNumberOfResults)
+import DB.Repository.User.Error (UserRepositoryError)
 
 -- |
 -- How 'authenticateUser' can actually fail

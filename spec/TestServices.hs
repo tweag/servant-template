@@ -1,11 +1,11 @@
 module TestServices where
 
-import App.Services (Services (..), connectedAuthenticateUser, connectedContentRepository, connectedUserRepository, encryptedPasswordManager)
 import App.Env
-import GHC.Conc (newTVarIO)
-import Impl.Authentication.Authenticator qualified as Auth
+import App.Services (Services (..), connectedAuthenticateUser, connectedContentRepository, connectedUserRepository, encryptedPasswordManager)
+import Authentication qualified as Auth
 import DB.Repository.Content qualified as Repo.Content
 import DB.Repository.User qualified as Repo.User
+import GHC.Conc (newTVarIO)
 import Infrastructure.Authentication.PasswordManager (bcryptPasswordManager)
 import Infrastructure.Logger as Logger
 import Infrastructure.SystemTime as SystemTime

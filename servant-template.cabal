@@ -27,6 +27,8 @@ library
       App.Services
       Application
       AppM
+      Authentication
+      Authentication.Error
       Boot
       CLIOptions
       DB.Queries
@@ -38,10 +40,9 @@ library
       DB.Repository.User.InMemory
       DB.Repository.User.Postgres
       DB.Schema
+      DB.Schema.Content
       DB.Schema.Tag
-      DB.Serializer
-      Impl.Authentication.Authenticator
-      Impl.Authentication.Authenticator.Error
+      DB.Schema.User
       Infrastructure.Authentication.PasswordManager
       Infrastructure.Authentication.PasswordManager.Error
       Infrastructure.Authentication.Token

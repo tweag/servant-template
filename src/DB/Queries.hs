@@ -1,12 +1,17 @@
 module DB.Queries where
 
+import DB.Schema (ContentsTags (..), contentsTagsSchema)
+import DB.Schema.Content (litContent)
+import DB.Schema.Content qualified as Content
+import DB.Schema.Tag (litTag)
+import DB.Schema.Tag qualified as Tag
+import DB.Schema.User qualified as User
 import Data.List qualified as List (filter)
 import Data.Text (Text)
 import Hasql.Session (Session, statement)
 import Hasql.Statement (Statement)
 import Hasql.Transaction qualified as Transaction (statement)
 import Hasql.Transaction.Sessions (IsolationLevel (Serializable), Mode (Write), transaction)
-import DB.Schema (Content (..), ContentsTags (..), Tag (..), User (userName), contentSchema, contentsTagsSchema, litContent, litTag, tagSchema, userId, userSchema)
 import Rel8 (Expr, Insert (..), Name, OnConflict (..), Query, Rel8able, Result, TableSchema, each, filter, in_, insert, lit, many, select, values, where_, (==.))
 import Tagger.Id (Id)
 import Tagger.User qualified as Domain (User)
@@ -16,43 +21,43 @@ import Prelude hiding (filter)
 
 -- |
 -- Selects the 'ContentsTags' for a given 'Content'
-contentsTagsForContent :: Content Expr -> Query (ContentsTags Expr)
+contentsTagsForContent :: Content.Row Expr -> Query (ContentsTags Expr)
 contentsTagsForContent content =
   each contentsTagsSchema
     >>= filter
       ( \contentTag' ->
-          ctContentId contentTag' ==. contentId content
+          ctContentId contentTag' ==. content.contentId
       )
 
 -- |
 -- Selects the 'Tags' associated with a given 'Content'
-tagsForContent :: Content Expr -> Query (Tag Expr)
+tagsForContent :: Content.Row Expr -> Query (Tag.Row Expr)
 tagsForContent content = do
-  tag <- each tagSchema
+  tag <- each Tag.relation
   contentTag' <- contentsTagsForContent content
-  where_ $ tagId tag ==. ctTagId contentTag'
+  where_ $ tag.tagId ==. ctTagId contentTag'
   return tag
 
 -- |
 -- Selects the 'User' who ownes a 'Content'
-userForContent :: Content Expr -> Query (User Expr)
+userForContent :: Content.Row Expr -> Query (User.Row Expr)
 userForContent content =
-  each userSchema
+  each User.relation
     >>= filter
       ( \user ->
-          userId user ==. contentUserId content
+          user.userId ==. content.contentUserId
       )
 
 -- |
 -- Given a 'Domain.User' 'Id', retrieves all the contents for that specific user
-selectUserContents :: Id Domain.User -> Session [(Content Result, [Tag Result], User Result)]
+selectUserContents :: Id Domain.User -> Session [(Content.Row Result, [Tag.Row Result], User.Row Result)]
 selectUserContents userId' = statement () . select $ do
   -- Select all content for the given user
   content <-
-    each contentSchema
+    each Content.relation
       >>= filter
         ( \content ->
-            contentUserId content ==. lit userId'
+            content.contentUserId ==. lit userId'
         )
   -- Select tags for each content
   tags <- many $ tagsForContent content
@@ -64,8 +69,8 @@ selectUserContents userId' = statement () . select $ do
 
 -- |
 -- Selects all tags present in the database among the requested ones
-selectTags :: [Tag Result] -> Statement () [Tag Result]
-selectTags tagNames = select $ each tagSchema >>= filter ((`in_` (tagName . litTag <$> tagNames)) . tagName)
+selectTags :: [Tag.Row Result] -> Statement () [Tag.Row Result]
+selectTags tagNames = select $ each Tag.relation >>= filter ((`in_` ((.tagName) . litTag <$> tagNames)) . (.tagName))
 
 -- ADD CONTENT
 
@@ -83,17 +88,17 @@ add schema rows' =
 
 -- |
 -- Creates a 'ContentTag' given a 'Content' and a 'Tag'
-contentTag :: Content f -> Tag f -> ContentsTags f
+contentTag :: Content.Row f -> Tag.Row f -> ContentsTags f
 contentTag content tag =
   ContentsTags
-    { ctContentId = contentId content,
-      ctTagId = tagId tag
+    { ctContentId = content.contentId,
+      ctTagId = tag.tagId
     }
 
 -- |
 -- Removes the 'alreadyPresentTags' from 'allTags'
-removeAlreadyPresentTags :: [Tag Result] -> [Tag Result] -> [Tag Result]
-removeAlreadyPresentTags allTags alreadyPresentTags = List.filter (\tag -> tagName tag `notElem` (tagName <$> alreadyPresentTags)) allTags
+removeAlreadyPresentTags :: [Tag.Row Result] -> [Tag.Row Result] -> [Tag.Row Result]
+removeAlreadyPresentTags allTags alreadyPresentTags = List.filter (\tag -> tag.tagName `notElem` ((.tagName) <$> alreadyPresentTags)) allTags
 
 -- |
 -- Given a 'Content' and a list of 'Tag's, it inserts the new content into the database associating to it the provided tags.
@@ -104,12 +109,12 @@ removeAlreadyPresentTags allTags alreadyPresentTags = List.filter (\tag -> tagNa
 -- * inserts the new 'Tag's
 -- * inserts the 'Content'
 -- * inserts the 'ContentsTags' to link the 'Content' with its 'Tags'
-addContentWithTags :: Content Result -> [Tag Result] -> Session ()
+addContentWithTags :: Content.Row Result -> [Tag.Row Result] -> Session ()
 addContentWithTags content tags = transaction Serializable Write $ do
   alreadyPresentTags <- Transaction.statement () (selectTags tags)
   let newTags = litTag <$> removeAlreadyPresentTags tags alreadyPresentTags
-  Transaction.statement () $ add tagSchema newTags
-  Transaction.statement () $ add contentSchema [litContent content]
+  Transaction.statement () $ add Tag.relation newTags
+  Transaction.statement () $ add Content.relation [litContent content]
   Transaction.statement () $ add contentsTagsSchema (contentTag (litContent content) <$> (litTag <$> alreadyPresentTags) <> newTags)
 
 -- SELECT USER BY USERNAME
@@ -132,16 +137,16 @@ justOne = \case
 -- |
 -- Retrieve from the database a user with the provided name.
 -- If in the database we find none or more the one, it returns the appropriate error message
-selectUserByName :: Text -> Session (Either WrongNumberOfResults (User Result))
+selectUserByName :: Text -> Session (Either WrongNumberOfResults (User.Row Result))
 selectUserByName name = statement () query
   where
     query = fmap justOne . select $ do
-      users <- each userSchema
-      filter (\user -> userName user ==. lit name) users
+      users <- each User.relation
+      filter (\user -> user.userName ==. lit name) users
 
 -- ADD USER
 
 -- |
 -- Add a new 'User' in the database
-addUser :: User Expr -> Session ()
-addUser = statement () . add userSchema . pure
+addUser :: User.Row Expr -> Session ()
+addUser = statement () . add User.relation . pure

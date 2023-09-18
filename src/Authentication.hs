@@ -1,10 +1,10 @@
-module Impl.Authentication.Authenticator (authenticator) where
+module Authentication (authenticator) where
 
 import App.Error (AppError (..))
 import AppM
+import Authentication.Error (Error (..))
 import Control.Monad.Except (catchError)
 import Control.Monad.Trans.Except (throwE)
-import Impl.Authentication.Authenticator.Error (Error (..))
 import Infrastructure.Authentication.PasswordManager (PasswordManager (validatePassword))
 import Tagger.Authentication.Authenticator (Authenticator (..))
 import Tagger.Authentication.Credentials (Credentials (..))

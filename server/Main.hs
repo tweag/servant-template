@@ -1,6 +1,6 @@
 module Main where
 
-import Server (run)
+import Server qualified
 
 main :: IO ()
-main = run
+main = Server.run
