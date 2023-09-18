@@ -18,7 +18,7 @@ import Infrastructure.Authentication.PasswordManager qualified as PasswordManage
 import Infrastructure.Logging.Logger (withContext)
 import Optics
 import Servant (Handler)
-import Servant.Auth.Server (JWTSettings, defaultJWTSettings)
+import Servant.Auth.Server (defaultJWTSettings)
 import Tagger.Authentication.Authenticator (Authenticator)
 import Tagger.Authentication.Authenticator qualified as Auth
 import Tagger.Repository.Content (ContentRepository)
@@ -30,8 +30,7 @@ import Prelude hiding (log)
 -- |
 -- Collection of services needed by the application to work
 data AppServices = AppServices
-  { jwtSettings :: JWTSettings,
-    passwordManager :: PasswordManager Handler,
+  { passwordManager :: PasswordManager Handler,
     contentRepository :: ContentRepository Handler,
     userRepository :: UserRepository Handler,
     authenticateUser :: Auth.Authenticator Handler
@@ -57,10 +56,8 @@ start env =
         connectedAuthenticateUser
           (env & #handles % #logger %~ withContext "Authenticator")
           authenticator
-      jwtSettings = defaultJWTSettings env.jwkKey
    in AppServices
-        { jwtSettings,
-          passwordManager,
+        { passwordManager,
           contentRepository,
           userRepository,
           authenticateUser

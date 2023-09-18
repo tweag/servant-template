@@ -31,12 +31,17 @@ data ApplicationAPI mode = ApplicationAPI
 -- |
 -- Setup all the application server, providing the services needed by the various endpoints
 mkAPI :: AppServices -> ApplicationAPI AsServer
-mkAPI AppServices {passwordManager, contentRepository, userRepository, authenticateUser} =
+mkAPI services =
   ApplicationAPI
-    { tagger = authenticatedTaggerServer contentRepository,
+    { tagger =
+        authenticatedTaggerServer services.contentRepository,
       docs = Docs.api,
       healthcheck = Healthcheck.api,
-      authentication = Authentication.api passwordManager authenticateUser userRepository
+      authentication =
+        Authentication.api
+          services.passwordManager
+          services.authenticateUser
+          services.userRepository
     }
 
 -- |

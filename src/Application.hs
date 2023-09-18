@@ -1,23 +1,20 @@
-module Application (mkApp', mkApp) where
+module Application (mkApp) where
 
 import API
-import API.AppServices as AppServices
+import API.AppServices
 import App.Env qualified as App
 import Data.Proxy (Proxy (..))
 import Middleware qualified
 import Network.Wai (Application)
 import Servant (Context (EmptyContext, (:.)), serveWithContext)
-import Servant.Auth.Server (defaultCookieSettings)
+import Servant.Auth.Server (defaultCookieSettings, defaultJWTSettings)
 
-mkApp' :: App.Env -> Application
-mkApp' context =
-  let services = AppServices.start context
-      app = mkApp services
+mkApp :: App.Env -> AppServices -> Application
+mkApp env services =
+  let jwtSettings = defaultJWTSettings env.jwkKey
+      app =
+        serveWithContext
+          (Proxy :: Proxy API)
+          (defaultCookieSettings :. jwtSettings :. EmptyContext)
+          (mkAPI services)
    in Middleware.apply app
-
-mkApp :: AppServices -> Application
-mkApp appServices =
-  serveWithContext
-    (Proxy :: Proxy API)
-    (defaultCookieSettings :. jwtSettings appServices :. EmptyContext)
-    (mkAPI appServices)

@@ -1,9 +1,10 @@
 module App (run) where
 
+import API.AppServices qualified as AppServices
 import API.Config (Config (..), Port (..), apiPort)
 import API.Config qualified as Config
 import App.Env (Env (..))
-import Application (mkApp')
+import Application (mkApp)
 import Boot (Handles (..), boot)
 import CLIOptions (CLIOptions (configPath))
 import CLIOptions qualified
@@ -19,8 +20,9 @@ run = do
 
   boot config $ \handles -> do
     let port = config.api.apiPort.getPort
-        context = Env {handles, config, jwkKey}
-        application = mkApp' context
+        env = Env {handles, config, jwkKey}
+        services = AppServices.start env
+        application = mkApp env services
 
     Logger.logInfo handles.logger $ "Accepting connections on port " <> show port <> "."
     Warp.run port application

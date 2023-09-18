@@ -21,11 +21,14 @@ import Tagger.Owned (Owned (Owned))
 import Tagger.Tag (Tag (Tag))
 import Tagger.User (User)
 import Test.Hspec (Spec, around, describe, it, runIO, shouldMatchList, shouldSatisfy)
-import TestServices (testServices)
+import TestServices (mkTestEnv, testServices)
 import Prelude hiding (getContents)
 
 withTaggerApp :: (Port -> IO ()) -> IO ()
-withTaggerApp = testWithApplication $ mkApp <$> testServices
+withTaggerApp test = do
+  env <- mkTestEnv
+  let application = mkApp env <$> testServices env
+  testWithApplication application test
 
 hasStatus :: Status -> Either ClientError a -> Bool
 hasStatus status = \case
