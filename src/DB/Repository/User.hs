@@ -1,8 +1,8 @@
-module Impl.Repository.User (inMemory, postgres) where
+module DB.Repository.User (inMemory, postgres) where
 
 import AppM (AppM')
-import Impl.Repository.User.InMemory qualified as IM
-import Impl.Repository.User.Postgres qualified as PG
+import DB.Repository.User.InMemory qualified as IM
+import DB.Repository.User.Postgres qualified as PG
 import Tagger.Repository.User (UserRepository (..))
 
 postgres :: UserRepository AppM'

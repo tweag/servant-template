@@ -1,4 +1,4 @@
-module Impl.Repository.Content.InMemory (Table, repository) where
+module DB.Repository.Content.InMemory (Table, repository) where
 
 import AppM (AppM, AppM')
 import Control.Monad.IO.Class (liftIO)

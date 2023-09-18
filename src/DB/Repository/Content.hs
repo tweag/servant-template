@@ -1,8 +1,8 @@
-module Impl.Repository.Content (inMemory, postgres) where
+module DB.Repository.Content (inMemory, postgres) where
 
 import AppM (AppM')
-import Impl.Repository.Content.InMemory qualified as IM
-import Impl.Repository.Content.Postgres qualified as PG
+import DB.Repository.Content.InMemory qualified as IM
+import DB.Repository.Content.Postgres qualified as PG
 import Tagger.Repository.Content (ContentRepository (..))
 
 postgres :: ContentRepository AppM'

@@ -5,11 +5,11 @@ import Control.Monad.IO.Class
 import Hasql.Session (QueryError)
 import Impl.Authentication.Authenticator.Error (Error (..))
 import Impl.Authentication.Authenticator.Error qualified as Auth
-import Impl.Repository.User.Error (UserRepositoryError (..))
+import DB.Repository.User.Error (UserRepositoryError (..))
 import Infrastructure.Authentication.PasswordManager.Error (PasswordManagerError (..))
-import Infrastructure.Logging.Logger (logError, logWarning)
-import Infrastructure.Logging.Logger qualified as Logger
-import Infrastructure.Persistence.Queries (WrongNumberOfResults (..))
+import Infrastructure.Logger (logError, logWarning)
+import Infrastructure.Logger qualified as Logger
+import DB.Queries (WrongNumberOfResults (..))
 import Servant (Handler, err401, err403, err500)
 import Prelude hiding (log)
 

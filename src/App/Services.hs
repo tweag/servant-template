@@ -1,5 +1,5 @@
-module API.AppServices
-  ( AppServices (..),
+module App.Services
+  ( Services (..),
     start,
     connectedContentRepository,
     connectedUserRepository,
@@ -11,11 +11,11 @@ where
 import App.Env
 import AppM
 import Impl.Authentication.Authenticator qualified as Auth
-import Impl.Repository.Content as Repo.Content
-import Impl.Repository.User qualified as Repo.User
+import DB.Repository.Content as Repo.Content
+import DB.Repository.User qualified as Repo.User
 import Infrastructure.Authentication.PasswordManager (PasswordManager, bcryptPasswordManager)
 import Infrastructure.Authentication.PasswordManager qualified as PasswordManager
-import Infrastructure.Logging.Logger (withContext)
+import Infrastructure.Logger (withContext)
 import Optics
 import Servant (Handler)
 import Servant.Auth.Server (defaultJWTSettings)
@@ -29,14 +29,14 @@ import Prelude hiding (log)
 
 -- |
 -- Collection of services needed by the application to work
-data AppServices = AppServices
+data Services = Services
   { passwordManager :: PasswordManager Handler,
     contentRepository :: ContentRepository Handler,
     userRepository :: UserRepository Handler,
     authenticateUser :: Auth.Authenticator Handler
   }
 
-start :: Env -> AppServices
+start :: Env -> Services
 start env =
   let passwordManager =
         encryptedPasswordManager
@@ -56,7 +56,7 @@ start env =
         connectedAuthenticateUser
           (env & #handles % #logger %~ withContext "Authenticator")
           authenticator
-   in AppServices
+   in Services
         { passwordManager,
           contentRepository,
           userRepository,

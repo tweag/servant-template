@@ -1,4 +1,4 @@
-module Infrastructure.Logging.Logger
+module Infrastructure.Logger
   ( Handle,
     withHandle,
     withContext,

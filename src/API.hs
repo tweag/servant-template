@@ -1,6 +1,6 @@
 module API (mkAPI, API, ApplicationAPI (..)) where
 
-import API.AppServices (AppServices (..))
+import App.Services (Services (..))
 import API.Authentication qualified as Authentication
 import API.Docs qualified as Docs
 import API.Healthcheck qualified as Healthcheck
@@ -30,7 +30,7 @@ data ApplicationAPI mode = ApplicationAPI
 
 -- |
 -- Setup all the application server, providing the services needed by the various endpoints
-mkAPI :: AppServices -> ApplicationAPI AsServer
+mkAPI :: Services -> ApplicationAPI AsServer
 mkAPI services =
   ApplicationAPI
     { tagger =

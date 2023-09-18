@@ -1,6 +1,6 @@
-module App (run) where
+module Server (run) where
 
-import API.AppServices qualified as AppServices
+import App.Services qualified as AppServices
 import API.Config (Config (..), Port (..), apiPort)
 import API.Config qualified as Config
 import App.Env (Env (..))
@@ -8,7 +8,7 @@ import Application (mkApp)
 import Boot (Handles (..), boot)
 import CLIOptions (CLIOptions (configPath))
 import CLIOptions qualified
-import Infrastructure.Logging.Logger qualified as Logger
+import Infrastructure.Logger qualified as Logger
 import Network.Wai.Handler.Warp qualified as Warp
 import Tagger.JSONWebKey qualified as JWK
 

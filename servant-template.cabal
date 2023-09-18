@@ -17,38 +17,39 @@ extra-source-files:
 library
   exposed-modules:
       API
-      API.AppServices
       API.Authentication
       API.Config
       API.Docs
       API.Healthcheck
       API.Tagger
-      App
       App.Env
       App.Error
+      App.Services
       Application
       AppM
       Boot
       CLIOptions
+      DB.Queries
+      DB.Repository.Content
+      DB.Repository.Content.InMemory
+      DB.Repository.Content.Postgres
+      DB.Repository.User
+      DB.Repository.User.Error
+      DB.Repository.User.InMemory
+      DB.Repository.User.Postgres
+      DB.Schema
+      DB.Schema.Tag
+      DB.Serializer
       Impl.Authentication.Authenticator
       Impl.Authentication.Authenticator.Error
-      Impl.Repository.Content
-      Impl.Repository.Content.InMemory
-      Impl.Repository.Content.Postgres
-      Impl.Repository.User
-      Impl.Repository.User.Error
-      Impl.Repository.User.InMemory
-      Impl.Repository.User.Postgres
       Infrastructure.Authentication.PasswordManager
       Infrastructure.Authentication.PasswordManager.Error
       Infrastructure.Authentication.Token
       Infrastructure.Database
-      Infrastructure.Logging.Logger
-      Infrastructure.Persistence.Queries
-      Infrastructure.Persistence.Schema
-      Infrastructure.Persistence.Serializer
+      Infrastructure.Logger
       Infrastructure.SystemTime
       Middleware
+      Server
       Tagger.Authentication.Authenticator
       Tagger.Authentication.Credentials
       Tagger.Content

@@ -3,7 +3,7 @@ module App.Env (Env (..), Handles (..)) where
 import API.Config (Config (..))
 import GHC.Generics (Generic)
 import Infrastructure.Database qualified as DB
-import Infrastructure.Logging.Logger qualified as Logger
+import Infrastructure.Logger qualified as Logger
 import Infrastructure.SystemTime qualified as SystemTime
 import Tagger.JSONWebKey qualified as JWK
 

@@ -1,4 +1,4 @@
-module Impl.Repository.User.InMemory (Table, repository) where
+module DB.Repository.User.InMemory (Table, repository) where
 
 import App.Error (AppError (..))
 import AppM (AppM, AppM')
@@ -10,8 +10,8 @@ import Data.Text.Encoding (encodeUtf8)
 import Data.UUID.V4 (nextRandom)
 import GHC.Conc (TVar, atomically, readTVar, readTVarIO, writeTVar)
 import Hasql.Session (CommandError (ResultError), QueryError (QueryError), ResultError (ServerError))
-import Impl.Repository.User.Error (UserRepositoryError (..))
-import Infrastructure.Persistence.Queries (WrongNumberOfResults (..))
+import DB.Repository.User.Error (UserRepositoryError (..))
+import DB.Queries (WrongNumberOfResults (..))
 import PostgreSQL.ErrorCodes (unique_violation)
 import Tagger.EncryptedPassword (EncryptedPassword)
 import Tagger.Id (Id (Id))

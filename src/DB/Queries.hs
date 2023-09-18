@@ -1,4 +1,4 @@
-module Infrastructure.Persistence.Queries where
+module DB.Queries where
 
 import Data.List qualified as List (filter)
 import Data.Text (Text)
@@ -6,7 +6,7 @@ import Hasql.Session (Session, statement)
 import Hasql.Statement (Statement)
 import Hasql.Transaction qualified as Transaction (statement)
 import Hasql.Transaction.Sessions (IsolationLevel (Serializable), Mode (Write), transaction)
-import Infrastructure.Persistence.Schema (Content (..), ContentsTags (..), Tag (..), User (userName), contentSchema, contentsTagsSchema, litContent, litTag, tagSchema, userId, userSchema)
+import DB.Schema (Content (..), ContentsTags (..), Tag (..), User (userName), contentSchema, contentsTagsSchema, litContent, litTag, tagSchema, userId, userSchema)
 import Rel8 (Expr, Insert (..), Name, OnConflict (..), Query, Rel8able, Result, TableSchema, each, filter, in_, insert, lit, many, select, values, where_, (==.))
 import Tagger.Id (Id)
 import Tagger.User qualified as Domain (User)

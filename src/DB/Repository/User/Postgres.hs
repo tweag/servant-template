@@ -1,4 +1,4 @@
-module Impl.Repository.User.Postgres (repository) where
+module DB.Repository.User.Postgres (repository) where
 
 import App.Error (AppError (..))
 import AppM (AppM, AppM')
@@ -9,10 +9,10 @@ import Data.ByteString (isInfixOf)
 import Data.Text (Text)
 import Data.UUID.V4 (nextRandom)
 import Hasql.Session (CommandError (ResultError), QueryError (QueryError), ResultError (ServerError), Session)
-import Impl.Repository.User.Error (UserRepositoryError (..))
-import Infrastructure.Persistence.Queries qualified as Query
-import Infrastructure.Persistence.Schema (litUser, userId)
-import Infrastructure.Persistence.Serializer (serializeUser, unserializeUser)
+import DB.Repository.User.Error (UserRepositoryError (..))
+import DB.Queries qualified as Query
+import DB.Schema (litUser, userId)
+import DB.Serializer (serializeUser, unserializeUser)
 import Tagger.Database (runQuery)
 import Tagger.EncryptedPassword (EncryptedPassword)
 import Tagger.Id (Id (Id))

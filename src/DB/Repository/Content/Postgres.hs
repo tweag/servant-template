@@ -1,12 +1,12 @@
-module Impl.Repository.Content.Postgres (repository) where
+module DB.Repository.Content.Postgres (repository) where
 
 import AppM (AppM, AppM')
 import Control.Monad (forM)
 import Control.Monad.IO.Class (liftIO)
 import Data.Tuple.Extra (uncurry3)
 import Data.UUID.V4 (nextRandom)
-import Infrastructure.Persistence.Queries qualified as DB (addContentWithTags, selectUserContents)
-import Infrastructure.Persistence.Serializer (serializeContent, unserializeContent)
+import DB.Queries qualified as DB (addContentWithTags, selectUserContents)
+import DB.Serializer (serializeContent, unserializeContent)
 import Tagger.Content (Content, hasAllTags)
 import Tagger.Database (runQuery)
 import Tagger.Id (Id (Id))

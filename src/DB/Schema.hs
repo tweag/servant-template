@@ -1,4 +1,4 @@
-module Infrastructure.Persistence.Schema where
+module DB.Schema where
 
 import Data.Text (Text)
 import GHC.Generics (Generic)
@@ -9,35 +9,6 @@ import Tagger.Id (Id)
 import Tagger.Tag qualified as Domain (Tag)
 import Tagger.User qualified as Domain (User)
 
--- TAG
-
--- |
--- The database representation of a 'Tag'
-data Tag f = Tag
-  { tagId :: Column f (Id Domain.Tag),
-    tagName :: Column f Text
-  }
-  deriving stock (Generic)
-  deriving anyclass (Rel8able)
-
--- |
--- A description of the schema of the 'Tag' table
-tagSchema :: TableSchema (Tag Name)
-tagSchema =
-  TableSchema
-    { name = "tags",
-      schema = Nothing,
-      columns =
-        Tag
-          { tagId = "id",
-            tagName = "name"
-          }
-    }
-
--- |
--- Allows to lift a 'Tag' with no context into the 'Expr' context
-litTag :: Tag Result -> Tag Expr
-litTag (Tag id' name') = Tag (lit id') (lit name')
 
 -- CONTENT
 

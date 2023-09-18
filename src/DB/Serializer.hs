@@ -1,14 +1,15 @@
-module Infrastructure.Persistence.Serializer where
+module DB.Serializer where
 
-import Infrastructure.Persistence.Schema (contentContent, contentId, contentUserId, tagId, tagName, userId, userName, userPassword)
-import Infrastructure.Persistence.Schema qualified as DB (Content (Content), Tag (Tag), User (User))
+import DB.Schema (contentContent, contentId, contentUserId, userId, userName, userPassword)
+import DB.Schema qualified as DB
+import DB.Schema.Tag (serializeTag, unserializeTag)
+import DB.Schema.Tag qualified as Tag
 import Rel8 (Result)
 import Tagger.Content (Content (..), createContent)
 import Tagger.Id (Id)
 import Tagger.Owned (Owned (Owned))
 import Tagger.Owned qualified as Owned (content, userId)
-import Tagger.Tag (Tag (Tag))
-import Tagger.Tag qualified as Tag (name)
+import Tagger.Tag (Tag)
 import Tagger.User (User (User))
 import Tagger.User qualified as User (name, password)
 
@@ -16,7 +17,7 @@ import Tagger.User qualified as User (name, password)
 
 -- |
 -- Transform from a domain representation of a 'Content' to its underlying database representation
-serializeContent :: Id (Content Tag) -> Id User -> Content (Id Tag, Tag) -> (DB.Content Result, [DB.Tag Result])
+serializeContent :: Id (Content Tag) -> Id User -> Content (Id Tag, Tag) -> (DB.Content Result, [Tag.Row Result])
 serializeContent contentId' userId' content = (dbContent, dbTags)
   where
     dbContent =
@@ -29,7 +30,7 @@ serializeContent contentId' userId' content = (dbContent, dbTags)
 
 -- |
 -- Transform from the database representation of a 'Content' to its domain representation
-unserializeContent :: DB.Content Result -> [DB.Tag Result] -> DB.User Result -> Owned (Content Tag)
+unserializeContent :: DB.Content Result -> [Tag.Row Result] -> DB.User Result -> Owned (Content Tag)
 unserializeContent content tags' user =
   Owned
     { Owned.content =
@@ -38,22 +39,6 @@ unserializeContent content tags' user =
           (unserializeTag <$> tags'),
       Owned.userId = userId user
     }
-
--- TAG
-
--- |
--- Transform from a domain representation of a 'Tag' to its underlying database representation
-serializeTag :: Id Tag -> Tag -> DB.Tag Result
-serializeTag uuid tag =
-  DB.Tag
-    { tagId = uuid,
-      tagName = Tag.name tag
-    }
-
--- |
--- Transform from the database representation of a 'Tag' to its domain representation
-unserializeTag :: DB.Tag Result -> Tag
-unserializeTag tag = Tag (tagName tag)
 
 -- USER
 

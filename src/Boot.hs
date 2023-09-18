@@ -3,7 +3,7 @@ module Boot (boot, Handles (..)) where
 import API.Config qualified as Config
 import App.Env
 import Infrastructure.Database qualified as DB
-import Infrastructure.Logging.Logger qualified as Logger
+import Infrastructure.Logger qualified as Logger
 import Infrastructure.SystemTime qualified as SystemTime
 
 -- |
