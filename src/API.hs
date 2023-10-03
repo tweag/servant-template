@@ -1,10 +1,10 @@
 module API (mkAPI, API, ApplicationAPI (..)) where
 
-import App.Services (Services (..))
 import API.Authentication qualified as Authentication
 import API.Docs qualified as Docs
 import API.Healthcheck qualified as Healthcheck
 import API.Tagger qualified as Tagger
+import App.Services (Services (..))
 import GHC.Generics (Generic)
 import Servant (Handler, err401)
 import Servant.API (NamedRoutes, type (:>))
@@ -30,7 +30,7 @@ data ApplicationAPI mode = ApplicationAPI
 
 -- |
 -- Setup all the application server, providing the services needed by the various endpoints
-mkAPI :: Services -> ApplicationAPI AsServer
+mkAPI :: Services Handler -> ApplicationAPI AsServer
 mkAPI services =
   ApplicationAPI
     { tagger =

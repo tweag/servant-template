@@ -12,4 +12,7 @@ newtype Authenticator m = Authenticator {authUser :: Credentials -> m (Id User)}
 -- |
 -- Given a natural transformation between a context 'm' and a context 'n', it allows to change the context where 'AuthenticateUser' is operating
 hoist :: (forall a. m a -> n a) -> Authenticator m -> Authenticator n
-hoist f (Authenticator auth) = Authenticator $ f . auth
+hoist f auth =
+  Authenticator
+    { authUser = f . auth.authUser
+    }

@@ -6,7 +6,7 @@ import Tagger.Id (Id)
 import Tagger.User (User)
 
 -- |
--- A 'UserRespository' represents a collection of 'User's.
+-- A 'UserRepository' represents a collection of 'User's.
 -- It is indexed by a context 'm' which wraps the results.
 data UserRepository m = UserRepository
   { -- | Searches the repository for 'User's with the provided name
@@ -18,4 +18,8 @@ data UserRepository m = UserRepository
 -- |
 -- Given a natural transformation between a context 'm' and a context 'n', it allows to change the context where 'UserRepository' is operating
 hoist :: (forall a. m a -> n a) -> UserRepository m -> UserRepository n
-hoist f UserRepository {findByName, add} = UserRepository (f . findByName) ((f .) . add)
+hoist f repo =
+  UserRepository
+    { findByName = f . repo.findByName,
+      add = \name pw -> f $ repo.add name pw
+    }

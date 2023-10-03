@@ -12,10 +12,7 @@ import Tagger.Id (Id)
 import Tagger.Repository.User as UserRepo
 import Tagger.User (User)
 
-authenticator ::
-  UserRepository AppM' ->
-  PasswordManager n ->
-  Authenticator AppM'
+authenticator :: UserRepository AppM' -> PasswordManager n -> Authenticator AppM'
 authenticator repo pm =
   Authenticator
     { authUser = authenticateUser repo pm

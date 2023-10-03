@@ -1,10 +1,6 @@
 module App.Services
   ( Services (..),
     start,
-    connectedContentRepository,
-    connectedUserRepository,
-    connectedAuthenticateUser,
-    encryptedPasswordManager,
   )
 where
 
@@ -15,11 +11,8 @@ import DB.Repository.Content as Repo.Content
 import DB.Repository.User qualified as Repo.User
 import Infrastructure.Authentication.PasswordManager (PasswordManager, bcryptPasswordManager)
 import Infrastructure.Authentication.PasswordManager qualified as PasswordManager
-import Infrastructure.Logger (withContext)
-import Optics
 import Servant (Handler)
 import Servant.Auth.Server (defaultJWTSettings)
-import Tagger.Authentication.Authenticator (Authenticator)
 import Tagger.Authentication.Authenticator qualified as Auth
 import Tagger.Repository.Content (ContentRepository)
 import Tagger.Repository.Content qualified as ContentRepository
@@ -28,56 +21,34 @@ import Tagger.Repository.User qualified as UserRepository
 
 -- |
 -- Collection of services needed by the application to work
-data Services = Services
-  { passwordManager :: PasswordManager Handler,
-    contentRepository :: ContentRepository Handler,
-    userRepository :: UserRepository Handler,
-    authenticateUser :: Auth.Authenticator Handler
+data Services m = Services
+  { passwordManager :: PasswordManager m,
+    contentRepository :: ContentRepository m,
+    userRepository :: UserRepository m,
+    authenticateUser :: Auth.Authenticator m
   }
 
-start :: Env -> Services
+start :: Env -> Services Handler
 start env =
   let passwordManager =
-        encryptedPasswordManager
-          (env & #handles % #logger %~ withContext "PasswordManager")
+        PasswordManager.hoist
+          (runWithContext "PasswordManager" env)
           (bcryptPasswordManager (defaultJWTSettings env.jwkKey))
-      dbUserRepository = Repo.User.postgres
-      authenticator = Auth.authenticator dbUserRepository passwordManager
       contentRepository =
-        connectedContentRepository
-          (env & #handles % #logger %~ withContext "ContentRepository")
+        ContentRepository.hoist
+          (runWithContext "ContentRepository" env)
           Repo.Content.postgres
       userRepository =
-        connectedUserRepository
-          (env & #handles % #logger %~ withContext "UserRepository")
-          dbUserRepository
-      authenticateUser =
-        connectedAuthenticateUser
-          (env & #handles % #logger %~ withContext "Authenticator")
-          authenticator
+        UserRepository.hoist
+          (runWithContext "UserRepository" env)
+          Repo.User.postgres
+      authenticateUser = do
+        Auth.hoist
+          (runWithContext "Authenticator" env)
+          (Auth.authenticator Repo.User.postgres passwordManager)
    in Services
         { passwordManager,
           contentRepository,
           userRepository,
           authenticateUser
         }
-
--- |
--- Creates a 'PasswordManager' service injecting its dependencies and handling errors
-encryptedPasswordManager :: Env -> PasswordManager AppM' -> PasswordManager Handler
-encryptedPasswordManager = runComponent PasswordManager.hoist
-
--- |
--- Lifts a 'ContentRepository' fo the 'Handler' monad, handling all errors by logging them and returning a 500 response
-connectedContentRepository :: Env -> ContentRepository AppM' -> ContentRepository Handler
-connectedContentRepository = runComponent ContentRepository.hoist
-
--- |
--- Lifts a 'UserRepository' fo the 'Handler' monad, handling all errors by logging them and returning a 500 response
-connectedUserRepository :: Env -> UserRepository AppM' -> UserRepository Handler
-connectedUserRepository = runComponent UserRepository.hoist
-
--- |
--- Creates an 'AuthenticateUser' service injecting its dependencies and handling errors
-connectedAuthenticateUser :: Env -> Authenticator AppM' -> Auth.Authenticator Handler
-connectedAuthenticateUser = runComponent Auth.hoist

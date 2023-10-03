@@ -29,8 +29,12 @@ data PasswordManager m = PasswordManager
 -- |
 -- Given a natural transformation between a context 'm' and a context 'n', it allows to change the context where 'PasswordManager' is operating
 hoist :: (forall a. m a -> n a) -> PasswordManager m -> PasswordManager n
-hoist f PasswordManager {generatePassword, generateToken, validatePassword} =
-  PasswordManager (f . generatePassword) (f . generateToken) validatePassword
+hoist f pm =
+  PasswordManager
+    { generatePassword = f . pm.generatePassword,
+      generateToken = f . pm.generateToken,
+      validatePassword = pm.validatePassword
+    }
 
 -- |
 -- A 'PasswordManager' implementation based on the 'bcrypt' algorithm
