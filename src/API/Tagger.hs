@@ -1,10 +1,10 @@
 module API.Tagger (API (..), api) where
 
+import AppM (AppM)
 import GHC.Generics (Generic)
-import Servant (Handler)
 import Servant.API (Get, JSON, Post, QueryParams, ReqBody, type (:>))
 import Servant.API.Generic ((:-))
-import Servant.Server.Generic (AsServer)
+import Servant.Server.Generic (AsServerT)
 import Tagger.Content (Content)
 import Tagger.Id (Id)
 import Tagger.Owned (Owned)
@@ -22,15 +22,15 @@ data API mode = API
   }
   deriving stock (Generic)
 
-api :: Id User -> ContentRepository Handler -> API AsServer
+api :: Id User -> ContentRepository AppM -> API (AsServerT AppM)
 api userId contentRepository =
   API
     { addContent = addContentImpl userId contentRepository,
       getContents = getContentsImpl userId contentRepository
     }
 
-addContentImpl :: Id User -> ContentRepository Handler -> Content Tag -> Handler (Id (Content Tag))
+addContentImpl :: Id User -> ContentRepository AppM -> Content Tag -> AppM (Id (Content Tag))
 addContentImpl userId contentRepository = contentRepository.addContentWithTags userId
 
-getContentsImpl :: Id User -> ContentRepository Handler -> [Tag] -> Handler [Owned (Content Tag)]
+getContentsImpl :: Id User -> ContentRepository AppM -> [Tag] -> AppM [Owned (Content Tag)]
 getContentsImpl userId contentRepository = contentRepository.selectUserContentsByTags userId

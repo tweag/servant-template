@@ -1,17 +1,13 @@
 module Infrastructure.Authentication.Token where
 
 import Data.Aeson (FromJSON (parseJSON), ToJSON (toJSON), Value (String), withText)
--- bytestring
 import Data.ByteString.Lazy (ByteString, fromStrict, toStrict)
 import Data.Data (Proxy (Proxy))
--- openapi3
 import Data.OpenApi (ToSchema (declareNamedSchema))
--- text
 import Data.Text (Text)
 import Data.Text.Encoding (decodeUtf8, encodeUtf8)
 
--- |
--- An authentication 'Token'
+-- | An authentication 'Token'
 newtype Token = Token ByteString
   deriving newtype (Show)
 

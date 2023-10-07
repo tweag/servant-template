@@ -2,12 +2,12 @@ module Infrastructure.Authentication.PasswordManager where
 
 import App.Error (AppError (..))
 import AppM
+import Control.Monad.Except (throwError)
 import Control.Monad.IO.Class (liftIO)
-import Control.Monad.Trans.Except (throwE)
 import Infrastructure.Authentication.PasswordManager.Error (PasswordManagerError (..))
 import Infrastructure.Authentication.Token (Token (Token))
 import Servant.Auth.Server (JWTSettings, makeJWT)
-import Tagger.Authentication.Credentials (Credentials, Password (asBytestring))
+import Tagger.Authentication.Credentials (Credentials, Password)
 import Tagger.Authentication.Credentials qualified as Credentials (password)
 import Tagger.EncryptedPassword (EncryptedPassword, encryptPassword)
 import Tagger.EncryptedPassword qualified as Encrypted (validatePassword)
@@ -38,7 +38,7 @@ hoist f pm =
 
 -- |
 -- A 'PasswordManager' implementation based on the 'bcrypt' algorithm
-bcryptPasswordManager :: JWTSettings -> PasswordManager AppM'
+bcryptPasswordManager :: JWTSettings -> PasswordManager AppM
 bcryptPasswordManager jwtSettings =
   PasswordManager
     { generatePassword = bcryptGeneratePassword,
@@ -48,14 +48,10 @@ bcryptPasswordManager jwtSettings =
 
 bcryptGeneratePassword :: Credentials -> AppM EncryptedPassword
 bcryptGeneratePassword credentials = do
-  -- extract the password from the Credentials
-  let x = asBytestring $ Credentials.password credentials
-
-  -- convert it to bytestring
-  -- try to encrypt it
-  mPwd <- liftIO $ encryptPassword x
+  -- extract the password from the Credentials and try to encrypt it
+  mPwd <- liftIO $ encryptPassword credentials.password
   case mPwd of
-    Nothing -> throwE (PasswordManagerErr FailedHashing)
+    Nothing -> throwError (PasswordManagerErr FailedHashing)
     Just pwd -> pure pwd
 
 bcryptGenerateToken :: JWTSettings -> Id User -> AppM Token
@@ -64,8 +60,8 @@ bcryptGenerateToken jwtSettings userId = do
   -- the Nothing means that the token does not expire
   liftIO (makeJWT userId jwtSettings Nothing) >>= \case
     -- wrap the error to get a PasswordErrorManager and the token to get a Token
-    Left err -> throwE (PasswordManagerErr (FailedJWTCreation err))
+    Left err -> throwError (PasswordManagerErr (FailedJWTCreation err))
     Right token -> pure (Token token)
 
 bcryptValidatePassword :: User -> Password -> Bool
-bcryptValidatePassword user password' = Encrypted.validatePassword (password user) (asBytestring password')
+bcryptValidatePassword user = Encrypted.validatePassword user.password

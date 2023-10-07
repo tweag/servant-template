@@ -17,6 +17,7 @@ data AppError
   | UserRepositoryErr UserRepositoryError
   | PasswordManagerErr PasswordManagerError
   | AuthenticatorErr Auth.Error
+  | Unauthorized
   deriving (Show)
 
 handleAppError :: Logger.Handle -> AppError -> Handler a
@@ -52,4 +53,6 @@ handleAppError logHandle err = do
     (AuthenticatorErr e) -> do
       -- In other cases, there was an authentication error and we return a 401 response
       logWarning logHandle (show e)
+      throwError err401
+    Unauthorized -> do
       throwError err401

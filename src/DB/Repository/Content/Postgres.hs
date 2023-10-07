@@ -1,6 +1,6 @@
 module DB.Repository.Content.Postgres (repository) where
 
-import AppM (AppM, AppM')
+import AppM (AppM)
 import Control.Monad (forM)
 import Control.Monad.IO.Class (liftIO)
 import DB.Queries qualified as DB (addContentWithTags, selectUserContents)
@@ -17,7 +17,7 @@ import Tagger.User (User)
 
 -- |
 -- A 'ContentRepository' based on PostgreSQL
-repository :: ContentRepository AppM'
+repository :: ContentRepository AppM
 repository =
   ContentRepository
     { selectUserContentsByTags = postgresSelectUserContentsByTags,

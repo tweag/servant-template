@@ -1,9 +1,9 @@
 module Server (run) where
 
-import App.Services qualified as AppServices
 import API.Config (Config (..), Port (..), apiPort)
 import API.Config qualified as Config
 import App.Env (Env (..))
+import App.Services qualified as AppServices
 import Application (mkApp)
 import Boot (Handles (..), boot)
 import CLIOptions (CLIOptions (configPath))
@@ -24,5 +24,7 @@ run = do
         services = AppServices.start env
         application = mkApp env services
 
-    Logger.logInfo handles.logger $ "Accepting connections on port " <> show port <> "."
+    Logger.logInfo handles.logger $
+      "Accepting connections on port " <> show port <> "."
+
     Warp.run port application

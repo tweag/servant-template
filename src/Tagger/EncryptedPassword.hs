@@ -10,9 +10,10 @@ import Data.Text (Text)
 import Data.Text.Encoding (decodeUtf8, encodeUtf8)
 import GHC.Generics (Generic)
 import Rel8 (DBEq, DBType)
+import Tagger.Authentication.Credentials (Password)
+import Tagger.Authentication.Credentials qualified
 
--- |
--- An 'EncryptedPassword' is a newtype wrapping a 'Bytestring'.
+-- | An 'EncryptedPassword' is a newtype wrapping a 'Bytestring'.
 -- We do not export the constructor to enforce that an 'EncryptedPassword' is built using 'encryptPassword'
 newtype EncryptedPassword = EncryptedPassword {asBytestring :: ByteString}
   deriving stock (Eq, Show, Read, Generic)
@@ -27,12 +28,14 @@ instance ToJSON EncryptedPassword where
 instance ToSchema EncryptedPassword where
   declareNamedSchema _ = declareNamedSchema (Proxy :: Proxy Text)
 
--- |
--- encrypt a 'ByteString' into an 'EncryptedPassword' using bcrypt with 'fastBcryptHashingPolicy'
-encryptPassword :: ByteString -> IO (Maybe EncryptedPassword)
-encryptPassword password = fmap EncryptedPassword <$> hashPasswordUsingPolicy fastBcryptHashingPolicy password
+-- | Encrypt a 'Password' into an 'EncryptedPassword' using bcrypt with 'fastBcryptHashingPolicy'
+encryptPassword :: Password -> IO (Maybe EncryptedPassword)
+encryptPassword password =
+  fmap EncryptedPassword <$> hashPasswordUsingPolicy fastBcryptHashingPolicy password.asBytestring
 
--- |
--- Given an 'EncryptedPassword' and a 'ByteString' password, it checks whether the password is valid
-validatePassword :: EncryptedPassword -> ByteString -> Bool
-validatePassword (EncryptedPassword password) = BCrypt.validatePassword password
+-- | Given an 'EncryptedPassword' and a 'Password', it checks whether the password is valid
+validatePassword :: EncryptedPassword -> Password -> Bool
+validatePassword encryptedPassword password =
+  BCrypt.validatePassword
+    encryptedPassword.asBytestring
+    password.asBytestring

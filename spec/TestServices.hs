@@ -2,7 +2,7 @@ module TestServices where
 
 import App.Env
 import App.Services (Services (..))
-import AppM (runApp, runWithContext)
+import AppM
 import Authentication qualified as Auth
 import DB.Repository.Content qualified as Repo.Content
 import DB.Repository.User qualified as Repo.User
@@ -12,10 +12,7 @@ import Infrastructure.Authentication.PasswordManager qualified as PasswordManage
 import Infrastructure.Logger as Logger
 import Infrastructure.SystemTime as SystemTime
 import Servant.Auth.Server (defaultJWTSettings, generateKey)
-import Servant.Server (Handler)
 import Tagger.Authentication.Authenticator qualified as Auth
-import Tagger.Repository.Content qualified as Repo.Content
-import Tagger.Repository.User qualified as Repo.User
 
 mkTestEnv :: IO Env
 mkTestEnv = do
@@ -34,7 +31,7 @@ mkTestEnv = do
                 }
           }
 
-testServices :: Env -> IO (Services Handler)
+testServices :: Env -> IO (Services AppM)
 testServices env = do
   userMap <- newTVarIO mempty
   contentsMap <- newTVarIO mempty
@@ -42,17 +39,17 @@ testServices env = do
       contentsRepository = Repo.Content.inMemory contentsMap
       passwordManager =
         PasswordManager.hoist
-          (runWithContext "PasswordManager" env)
+          (changeContext "PasswordManager")
           (bcryptPasswordManager (defaultJWTSettings env.jwkKey))
       authenticator = Auth.authenticator userRepository passwordManager
       authenticateUser =
         Auth.hoist
-          (runWithContext "Authenticator" env)
+          (changeContext "Authenticator")
           authenticator
   pure $
     Services
       { passwordManager = passwordManager,
-        contentRepository = Repo.Content.hoist (runApp env) contentsRepository,
-        userRepository = Repo.User.hoist (runApp env) userRepository,
+        contentRepository = contentsRepository,
+        userRepository = userRepository,
         authenticateUser
       }

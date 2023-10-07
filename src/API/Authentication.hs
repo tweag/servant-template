@@ -1,11 +1,12 @@
 module API.Authentication (API (..), api) where
 
+import AppM (AppM)
 import GHC.Generics (Generic)
 import Infrastructure.Authentication.PasswordManager (PasswordManager (generatePassword, generateToken))
 import Infrastructure.Authentication.Token (Token)
-import Servant (Handler, JSON, Post, ReqBody, type (:>))
+import Servant (JSON, Post, ReqBody, type (:>))
 import Servant.API.Generic (type (:-))
-import Servant.Server.Generic (AsServer)
+import Servant.Server.Generic (AsServerT)
 import Tagger.Authentication.Authenticator (Authenticator)
 import Tagger.Authentication.Authenticator qualified as Authenticator
 import Tagger.Authentication.Credentials (Credentials (username))
@@ -18,28 +19,28 @@ import Tagger.User (User)
 data API mode = API
   { -- | Given some 'Login' data, registers a new 'User'
     register :: mode :- "register" :> ReqBody '[JSON] Credentials :> Post '[JSON] (Id User),
-    -- | Given some 'Login' data, generates an authentication token
+    -- | Given valid Credentials, generates an authentication Token
     login :: mode :- "login" :> ReqBody '[JSON] Credentials :> Post '[JSON] Token
   }
   deriving stock (Generic)
 
-api :: PasswordManager Handler -> Authenticator Handler -> UserRepository Handler -> API AsServer
+api :: PasswordManager AppM -> Authenticator AppM -> UserRepository AppM -> API (AsServerT AppM)
 api passwordManager authHandler userRepository =
   API
     { register = registerEndpoint passwordManager userRepository,
       login = loginEndpoint passwordManager authHandler
     }
 
-registerEndpoint :: PasswordManager Handler -> UserRepository Handler -> Credentials -> Handler (Id User)
+registerEndpoint :: PasswordManager AppM -> UserRepository AppM -> Credentials -> AppM (Id User)
 registerEndpoint passwordManager userRepository login' = do
   -- hash the password
   hashedPassword <- generatePassword passwordManager login'
   -- store the new user into the database
   UserRepository.add userRepository (username login') hashedPassword
 
-loginEndpoint :: PasswordManager Handler -> Authenticator Handler -> Credentials -> Handler Token
+loginEndpoint :: PasswordManager AppM -> Authenticator AppM -> Credentials -> AppM Token
 loginEndpoint passwordManager authHandler login' = do
   -- try to authenticate the user
-  user <- Authenticator.authUser authHandler login'
+  userId <- Authenticator.authUser authHandler login'
   -- if the user authenticated, generate an authentication token
-  generateToken passwordManager user
+  passwordManager.generateToken userId

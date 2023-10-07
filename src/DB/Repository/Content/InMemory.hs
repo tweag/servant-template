@@ -1,6 +1,6 @@
 module DB.Repository.Content.InMemory (Table, repository) where
 
-import AppM (AppM, AppM')
+import AppM (AppM)
 import Control.Monad.IO.Class (liftIO)
 import Data.Map.Lazy (Map, elems, filter, insert)
 import Data.UUID.V4 (nextRandom)
@@ -15,7 +15,7 @@ import Prelude hiding (filter)
 
 type Table = TVar (Map (Id (Content Tag)) (Owned (Content Tag)))
 
-repository :: Table -> ContentRepository AppM'
+repository :: Table -> ContentRepository AppM
 repository contentsMap =
   ContentRepository
     { selectUserContentsByTags = inMemorySelectUserContentsByTags contentsMap,

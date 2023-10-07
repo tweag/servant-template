@@ -1,28 +1,31 @@
-module AppM (AppM, AppM', runApp, runWithContext) where
+module AppM (AppM, runApp, changeContext) where
 
-import App.Env (Env (..), Handles (..))
+import App.Env
 import App.Error
 import Control.Arrow ((>>>))
-import Control.Monad.IO.Class (liftIO)
+import Control.Monad.Except (MonadError)
+import Control.Monad.IO.Class (MonadIO, liftIO)
+import Control.Monad.Reader (MonadReader (local))
 import Control.Monad.Trans.Except (ExceptT, runExceptT)
 import Control.Monad.Trans.Reader (ReaderT, runReaderT)
 import Data.Text (Text)
 import Infrastructure.Logger (withContext)
 import Optics
-import Servant (Handler)
 
-type AppM a = AppM' a
+newtype AppM a = AppM {runAppM :: ExceptT AppError (ReaderT Env IO) a}
+  deriving newtype
+    ( Functor,
+      Applicative,
+      Monad,
+      MonadIO,
+      MonadReader Env,
+      MonadError AppError
+    )
 
-type AppM' = ExceptT AppError (ReaderT Env IO)
+runApp :: (MonadIO m) => forall a. Env -> AppM a -> m (Either AppError a)
+runApp env = runAppM >>> runExceptT >>> flip runReaderT env >>> liftIO
 
-runApp :: forall a. Env -> AppM a -> Handler a
-runApp env computation =
-  runApp' computation >>= \case
-    Right a -> pure a
-    Left e -> handleAppError env.handles.logger e
-  where
-    runApp' = runExceptT >>> flip runReaderT env >>> liftIO
-
-runWithContext :: Text -> Env -> AppM a -> Handler a
-runWithContext contextName env =
-  runApp $ env & #handles % #logger %~ withContext contextName
+changeContext :: Text -> AppM a -> AppM a
+changeContext contextName computation =
+  local (\env -> env & #handles % #logger %~ withContext contextName) $ do
+    computation

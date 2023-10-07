@@ -1,10 +1,9 @@
 module DB.Repository.User.Postgres (repository) where
 
 import App.Error (AppError (..))
-import AppM (AppM, AppM')
-import Control.Monad.Except (catchError)
+import AppM (AppM)
+import Control.Monad.Except (MonadError (throwError), catchError)
 import Control.Monad.IO.Class (liftIO)
-import Control.Monad.Trans.Except (throwE)
 import DB.Queries qualified as Query
 import DB.Repository.User.Error (UserRepositoryError (..))
 import DB.Schema.User (litUser, serializeUser, unserializeUser, userId)
@@ -20,7 +19,7 @@ import Tagger.User (User (User))
 
 -- |
 -- A 'UserRepository' based on PostgreSQL
-repository :: UserRepository AppM'
+repository :: UserRepository AppM
 repository =
   UserRepository
     { findByName = postgresGetUserByName,
@@ -32,7 +31,7 @@ postgresGetUserByName name = do
   eitherUser <- runRepositoryQuery (Query.selectUserByName name)
   case eitherUser of
     Right usr -> pure (userId usr, unserializeUser usr)
-    Left e -> throwE $ UserRepositoryErr (UnexpectedNumberOfRows e)
+    Left e -> throwError $ UserRepositoryErr (UnexpectedNumberOfRows e)
 
 postgresAddUser :: Text -> EncryptedPassword -> AppM (Id User)
 postgresAddUser name password = do
@@ -48,7 +47,7 @@ postgresAddUser name password = do
 -- domain.
 runRepositoryQuery :: Session a -> AppM a
 runRepositoryQuery session =
-  runQuery session `catchError` (throwE . liftE)
+  runQuery session `catchError` (throwError . liftE)
   where
     liftE :: AppError -> AppError
     liftE (QueryErr e) = UserRepositoryErr $ liftRepositoryError e

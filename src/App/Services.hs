@@ -1,8 +1,4 @@
-module App.Services
-  ( Services (..),
-    start,
-  )
-where
+module App.Services (Services (..), start) where
 
 import App.Env
 import AppM
@@ -11,7 +7,6 @@ import DB.Repository.Content as Repo.Content
 import DB.Repository.User qualified as Repo.User
 import Infrastructure.Authentication.PasswordManager (PasswordManager, bcryptPasswordManager)
 import Infrastructure.Authentication.PasswordManager qualified as PasswordManager
-import Servant (Handler)
 import Servant.Auth.Server (defaultJWTSettings)
 import Tagger.Authentication.Authenticator qualified as Auth
 import Tagger.Repository.Content (ContentRepository)
@@ -28,23 +23,23 @@ data Services m = Services
     authenticateUser :: Auth.Authenticator m
   }
 
-start :: Env -> Services Handler
+start :: Env -> Services AppM
 start env =
   let passwordManager =
         PasswordManager.hoist
-          (runWithContext "PasswordManager" env)
+          (changeContext "PasswordManager")
           (bcryptPasswordManager (defaultJWTSettings env.jwkKey))
       contentRepository =
         ContentRepository.hoist
-          (runWithContext "ContentRepository" env)
+          (changeContext "ContentRepository")
           Repo.Content.postgres
       userRepository =
         UserRepository.hoist
-          (runWithContext "UserRepository" env)
+          (changeContext "UserRepository")
           Repo.User.postgres
-      authenticateUser = do
+      authenticateUser =
         Auth.hoist
-          (runWithContext "Authenticator" env)
+          (changeContext "Authenticator")
           (Auth.authenticator Repo.User.postgres passwordManager)
    in Services
         { passwordManager,

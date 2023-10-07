@@ -1,17 +1,17 @@
 module DB.Repository.User.InMemory (Table, repository) where
 
 import App.Error (AppError (..))
-import AppM (AppM, AppM')
+import AppM (AppM)
 import Control.Monad.Except (throwError)
 import Control.Monad.IO.Class (liftIO)
+import DB.Queries (WrongNumberOfResults (..))
+import DB.Repository.User.Error (UserRepositoryError (..))
 import Data.Map.Lazy (Map, assocs, filter, insert, size)
 import Data.Text (Text)
 import Data.Text.Encoding (encodeUtf8)
 import Data.UUID.V4 (nextRandom)
 import GHC.Conc (TVar, atomically, readTVar, readTVarIO, writeTVar)
 import Hasql.Session (CommandError (ResultError), QueryError (QueryError), ResultError (ServerError))
-import DB.Repository.User.Error (UserRepositoryError (..))
-import DB.Queries (WrongNumberOfResults (..))
 import PostgreSQL.ErrorCodes (unique_violation)
 import Tagger.EncryptedPassword (EncryptedPassword)
 import Tagger.Id (Id (Id))
@@ -21,7 +21,7 @@ import Prelude hiding (filter)
 
 type Table = TVar (Map (Id User) User)
 
-repository :: Table -> UserRepository AppM'
+repository :: Table -> UserRepository AppM
 repository userMap =
   UserRepository
     { findByName = inMemoryGetUserByName userMap,
