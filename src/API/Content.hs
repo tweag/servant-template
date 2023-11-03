@@ -1,4 +1,4 @@
-module API.Tagger (API (..), api) where
+module API.Content (API (..), api) where
 
 import AppM (AppM)
 import GHC.Generics (Generic)

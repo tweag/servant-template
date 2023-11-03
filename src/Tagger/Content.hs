@@ -6,8 +6,7 @@ import Data.OpenApi (ToSchema)
 import Data.Text (Text)
 import GHC.Generics (Generic)
 
--- |
--- A 'Content' is just a text indexed by a list of 'tag's
+-- | A 'Content' is just a text indexed by a list of 'tag's
 data Content tag = Content
   { message :: Text,
     tags :: [tag]
@@ -29,7 +28,6 @@ instance (FromJSON tag) => FromJSON (Content tag)
 
 instance (ToJSON tag) => ToJSON (Content tag)
 
--- |
--- checks whether a 'Content' is indexed by all the provided 'tag's
+-- | Checks whether a 'Content' is indexed by all the provided 'tag's
 hasAllTags :: (Eq tag) => [tag] -> Content tag -> Bool
 hasAllTags tags' content = and $ (\tag -> tag `elem` tags content) <$> tags'

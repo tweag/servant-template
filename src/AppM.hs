@@ -12,6 +12,7 @@ import Data.Text (Text)
 import Infrastructure.Logger (withContext)
 import Optics
 
+-- | The application monad, providing access to the environment and error handling
 newtype AppM a = AppM {runAppM :: ExceptT AppError (ReaderT Env IO) a}
   deriving newtype
     ( Functor,
@@ -22,9 +23,11 @@ newtype AppM a = AppM {runAppM :: ExceptT AppError (ReaderT Env IO) a}
       MonadError AppError
     )
 
+-- | Run the application, providing the environment and returning the result
 runApp :: (MonadIO m) => forall a. Env -> AppM a -> m (Either AppError a)
 runApp env = runAppM >>> runExceptT >>> flip runReaderT env >>> liftIO
 
+-- | Change the context of the logger for the duration of the computation.
 changeContext :: Text -> AppM a -> AppM a
 changeContext contextName computation =
   local (\env -> env & #handles % #logger %~ withContext contextName) $ do

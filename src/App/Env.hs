@@ -7,6 +7,7 @@ import Infrastructure.Logger qualified as Logger
 import Infrastructure.SystemTime qualified as SystemTime
 import Tagger.JSONWebKey qualified as JWK
 
+-- | Aggregates all the dependencies needed by the app
 data Env = Env
   { handles :: Handles,
     config :: Config,
@@ -14,8 +15,7 @@ data Env = Env
   }
   deriving (Generic)
 
--- |
--- Aggregates all effects needed by the app
+-- | Aggregates all effects needed by the app
 data Handles = Handles
   { systemTime :: SystemTime.Handle,
     logger :: Logger.Handle,

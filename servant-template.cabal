@@ -19,9 +19,9 @@ library
       API
       API.Authentication
       API.Config
+      API.Content
       API.Docs
       API.Healthcheck
-      API.Tagger
       App.Env
       App.Error
       App.Services
