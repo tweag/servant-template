@@ -17,3 +17,4 @@ jobs:
           dist-newstyle
         key: ${{ runner.os }}-${{ matrix.ghc }}
     - run: nix develop -c task api:test
+    - run: nix flake check

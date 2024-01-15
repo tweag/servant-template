@@ -72,15 +72,15 @@ databaseConfigCodec :: TomlCodec DatabaseConfig
 databaseConfigCodec =
   DatabaseConfig
     <$> Toml.diwrap (Toml.text "host")
-    .= host
+      .= host
     <*> Toml.diwrap (Toml.int "port")
-    .= port
+      .= port
     <*> Toml.diwrap (Toml.text "dbname")
-    .= dbname
+      .= dbname
     <*> Toml.diwrap (Toml.text "user")
-    .= user
+      .= user
     <*> Toml.diwrap (Toml.text "password")
-    .= password
+      .= password
 
 -- |
 -- A bidirectional codec for 'ApiConfig'
@@ -93,6 +93,6 @@ configCodec :: TomlCodec Config
 configCodec =
   Config
     <$> Toml.table databaseConfigCodec "database"
-    .= database
+      .= database
     <*> Toml.table apiConfigCodec "api"
-    .= api
+      .= api
