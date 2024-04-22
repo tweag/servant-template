@@ -28,6 +28,7 @@ then
 
   echo "[DB] Granting privileges to \"$dbuser\"..."
   psql --command "grant all privileges on database \"$dbname\" to \"$dbuser\";"
+  psql -d "$dbname" --command "grant all on schema public to \"$dbuser\""
 
   echo "[DB] Applying schema..."
   psql -U "$dbuser" -d "$dbname" -f ./schema.sql;
